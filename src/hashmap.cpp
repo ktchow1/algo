@@ -166,3 +166,46 @@ void test_hashmap2_reference_wrapper()
 }
 
 
+// ********************************************************************************************* //
+// In order to use custom key in unordered_map, we need 2 things (necessary, or compile error) :
+// 1. hash-function for custom key 
+// 2. spaceship operator for custom key 
+//   (we can tell whether 2 items in the same bucket have the same key or not)
+//
+// *  We can see these constraints in concepts used in std::unordered_map cppreference.
+// ********************************************************************************************* //
+struct pod
+{
+    char a;
+    char b;
+    char c;
+
+    auto operator<=>(const pod& rhs) const = default; 
+};
+
+struct pod_hash
+{
+    std::size_t operator()(const pod& x) const noexcept
+    {
+        return (x.a << 16) | (x.b << 8) | x.c;
+    }
+};
+
+void test_hashmap3_custom_key()
+{
+    std::unordered_map<pod, std::uint32_t, pod_hash> map;
+//  std::unordered_map<pod, std::uint32_t> map; // compilation error
+    pod x{'a','b','c'};
+    pod y{'d','e','f'};
+    pod z{'g','h','i'};
+    map[x] = 1;
+    map[y] = 2;
+    map[z] = 3;  
+
+    // Objective of this experiment is to have successful compilation.
+}
+
+
+
+
+

@@ -27,6 +27,7 @@ void test_hashfct1();
 void test_hashmap0();
 void test_hashmap1();
 void test_hashmap2_reference_wrapper();
+void test_hashmap3_custom_key();
 void test_index_seq0();
 void test_index_seq1();
 void test_index_seq2();
@@ -35,6 +36,7 @@ void test_ipc_named_pipe(bool);
 void test_ipc_shared_memory();
 void test_is_vector();
 void test_literal_operator();
+void test_macro();
 void test_move_semantics();
 void test_new_operator();
 void test_optional();
@@ -107,8 +109,7 @@ void test_yaml1();
 
 int main(int argc, char* argv[])
 { 
-    test_global_and_static0();
-    test_global_and_static1();
+    test_hashmap3_custom_key();
 
     bool run_all = false;
     if (run_all)
@@ -139,6 +140,7 @@ int main(int argc, char* argv[])
         test_hashmap0(); 
         test_hashmap1(); 
         test_hashmap2_reference_wrapper();
+        test_hashmap3_custom_key();
         test_index_seq0();
         test_index_seq1();
         test_index_seq2();
@@ -147,6 +149,7 @@ int main(int argc, char* argv[])
     //  test_ipc_shared_memory();
         test_is_vector();
         test_literal_operator(); 
+        test_macro();
         test_move_semantics(); 
         test_new_operator(); 
         test_optional();  

@@ -19,7 +19,7 @@ void test_yaml0()
     node["101"] = 10000;
     node["101"] = 10001;                    // overwrite
     node["scalar"] = 10002;
-    node["scalar"] = "abc";             // overwrite
+    node["scalar"] = "abc";                 // overwrite
 //  node["group 102"].push_back(10002);     // crash
 
     // (2) sequence (i.e. heterogenous vector)
@@ -28,7 +28,7 @@ void test_yaml0()
     node["seq"].push_back(12);
     node["seq"].push_back("abc");
     node["seq"].push_back("ABC");
-    node["seq"].push_back(node[101]);   // reference
+    node["seq"].push_back(node[101]);       // reference
 
     // (3a) map (i.e. heterogenous subtree) method1
     node["map"][123]   = 12345;
