@@ -3,6 +3,7 @@
 #include<queue>
 #include<tuple>
 #include<string>
+#include<cstring> // for memcpy
 #include<type_traits>
 
 // *********************** //
@@ -181,4 +182,46 @@ void test_template_zip_with()
     print_pair_type<typename std::tuple_element<3, result_type>::type>();
 }
 
+// ********************************************** //
+// *** Template specialization for char array *** //
+// ********************************************** //
+template<typename T>
+void print(const T& x)
+{
+    std::cout << "just = " << x;
+}
 
+template<std::uint32_t N>
+void print(const char (&x)[N])
+{
+    std::string str(x,N);
+    std::cout << "char-array[" << N << "] = [" << str << "]";
+}
+
+template<std::uint32_t N>
+void update(char (&x)[N])
+{
+    char ac[11] = "!@#$%^&*()";
+    memcpy(x, ac, std::min(N,10U));
+}
+
+void test_specialization_for_char_array()
+{
+    std::string s = "ABCDEFG";
+    char ac0[10] = "ABCDEFG";
+    char ac1[10] = "ABCDEFGHI";
+//  char ac2[10] = "ABCDEFGHIJ"; // compile error, not large enough
+    
+    std::cout << "\ntemplate specialization for char array ;";
+    std::cout << "\n" << s;
+    std::cout << "\n" << ac0;
+    std::cout << "\n" << ac1;
+    std::cout << "\n"; print(s);
+    std::cout << "\n"; print(ac0);
+    std::cout << "\n"; print(ac1);
+    update(ac0);
+    update(ac1);
+    std::cout << "\n"; print(ac0);
+    std::cout << "\n"; print(ac1);
+    std::cout << "\n";
+}

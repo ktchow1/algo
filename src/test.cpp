@@ -68,6 +68,7 @@ void test_template_member_ptr();
 void test_template_template(); 
 void test_template_common_type();
 void test_template_zip_with();
+void test_specialization_for_char_array();
 void test_template_traits();
 void test_template_AFT();
 void test_template_AFT_invocable();
@@ -106,10 +107,11 @@ void test_reckless_custom_argument();
 void test_reckless_custom_header_and_argument();
 void test_yaml0();
 void test_yaml1();
+void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-    test_hashmap3_custom_key();
+    test_specialization_for_char_array();
 
     bool run_all = false;
     if (run_all)
@@ -181,6 +183,7 @@ int main(int argc, char* argv[])
         test_template_template(); 
         test_template_common_type();
         test_template_zip_with(); 
+        test_specialization_for_char_array();
         test_template_traits();
         test_template_AFT();
         test_template_AFT_invocable();
@@ -216,6 +219,7 @@ int main(int argc, char* argv[])
 //  test_reckless_custom_header_and_argument();
 //  test_yaml0(); 
 //  test_yaml1(); 
+//  test_yaml2();
 
     // ******************* //
     // *** Hackersrank *** //
