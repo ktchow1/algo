@@ -57,6 +57,8 @@ void test_sfinae2();
 void test_sfinae_class();
 void test_sfinae_is_base_implement();
 void test_sfinae_is_base_usage();
+void test_simd0();
+void test_simd1();
 void test_singleton();
 void test_STL_constraint0();
 void test_STL_constraint1();
@@ -111,7 +113,8 @@ void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-    test_specialization_for_char_array();
+    test_simd0();
+    test_simd1();
 
     bool run_all = false;
     if (run_all)
@@ -172,6 +175,8 @@ int main(int argc, char* argv[])
         test_sfinae_class(); 
         test_sfinae_is_base_implement();
         test_sfinae_is_base_usage();
+        test_simd0();
+        test_simd1();
         test_singleton();
         test_STL_constraint0();
         test_STL_constraint1();

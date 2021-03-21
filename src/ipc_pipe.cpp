@@ -71,19 +71,19 @@ void test_ipc_named_pipe(bool is_producer)
     // 2. need to create named pipe outside mapped drive
     // 3. named pipe works like a file, you can list it in bash
     // 4. can also be done using ::mkfifo system call
-
+  
     if (is_producer)
     {
         // give full path please
     //  ::mkfifo("~/my_pipe", S_IFIFO|0640); // 0777
-        int fd = ::open("~/my_pipe", O_CREAT|O_WRONLY);
+        int fd = ::open("~/my_pipe", O_CREAT|O_WRONLY, 0755);
         std::cout << "producer fd = " << fd << std::flush;
         ipc::producer_pipe(fd, "named pipe"); 
     }
     else
     {
     //  ::mkfifo("~/my_pipe", S_IFIFO|0640); // 0777
-        int fd = ::open("~/my_pipe", O_RDONLY);
+        int fd = ::open("~/my_pipe", O_RDONLY, 0755); 
         std::cout << "consumer fd = " << fd << std::flush;
         ipc::consumer_pipe(fd, "named pipe"); // this thing crash, don't know why? 
     }
