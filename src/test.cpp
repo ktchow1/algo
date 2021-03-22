@@ -31,9 +31,6 @@ void test_hashmap3_custom_key();
 void test_index_seq0();
 void test_index_seq1();
 void test_index_seq2();
-void test_ipc_unnamed_pipe();
-void test_ipc_named_pipe(bool);
-void test_ipc_shared_memory();
 void test_is_vector();
 void test_literal_operator();
 void test_macro();
@@ -149,9 +146,6 @@ int main(int argc, char* argv[])
         test_index_seq0();
         test_index_seq1();
         test_index_seq2();
-    //  test_ipc_unnamed_pipe();
-    //  test_ipc_named_pipe(argc > 1); // with argument for producer
-    //  test_ipc_shared_memory();
         test_is_vector();
         test_literal_operator(); 
         test_macro();
