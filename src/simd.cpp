@@ -144,3 +144,64 @@ void test_simd1()
     std::cout << "\nerror count = " << error;
 }
 
+// ********************** //
+// *** SSE for matrix *** //
+// ********************** //
+#include <matrix.h>
+
+void test_simd_matrix0()
+{
+    matrix<float,16,8> A;
+    matrix<float,16,8> B(true);
+    matrix<float,16,8> C(false);
+
+    matrix<float,16,16> BTB;
+    matrix<float,16,16> CTC;
+    inner_product(B.cview(), BTB.view());
+    inner_product(C.cview(), CTC.view());
+
+    std::cout << "\nA   = \n"; print(A.cview());
+    std::cout << "\nB   = \n"; print(B.cview());
+    std::cout << "\nC   = \n"; print(C.cview());
+    std::cout << "\nC.. = \n"; print(C.cview().cview(1,2,3,4));
+    std::cout << "\nBTB = \n"; print(BTB.cview());
+    std::cout << "\nCTC = \n"; print(CTC.cview());
+    
+    set(C.view(1,2,3,4), .01234f);
+    std::cout << "\nC.. = \n"; print(C.cview());
+    set(C.view(8,0,4,4), .0f);
+    std::cout << "\nC.. = \n"; print(C.cview());
+    ATB_add_4x4(C.cview(12,0,4,4), C.cview(12,0,4,4), C.view(8,0,4,4));
+    std::cout << "\nC.. = \n"; print(C.cview());
+}
+  
+void test_simd_matrix1()
+{
+    matrix<float,64,256> A(true);
+    matrix<float,64,64> ATA0;
+    matrix<float,64,64> ATA1;
+    matrix<float,64,64> ATA2;
+
+    for(std::uint32_t n=0; n!=50; ++n)
+    {
+        timespec ts0;
+        timespec ts1;
+        timespec ts2;
+        timespec ts3;
+
+        clock_gettime(CLOCK_MONOTONIC, &ts0);
+        inner_product(A.cview(), ATA0.view());
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
+        inner_product_4x4(A.cview(), ATA1.view());
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+
+        std::cout << "\nis_same = " << is_same(ATA0.cview(), ATA1.cview(), (float)0.00001)
+        //        << ", is_same = " << is_same(ATA0.cview(), ATA2.cview(), (float)0.00001)
+                  << ", time0 = "   << time_diff(ts0,ts1)
+                  << ", time1 = "   << time_diff(ts1,ts2);
+        //        << ", time2 = "   << time_diff(ts2,ts3);
+    } 
+}
+
+
+
