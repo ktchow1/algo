@@ -184,11 +184,13 @@ void test_simd_matrix1()
         matrix<float,64,64> ATA0;
         matrix<float,64,64> ATA1;
         matrix<float,64,64> ATA2;
+        matrix<float,64,64> ATA3;
 
         timespec ts0;
         timespec ts1;
         timespec ts2;
         timespec ts3;
+        timespec ts4;
 
         clock_gettime(CLOCK_MONOTONIC, &ts0);
         inner_product(A.cview(), ATA0.view());
@@ -197,12 +199,17 @@ void test_simd_matrix1()
         clock_gettime(CLOCK_MONOTONIC, &ts2);
         inner_product_4x4<true>(A.cview(), ATA2.view());
         clock_gettime(CLOCK_MONOTONIC, &ts3);
+        inner_product_1x4<64*64>(A.cview(), ATA3.view());
+        clock_gettime(CLOCK_MONOTONIC, &ts4);
+
 
         std::cout << "\nis_same = " << is_same(ATA0.cview(), ATA1.cview(), (float)0.0001)
                   << ", is_same = " << is_same(ATA0.cview(), ATA2.cview(), (float)0.0001)
+                  << ", is_same = " << is_same(ATA0.cview(), ATA3.cview(), (float)0.0001)
                   << ", time0 = "   << time_diff(ts0,ts1)
                   << ", time1 = "   << time_diff(ts1,ts2)
                   << ", time2 = "   << time_diff(ts2,ts3)
+                  << ", time3 = "   << time_diff(ts3,ts4)
                   << ", A(0,0) = "   << *A.cview().ptr;
     }
 }

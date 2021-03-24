@@ -178,6 +178,9 @@ void set(matrix_view<T> A, const T& value)
     }
 }
 
+// ********************** //
+// *** Implementation *** //
+// ********************** //
 template<typename T>
 bool ATB_add_4x4(const const_matrix_view<T>& lhs,
                  const const_matrix_view<T>& rhs,
@@ -224,7 +227,7 @@ bool ATB_add_4x4_SIMD(const const_matrix_view<float>& lhs,
     {
     //  a[y] = _mm_set_ps(ptr0[0], ptr0[1], ptr0[2], ptr0[3]); // THIS IS SLOW.
     //  b[y] = _mm_set_ps(ptr1[0], ptr1[1], ptr1[2], ptr1[3]); // THIS IS SLOW.
-        a[y] = _mm_load_ps(ptr0); // SLIGHTY FASTER
+        a[y] = _mm_load_ps(ptr0); // SLIGHTY FASTER (auto load 128 bits / 16 bytes ?)
         b[y] = _mm_load_ps(ptr1); // SLIGHTY FASTER
         ptr0 += lhs.linestep;
         ptr1 += rhs.linestep;
@@ -243,6 +246,24 @@ bool ATB_add_4x4_SIMD(const const_matrix_view<float>& lhs,
     }
     return true;
 }
+
+void ATB_add_1x4_SIMD(const __m128& y, 
+                      const __m128& x0, 
+                      const __m128& x1, 
+                      const __m128& x2, 
+                      const __m128& x3, 
+                      matrix_view<float>& ans)
+{
+     __m128 c0 = _mm_mul_ps(y, x0); float* p0 = reinterpret_cast<float*>(&c0);
+     __m128 c1 = _mm_mul_ps(y, x1); float* p1 = reinterpret_cast<float*>(&c1);
+     __m128 c2 = _mm_mul_ps(y, x2); float* p2 = reinterpret_cast<float*>(&c2);
+     __m128 c3 = _mm_mul_ps(y, x3); float* p3 = reinterpret_cast<float*>(&c3);
+     ans.ptr[0] += (p0[0] + p0[1] + p0[2] + p0[3]);
+     ans.ptr[1] += (p1[0] + p1[1] + p1[2] + p1[3]);
+     ans.ptr[2] += (p2[0] + p2[1] + p2[2] + p2[3]);
+     ans.ptr[3] += (p3[0] + p3[1] + p3[2] + p3[3]);
+}
+
 // ********************* //
 // *** Inner product *** //
 // ********************* //
@@ -303,3 +324,58 @@ bool inner_product_4x4(const const_matrix_view<float>& A, matrix_view<float> ATA
     }
     return true;
 }
+
+template<std::uint32_t N>
+bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA)
+{
+    set(ATA, .0f);
+    if (A.size_x % 4 != 0)      return false;
+    if (ATA.size_y != A.size_y) return false;
+    if (ATA.size_x != A.size_y) return false;
+
+    // **************************** //
+    // *** Pre-load into buffer *** //
+    // **************************** //
+    std::uint32_t Z = A.size_x/4;
+    if (N < A.size_y * Z) return false;
+    __m128 buf[N]; 
+
+    const float* ptr0 = A.ptr;
+         __m128* ptr1 = &buf[0];
+    for(std::uint32_t y=0; y!=A.size_y; ++y)
+    {
+        for(std::uint32_t z=0; z!=Z; ++z)
+        {
+            ptr1[z] = _mm_load_ps(ptr0 + z * 4);
+        }
+        ptr0 += A.linestep;
+        ptr1 += Z;
+    }
+
+    // ***************** //
+    // *** Main loop *** //
+    // ***************** //
+    for(std::uint32_t y=0; y!=A.size_y; ++y)
+    {
+        for(std::uint32_t x=0; x!=A.size_y; x+=4)
+        {
+            matrix_view<float> ans = ATA.view(y,x,1,4);
+            for(std::uint32_t z=0; z!=Z; ++z)
+            {
+                 // Avoid multiplications
+                 std::uint32_t i0 = x*Z+z;
+                 std::uint32_t i1 = i0+z;
+                 std::uint32_t i2 = i1+z;
+                 std::uint32_t i3 = i2+z;
+
+                 ATB_add_1x4_SIMD(buf[y*Z+z], 
+                                  buf[x*Z+z],
+                                  buf[(x+1)*Z+z],
+                                  buf[(x+2)*Z+z],
+                                  buf[(x+3)*Z+z], ans);
+            }
+        }
+    }
+    return true;
+}
+

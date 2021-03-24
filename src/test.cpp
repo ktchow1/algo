@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 { 
 //  test_simd0();
 //  test_simd1();
-    test_simd_matrix0();
+//  test_simd_matrix0();
     test_simd_matrix1();
 
     bool run_all = false;
