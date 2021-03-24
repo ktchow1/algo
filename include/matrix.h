@@ -339,7 +339,7 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
     std::uint32_t Z = A.size_x/4;
     if (N < A.size_y * Z) return false;
     __m128 buf[N]; 
-
+  
     const float* ptr0 = A.ptr;
          __m128* ptr1 = &buf[0];
     for(std::uint32_t y=0; y!=A.size_y; ++y)
@@ -351,7 +351,7 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
         ptr0 += A.linestep;
         ptr1 += Z;
     }
-
+  
     // ***************** //
     // *** Main loop *** //
     // ***************** //
@@ -362,12 +362,6 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
             matrix_view<float> ans = ATA.view(y,x,1,4);
             for(std::uint32_t z=0; z!=Z; ++z)
             {
-                 // Avoid multiplications
-                 std::uint32_t i0 = x*Z+z;
-                 std::uint32_t i1 = i0+z;
-                 std::uint32_t i2 = i1+z;
-                 std::uint32_t i3 = i2+z;
-
                  ATB_add_1x4_SIMD(buf[y*Z+z], 
                                   buf[x*Z+z],
                                   buf[(x+1)*Z+z],
