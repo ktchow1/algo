@@ -247,23 +247,6 @@ bool ATB_add_4x4_SIMD(const const_matrix_view<float>& lhs,
     return true;
 }
 
-void ATB_add_1x4_SIMD(const __m128& y, 
-                      const __m128& x0, 
-                      const __m128& x1, 
-                      const __m128& x2, 
-                      const __m128& x3, 
-                      matrix_view<float>& ans)
-{
-     __m128 c0 = _mm_mul_ps(y, x0); float* p0 = reinterpret_cast<float*>(&c0);
-     __m128 c1 = _mm_mul_ps(y, x1); float* p1 = reinterpret_cast<float*>(&c1);
-     __m128 c2 = _mm_mul_ps(y, x2); float* p2 = reinterpret_cast<float*>(&c2);
-     __m128 c3 = _mm_mul_ps(y, x3); float* p3 = reinterpret_cast<float*>(&c3);
-     ans.ptr[0] += (p0[0] + p0[1] + p0[2] + p0[3]);
-     ans.ptr[1] += (p1[0] + p1[1] + p1[2] + p1[3]);
-     ans.ptr[2] += (p2[0] + p2[1] + p2[2] + p2[3]);
-     ans.ptr[3] += (p3[0] + p3[1] + p3[2] + p3[3]);
-}
-
 // ********************* //
 // *** Inner product *** //
 // ********************* //
@@ -344,9 +327,10 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
          __m128* ptr1 = &buf[0];
     for(std::uint32_t y=0; y!=A.size_y; ++y)
     {
-        for(std::uint32_t z=0; z!=Z; ++z)
+        std::uint32_t x=0;
+        for(std::uint32_t z=0; z!=Z; ++z, x+=4)
         {
-            ptr1[z] = _mm_load_ps(ptr0 + z * 4);
+            ptr1[z] = _mm_load_ps(ptr0 + x);
         }
         ptr0 += A.linestep;
         ptr1 += Z;
@@ -362,11 +346,19 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
             matrix_view<float> ans = ATA.view(y,x,1,4);
             for(std::uint32_t z=0; z!=Z; ++z)
             {
-                 ATB_add_1x4_SIMD(buf[y*Z+z], 
-                                  buf[x*Z+z],
-                                  buf[(x+1)*Z+z],
-                                  buf[(x+2)*Z+z],
-                                  buf[(x+3)*Z+z], ans);
+                std::uint32_t i  = y*Z+z;
+                std::uint32_t i0 = x*Z+z;
+                std::uint32_t i1 = i0+Z;
+                std::uint32_t i2 = i1+Z;
+                std::uint32_t i3 = i2+Z;
+                __m128 c0 = _mm_mul_ps(buf[i], buf[i0]); float* p0 = reinterpret_cast<float*>(&c0);
+                __m128 c1 = _mm_mul_ps(buf[i], buf[i1]); float* p1 = reinterpret_cast<float*>(&c1);
+                __m128 c2 = _mm_mul_ps(buf[i], buf[i2]); float* p2 = reinterpret_cast<float*>(&c2);
+                __m128 c3 = _mm_mul_ps(buf[i], buf[i3]); float* p3 = reinterpret_cast<float*>(&c3);
+                ans.ptr[0] += (p0[0] + p0[1] + p0[2] + p0[3]);
+                ans.ptr[1] += (p1[0] + p1[1] + p1[2] + p1[3]);
+                ans.ptr[2] += (p2[0] + p2[1] + p2[2] + p2[3]);
+                ans.ptr[3] += (p3[0] + p3[1] + p3[2] + p3[3]);
             }
         }
     }
