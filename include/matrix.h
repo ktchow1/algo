@@ -351,16 +351,35 @@ bool inner_product_1x4(const const_matrix_view<float>& A, matrix_view<float> ATA
                 std::uint32_t i1 = i0+Z;
                 std::uint32_t i2 = i1+Z;
                 std::uint32_t i3 = i2+Z;
-                __m128 c0 = _mm_mul_ps(buf[i], buf[i0]); float* p0 = reinterpret_cast<float*>(&c0);
-                __m128 c1 = _mm_mul_ps(buf[i], buf[i1]); float* p1 = reinterpret_cast<float*>(&c1);
-                __m128 c2 = _mm_mul_ps(buf[i], buf[i2]); float* p2 = reinterpret_cast<float*>(&c2);
-                __m128 c3 = _mm_mul_ps(buf[i], buf[i3]); float* p3 = reinterpret_cast<float*>(&c3);
+                __m128 c0 = _mm_mul_ps(buf[i], buf[i0]);
+                __m128 c1 = _mm_mul_ps(buf[i], buf[i1]);
+                __m128 c2 = _mm_mul_ps(buf[i], buf[i2]);
+                __m128 c3 = _mm_mul_ps(buf[i], buf[i3]);
+
+                float* p0 = reinterpret_cast<float*>(&c0);
+                float* p1 = reinterpret_cast<float*>(&c1);
+                float* p2 = reinterpret_cast<float*>(&c2);
+                float* p3 = reinterpret_cast<float*>(&c3);
                 ans.ptr[0] += (p0[0] + p0[1] + p0[2] + p0[3]);
                 ans.ptr[1] += (p1[0] + p1[1] + p1[2] + p1[3]);
                 ans.ptr[2] += (p2[0] + p2[1] + p2[2] + p2[3]);
                 ans.ptr[3] += (p3[0] + p3[1] + p3[2] + p3[3]);
+
+                // Add flag "-msse4.1" in CMakeLists.txt
+             /* c0 = _mm_hadd_ps(c0, c0);
+                c0 = _mm_hadd_ps(c0, c0);
+                ans.ptr[0] += _mm_cvtss_f32(c0);
+                c1 = _mm_hadd_ps(c1, c1);
+                c1 = _mm_hadd_ps(c1, c1);
+                ans.ptr[1] += _mm_cvtss_f32(c1);
+                c2 = _mm_hadd_ps(c2, c2);
+                c2 = _mm_hadd_ps(c2, c2);
+                ans.ptr[2] += _mm_cvtss_f32(c2);
+                c3 = _mm_hadd_ps(c3, c3);
+                c3 = _mm_hadd_ps(c3, c3);
+                ans.ptr[3] += _mm_cvtss_f32(c3); */
             }
-        }
+        } 
     }
     return true;
 }
