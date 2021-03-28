@@ -56,7 +56,7 @@ include_directories(
 file(GLOB SOURCES
      "src/*.cpp"
      "src_hacker/*.cpp"
-     "src_ylib/*.cpp"
+     "src_yxx/*.cpp"
 )
 add_executable(Test ${SOURCES})       # for building executable
 # add_library(Test STATIC ${SOURCES}) # for building static lib .a
