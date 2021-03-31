@@ -4,10 +4,10 @@
 #include<vector>
 #include<array>
 
-// ***************************************************************** //
-// *** The concept in YLib::EventHandler (apply visitor pattern) *** //
-// ***************************************************************** //
-// In YLib, macro is used to ensure consistent name :
+// *********************************************************** //
+// *** The concept in EventHandler (apply visitor pattern) *** //
+// *********************************************************** //
+// In Y, macro is used to ensure consistent name :
 // 1. event class name
 // 2. visitor handle function name
 //

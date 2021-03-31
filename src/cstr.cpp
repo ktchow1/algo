@@ -22,7 +22,7 @@ void test_cstr()
     std::cout << "\npc1[8] = " << (unsigned int)(pc1[8]);
 
     // char array string
-    // --- refer to YLib::static_string
+    // --- refer to static_string
 
     // null-terminated string
     std::string s0(pc0);          // '\0' is existing in source

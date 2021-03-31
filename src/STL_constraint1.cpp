@@ -1,4 +1,4 @@
-/* // requires YLib
+/* // requires Y
 
 #include<iostream>
 #include<functional.h>
@@ -11,10 +11,10 @@
 // *** Study whether map <-> list is good enough for hitter (the following works) *** //
 // ********************************************************************************** //
 struct index_and_iter;
-   using LIST_TYPE = YLib::SortedList <index_and_iter, std::less>; 
-// using LIST_TYPE = YLib::SortedList <index_and_iter, std::greater>; 
-// using LIST_TYPE = YLib::sorted_list<index_and_iter, std::less   <index_and_iter>>; 
-// using LIST_TYPE = YLib::sorted_list<index_and_iter, std::greater<index_and_iter>>; 
+   using LIST_TYPE = SortedList <index_and_iter, std::less>; 
+// using LIST_TYPE = SortedList <index_and_iter, std::greater>; 
+// using LIST_TYPE = sorted_list<index_and_iter, std::less   <index_and_iter>>; 
+// using LIST_TYPE = sorted_list<index_and_iter, std::greater<index_and_iter>>; 
 
 struct T
 {

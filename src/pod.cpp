@@ -74,9 +74,9 @@ void test_pod()
     std::cout << "\n\n"; 
 }
 
-// ***************************** //
-// *** Simulate YLib::String *** //
-// ***************************** //
+// ************************** //
+// *** Simulate Y::String *** //
+// ************************** //
 template<std::uint32_t N>
 struct my_string
 {

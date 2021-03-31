@@ -55,9 +55,9 @@ private:
     std::map<std::string, T> map;
 };
 
-// ****************************************************************************** // 
-// Imitate YLib::Hitter get relevant info from std::variant in HitterControlEvent //
-// ****************************************************************************** // 
+// ************************************************************************ // 
+// Imitate Hitter get relevant info from std::variant in HitterControlEvent //
+// ************************************************************************ // 
 void test_variant_with_decltype()
 {
     pods<pod> x;
