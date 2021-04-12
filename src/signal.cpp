@@ -32,6 +32,18 @@ void sigill_handler(int signal)
     ++count;
 }
 
+// *********************************************** //
+// *** Handler for timer is slightly different *** //
+// *********************************************** //
+#include<time.h>  
+
+void sigtimer_handler(union sigval signal)
+{ 
+    static std::uint32_t count = 0;
+    std::cout << "\n[sigtimer " << signal.sival_int << " handled in " << std::this_thread::get_id() << ", count = " << count << "]  " << std::flush;
+    ++count;
+}
+
 // *********************** //
 // *** Signal-and-slot *** //
 // *********************** //
@@ -76,3 +88,61 @@ void test_signal()
     }
     t.join();
 }
+
+// ************************ //
+// *** Signal and timer *** //
+// ************************ //
+void test_signal_and_timer()
+{
+    std::cout << "\nMain thread is " << std::this_thread::get_id() << std::flush;
+
+    struct sched_param parm;
+    parm.sched_priority = 255;
+
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setschedparam(&attr, &parm);
+
+    struct sigevent sig;
+    sig.sigev_notify = SIGEV_THREAD; // It is implemented by spawning a thread inside.
+//  sig.sigev_notify = SIGEV_SIGNAL; // Failed to create timer with this mode. Why?
+    sig.sigev_notify_function = sigtimer_handler;
+    sig.sigev_value.sival_int = 20;
+    sig.sigev_notify_attributes = &attr;
+
+    timer_t timer;
+    if (timer_create(CLOCK_REALTIME, &sig, &timer) != 0)
+    {
+        std::cout << "\nfailed to create timer" << std::flush;
+        return;
+    }
+
+    struct itimerspec in;
+    struct itimerspec out;
+    in.it_value.tv_sec = 2;     // timer lifetime
+    in.it_value.tv_nsec = 0;
+    in.it_interval.tv_sec = 0;   // timer interval
+    in.it_interval.tv_nsec = 500000000; 
+
+    // Start timer here ...
+    if (timer_settime(timer, 0, &in, &out) != 0)
+    {
+        std::cout << "\nfailed to start timer" << std::flush;
+        return;
+    }
+
+    // Main thread doing something, see if it is interrupted
+    for(std::uint32_t n=0; n!=100; ++n)
+    {
+        std::cout << " [$] " << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+
+
+
+
+
+
+

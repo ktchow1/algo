@@ -55,6 +55,7 @@ void test_sfinae_class();
 void test_sfinae_is_base_implement();
 void test_sfinae_is_base_usage();
 void test_signal();
+void test_signal_and_timer();
 void test_simd0();
 void test_simd1();
 void test_simd_matrix0();
@@ -113,7 +114,8 @@ void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-    test_signal();
+//  test_signal();
+    test_signal_and_timer();
 //  test_simd0();
 //  test_simd1();
 //  test_simd_matrix0();
@@ -176,6 +178,7 @@ int main(int argc, char* argv[])
         test_sfinae_is_base_implement();
         test_sfinae_is_base_usage();
         test_signal();
+        test_signal_and_timer();
         test_simd0();
         test_simd1();
         test_simd_matrix0();
