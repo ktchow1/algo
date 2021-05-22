@@ -10,16 +10,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_definitions(-std=c++20)
 add_definitions(-g)
 
-message("-----------------------------------------------")
-message("CMAKE_BUILD_TYPE        = ${CMAKE_BUILD_TYPE}")
-message("CMAKE_C_FLAGS           = ${CMAKE_C_FLAGS}")
-message("CMAKE_C_FLAGS_DEBUG     = ${CMAKE_C_FLAGS_DEBUG}")
-message("CMAKE_C_FLAGS_RELEASE   = ${CMAKE_C_FLAGS_RELEASE}")
-message("CMAKE_CXX_FLAGS         = ${CMAKE_CXX_FLAGS}")
-message("CMAKE_CXX_FLAGS_DEBUG   = ${CMAKE_CXX_FLAGS_DEBUG}")
-message("CMAKE_CXX_FLAGS_RELEASE = ${CMAKE_CXX_FLAGS_RELEASE}")
-message("-----------------------------------------------")
-
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     set(CMAKE_C_FLAGS   "-g -O0")
     set(CMAKE_CXX_FLAGS "-g -O0")
@@ -28,30 +18,18 @@ elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     set(CMAKE_CXX_FLAGS "-g -O3 -DNDEBUG")
 endif()
 
-message("-----------------------------------------------")
-message("CMAKE_BUILD_TYPE        = ${CMAKE_BUILD_TYPE}")
-message("CMAKE_C_FLAGS           = ${CMAKE_C_FLAGS}")
-message("CMAKE_C_FLAGS_DEBUG     = ${CMAKE_C_FLAGS_DEBUG}")
-message("CMAKE_C_FLAGS_RELEASE   = ${CMAKE_C_FLAGS_RELEASE}")
-message("CMAKE_CXX_FLAGS         = ${CMAKE_CXX_FLAGS}")
-message("CMAKE_CXX_FLAGS_DEBUG   = ${CMAKE_CXX_FLAGS_DEBUG}")
-message("CMAKE_CXX_FLAGS_RELEASE = ${CMAKE_CXX_FLAGS_RELEASE}")
-message("-----------------------------------------------")
-
-
-###################
-### (1) include ###
-###################
-include_directories(
-    include 
-    ~/dev/pgsql/include
-    ~/dev/yaml-cpp/include
-    ~/dev/reckless/reckless/include
-    /mnt/d/dev/boost_1_72_0 
-)
-
+# message("-----------------------------------------------")
+# message("CMAKE_BUILD_TYPE        = ${CMAKE_BUILD_TYPE}")
+# message("CMAKE_C_FLAGS           = ${CMAKE_C_FLAGS}")
+# message("CMAKE_C_FLAGS_DEBUG     = ${CMAKE_C_FLAGS_DEBUG}")
+# message("CMAKE_C_FLAGS_RELEASE   = ${CMAKE_C_FLAGS_RELEASE}")
+# message("CMAKE_CXX_FLAGS         = ${CMAKE_CXX_FLAGS}")
+# message("CMAKE_CXX_FLAGS_DEBUG   = ${CMAKE_CXX_FLAGS_DEBUG}")
+# message("CMAKE_CXX_FLAGS_RELEASE = ${CMAKE_CXX_FLAGS_RELEASE}")
+# message("-----------------------------------------------")
+ 
 ##################
-### (2) source ###
+### (1) source ###
 ##################
 file(GLOB SOURCES
      "src/*.cpp"
@@ -61,6 +39,17 @@ file(GLOB SOURCES
 add_executable(Test ${SOURCES})       # for building executable
 # add_library(Test STATIC ${SOURCES}) # for building static lib .a
 # add_library(Test SHARED ${SOURCES}) # for building shared lib .so
+
+###################
+### (2) include ###
+###################
+target_include_directories(Test PUBLIC
+    include 
+    ~/dev/pgsql/include
+    ~/dev/yaml-cpp/include
+    ~/dev/reckless/reckless/include
+    /mnt/d/dev/boost_1_72_0 
+)
 
 ##################################
 ### (3) link path and link lib ###

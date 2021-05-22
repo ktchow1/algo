@@ -81,15 +81,15 @@ template<typename T> void DFS_iterative(const node<T>* root, traverse_order orde
         s.push(root);        
         while (!s.empty())
         {
-            auto this_node = s.top();
+            auto this_node = s.top(); s.pop();
             if (this_node->lhs) 
             {
-                s.push(this_node->lhs);
+                s.push(this_node);
+                this_node = this_node->lhs;
             }
             else
             {                        
-                s.pop();
-                std::cout << this_node->value << " ";                
+                std::cout << this_node->value << " "; 
                 if (this_node->rhs) s.push(this_node->rhs);
             }                                                
         }
@@ -183,6 +183,7 @@ void test_tree_traverse()
     std::cout << "\nDFS "; DFS_iterative(root, pre_order);
     std::cout << "\nDFS "; DFS_recursive(root, in_order);
     std::cout << "\nDFS "; DFS_iterative(root, in_order);
+//  std::cout << "\nDFS "; DFS_iterative(root, in_order_does_not_work);
     std::cout << "\nDFS "; DFS_recursive(root, post_order);        
 //  std::cout << "\nDFS "; DFS_iterative(root, post_order);
     std::cout << "\nBFS "; BFS_iterative(root);

@@ -94,6 +94,7 @@ void test_variant_with_decltype();
 void test_anagram();
 void test_int2str();        // citadel
 void test_matrix_spiral();  // citadel
+void test_K_merge();        // citadel UK
 void test_tree_checker();   // optiver
 
 // Y: C-poly / event-handler / message-handler / PSQL / reckless / yaml
@@ -114,12 +115,7 @@ void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-//  test_signal();
-    test_signal_and_timer();
-//  test_simd0();
-//  test_simd1();
-//  test_simd_matrix0();
-//  test_simd_matrix1();
+//  test_cat_cut();
 
     bool run_all = false;
     if (run_all)
@@ -238,6 +234,7 @@ int main(int argc, char* argv[])
 //  test_anagram();    
 //  test_int2str();
 //  test_matrix_spiral(); 
+    test_K_merge(); 
 //  test_tree_checker();
     std::cout << "\n\n\n";
     return 0;
