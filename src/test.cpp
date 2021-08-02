@@ -115,7 +115,7 @@ void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-//  test_cat_cut();
+    test_cat_cut();
 
     bool run_all = false;
     if (run_all)
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 //  test_anagram();    
 //  test_int2str();
 //  test_matrix_spiral(); 
-    test_K_merge(); 
+//  test_K_merge(); 
 //  test_tree_checker();
     std::cout << "\n\n\n";
     return 0;

@@ -225,7 +225,7 @@ void test_cat_cut()
 //  test_cut_files("../../../cat_and_cut/tmp",        "../../../cat_and_cut/extract");
 
     // For extraction of Y files 
-    test_cut_files("../../../cat_and_cut/tmp0.txt",  "../../../cat_and_cut/YLibrary");
+//  test_cut_files("../../../cat_and_cut/tmp0.txt",  "../../../cat_and_cut/YLibrary");
     test_cut_files("../../../cat_and_cut/tmp1.txt",  "../../../cat_and_cut/hk-options");
 /*  test_cut_files("../../../cat_and_cut/tmp2.txt",  "../../../cat_and_cut/threadpool");
     test_cut_files("../../../cat_and_cut/tmp3.txt",  "../../../cat_and_cut/algo");
