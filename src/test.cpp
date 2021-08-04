@@ -115,9 +115,7 @@ void test_yaml2();
 
 int main(int argc, char* argv[])
 { 
-    test_cat_cut();
-
-    bool run_all = false;
+    bool run_all = true;
     if (run_all)
     {
         test_algbase();
@@ -228,14 +226,6 @@ int main(int argc, char* argv[])
 //  test_yaml1(); 
 //  test_yaml2();
 
-    // ******************* //
-    // *** Hackersrank *** //
-    // ******************* //
-//  test_anagram();    
-//  test_int2str();
-//  test_matrix_spiral(); 
-//  test_K_merge(); 
-//  test_tree_checker();
     std::cout << "\n\n\n";
     return 0;
 }

@@ -33,8 +33,7 @@ endif()
 ##################
 file(GLOB SOURCES
      "src/*.cpp"
-     "src_hacker/*.cpp"
-     "src_yxx/*.cpp"
+     "src_ylib/*.cpp"
 )
 add_executable(Test ${SOURCES})       # for building executable
 # add_library(Test STATIC ${SOURCES}) # for building static lib .a

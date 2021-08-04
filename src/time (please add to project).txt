@@ -1,0 +1,138 @@
+#include<iostream>
+#include<iomanip>
+#include<chrono>
+
+#include<stdio.h>
+#include<time.h>
+
+// ************************************************************************************** //
+// Comparison of 4 time classes
+// ************************************************************************************** //
+// chrono                 with clock,                   with sub-second
+// timespec    int,int    with clock (no time zone),    with sub-second
+// time_t      int        with clock    (time zone),      no sub-second
+// tm          pod          no clock    (time zone),      no sub-second
+// ************************************************************************************** //
+/*
+                 to_timespec 
+    std::chrono   <------>   timespec                  (for get time)
+               \            / 
+      to_time_t \          / time_t{timespec::tv_sec}   
+                 \        /
+                   time_t                              (for comparison as integer)
+                     |
+                     | up : mktime
+                     | dn : localtime/gmtime
+                     |     
+                    tm                                 (for manual setting, for printing)
+*/
+// ************************************************************************************** //
+timespec to_timespec(const std::chrono::time_point<std::chrono::system_clock>& tp)
+{
+    auto  sec = std::chrono::duration_cast<std::chrono::seconds>    (tp.time_since_epoch());
+    auto nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch() - sec);
+    return timespec{sec.count(), nsec.count()};
+}
+
+void test_time()
+{
+    // ************** //
+    // *** chrono *** //
+    // ************** //
+    std::chrono::time_point<std::chrono::system_clock> tp;
+    tp = std::chrono::system_clock::now();
+
+    // **************** //
+    // *** timespec *** //
+    // **************** //
+    timespec ts0 = to_timespec(tp);
+    timespec ts1;  clock_gettime(CLOCK_REALTIME, &ts1);
+    
+    // ************** //
+    // *** time_t *** // 
+    // ************** //
+    time_t t0{ts0.tv_sec};
+    time_t t1{ts1.tv_sec};
+    time_t t2;  time(&t2);
+
+    tm t0L = *std::localtime(&t0);
+    tm t0G = *std::gmtime   (&t0);
+    tm t1L = *std::localtime(&t1);
+    tm t1G = *std::gmtime   (&t1);
+    tm t2L = *std::localtime(&t2);
+    tm t2G = *std::gmtime   (&t2);
+
+    // ********** //
+    // *** tm *** // 
+    // ********** //
+    tm tm_hardcoded;
+    tm_hardcoded.tm_year = 121; // number of year  since 1900
+    tm_hardcoded.tm_mon  = 5;   // number of month since Jan (0 for Jan, 1 for Feb etc)
+    tm_hardcoded.tm_mday = 4;   // exact date of month, no offset
+    tm_hardcoded.tm_wday = 0;   // 0 for sunday and so on (no auto-checking)
+    tm_hardcoded.tm_hour = 12;
+    tm_hardcoded.tm_min  = 34;
+    tm_hardcoded.tm_sec  = 56;
+
+    std::cout << "\nchrono                                  = " << std::chrono::system_clock::to_time_t(tp);  
+    std::cout << "\ntimespec (from chrono)                  = " << ts0.tv_sec << "." << std::setfill('0') << std::setw(9) << ts0.tv_nsec;
+    std::cout << "\ntimespec (from clock_gettime)           = " << ts1.tv_sec << "." << std::setfill('0') << std::setw(9) << ts1.tv_nsec;
+    std::cout << "\ntime_t   (from chrono, as local)        = " << asctime(&t0L);
+    std::cout <<   "time_t   (from chrono, as gmt)          = " << asctime(&t0G);
+    std::cout <<   "time_t   (from clock_gettime, as local) = " << asctime(&t1L);
+    std::cout <<   "time_t   (from clock_gettime, as gmt)   = " << asctime(&t1G);
+    std::cout <<   "time_t   (from time, as local)          = " << asctime(&t2L);
+    std::cout <<   "time_t   (from time, as gmt)            = " << asctime(&t2G);
+    std::cout <<   "tm       (hard coded)                   = " << asctime(&tm_hardcoded);
+    std::cout << "\n";
+
+    char buffer[26];
+    strftime(buffer, 26, "%Y/%m/%d-%H:%M:%S", &tm_hardcoded);  std::cout << "\ntm (format 1) = " << buffer;
+    strftime(buffer, 26, "%Y%m%d %H_%M_%S",   &tm_hardcoded);  std::cout << "\ntm (format 2) = " << buffer;
+    strftime(buffer, 26, "%Y%m%d %Y:%m:%d",   &tm_hardcoded);  std::cout << "\ntm (format 3) = " << buffer;
+    std::cout << "\n";
+
+    // ************************* //
+    // *** Today cutoff time *** //
+    // ************************* //
+    time_t t_temp; 
+    time(&t_temp);
+
+    tm tm_temp = *std::localtime(&t_temp);
+    tm_temp.tm_hour = 16;
+    tm_temp.tm_min  = 30;
+    tm_temp.tm_sec  = 0;
+    time_t t_dead = std::mktime(&tm_temp);
+
+    std::cout << "time_t temp = " << t_temp << ", " << asctime(std::localtime(&t_temp));
+    std::cout << "time_t dead = " << t_dead << ", " << asctime(std::localtime(&t_dead));
+    std::cout << "\n";
+  
+    // **************************** //
+    // *** Extract date from tm *** //
+    // **************************** //
+    constexpr std::uint32_t buf_size = 9; // need one extra char, otherwise day cannot be printed, why?
+    char buf[buf_size];
+
+    std::strftime(buf, buf_size, "%Y%m%d", std::localtime(&t0));  std::string s0(buf, 8);
+    std::strftime(buf, buf_size, "%Y%m%d", std::gmtime(&t0));     std::string s1(buf, 8);
+    std::strftime(buf, buf_size, "%Y%m%d", &tm_hardcoded);        std::string s2(buf, 8);
+
+    // ***************************** //
+    // *** Extract date manually *** //
+    // ***************************** //
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(4) << tm_hardcoded.tm_year + 1900 
+       << std::setfill('0') << std::setw(2) << tm_hardcoded.tm_mon + 1
+       << std::setfill('0') << std::setw(2) << tm_hardcoded.tm_mday;
+
+    std::cout << "\ntoday from tm_local     = " << s0;
+    std::cout << "\ntoday from tm_gmt       = " << s1;
+    std::cout << "\ntoday from tm_hardcoded = " << s2;
+    std::cout << "\ntoday from tm_hardcoded = " << ss.str();
+}
+
+
+
+
+
