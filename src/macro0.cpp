@@ -49,7 +49,7 @@ struct S
     struct_object.member = create_##member();
 
 
-void test_macro()
+void test_macro0()
 {
     std::map<std::string, std::variant<std::string, std::uint32_t, T>> m0;
     std::map<std::string, std::variant<std::string, std::uint32_t, T>> m1;

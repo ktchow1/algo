@@ -50,7 +50,7 @@ void print(const T& x) // Must be named as "x"
 #undef OSTREAM_MEM
 #undef  ASSIGN_MEM
 
-void test_macro_new()
+void test_macro1()
 {
     std::cout << "\nTechnique schema" << std::flush;
 
