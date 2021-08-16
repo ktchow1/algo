@@ -152,9 +152,9 @@ int main(int argc, char* argv[])
         test_is_vector();
         test_literal_operator(); 
         test_macro0();
-        test_macro1();
+        // test_macro1();
         test_move_semantics(); 
-        test_new_operator(); 
+        // test_new_operator(); 
         test_optional();  
         test_parallel_algo();
         test_perfect_forwarding(); 
