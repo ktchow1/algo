@@ -98,7 +98,10 @@ void test_matrix_spiral();  // citadel
 void test_K_merge();        // citadel UK
 void test_tree_checker();   // optiver
 
-// Y: C-poly / event-handler / message-handler / PSQL / reckless / yaml
+// DAL : xml
+void test_xml();
+
+// YLib : C-poly / event-handler / message-handler / PSQL / reckless / yaml
 void test_cat_cut();
 void test_cpoly(); 
 void test_compose_and_parse();   
@@ -115,8 +118,8 @@ void test_yaml1();
 void test_yaml2();
 
 int main(int argc, char* argv[])
-{ 
-    bool run_all = true;
+{
+    bool run_all = false; // It is ok after relocation to the UK.
     if (run_all)
     {
         test_algbase();
@@ -152,9 +155,9 @@ int main(int argc, char* argv[])
         test_is_vector();
         test_literal_operator(); 
         test_macro0();
-        // test_macro1();
+    //  test_macro1();
         test_move_semantics(); 
-        // test_new_operator(); 
+    //  test_new_operator(); 
         test_optional();  
         test_parallel_algo();
         test_perfect_forwarding(); 
@@ -210,9 +213,14 @@ int main(int argc, char* argv[])
         test_variant_with_decltype();
     }
 
-    // ***************** //
-    // *** Y modules *** //
-    // ***************** //
+    // *********** //
+    // *** DAL *** //
+    // *********** //
+    test_xml();
+    
+    // ************ //
+    // *** YLib *** //
+    // ************ //
 //  test_cat_cut();
 //  test_cpoly();                // POD for C-style polymorphism
 //  test_compose_and_parse();    // POD for protocol composing and parsing

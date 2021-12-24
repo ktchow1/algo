@@ -33,6 +33,7 @@ endif()
 ##################
 file(GLOB SOURCES
      "src/*.cpp"
+     "src_dal/*.cpp"
      "src_ylib/*.cpp"
 )
 add_executable(Test ${SOURCES})       # for building executable
@@ -44,23 +45,26 @@ add_executable(Test ${SOURCES})       # for building executable
 ###################
 target_include_directories(Test PUBLIC
     include 
+    /mnt/d/dev/boost_1_72_0 
+    /usr/local/libxml2/include/libxml2
     ~/dev/pgsql/include
     ~/dev/yaml-cpp/include
     ~/dev/reckless/reckless/include
-    /mnt/d/dev/boost_1_72_0 
 )
 
 ##################################
 ### (3) link path and link lib ###
 ##################################
 target_link_libraries(Test -L/lib/x86_64-linux-gnu)
-target_link_libraries(Test -L~/dev/pgsql/lib)
+target_link_libraries(Test -L/usr/local/libxml2/lib) 
+target_link_libraries(Test -L~/dev/pgsql/lib) 
 # target_link_libraries(Test -L~/dev/yaml-cpp/build/debug) # Does not work, why?
 
 target_link_libraries(Test -lstdc++fs) # filesystem lib
-target_link_libraries(Test -ldl) # dynamically loaded lib, for boost::stacktrace's dladdr()
-target_link_libraries(Test -lrt) # realtime extension lib, for shm_open()
-target_link_libraries(Test -lpq) # psql API
+target_link_libraries(Test -ldl)   # dynamically loaded lib, for boost::stacktrace's dladdr()
+target_link_libraries(Test -lrt)   # realtime extension lib, for shm_open()
+target_link_libraries(Test -lpq)   # psql API
+target_link_libraries(Test -lxml2)
 target_link_libraries(Test -lgtest)
 target_link_libraries(Test -lpthread)
 target_link_libraries(Test "/home/ktchow1/dev/yaml-cpp/build/debug/libyaml-cppd.a") 
