@@ -173,6 +173,7 @@ void test_xml1()
     xmlFreeDoc(doc_ptr);
 }
 
+/*
 // ************************* //
 // *** XML wrapper class *** //
 // ************************* //
@@ -214,11 +215,6 @@ private:
     xmlDocPtr doc_ptr;
 };
 
-
-// ********************************* //
-// This is DFS iterator.
-// BFS iterator is more complicated.
-// ********************************* //
 class xml_iterator
 {
 public:
@@ -276,5 +272,5 @@ xml_iterator xml::begin() const
     }
 }
 
-
+*/
 
