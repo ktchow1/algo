@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<book>
+    <content>
+        <author>Peter</author>
+        <datewritten>May 21, 2022</datewritten>
+        <keyword>c++</keyword>
+    </content>
+    <body attr0="abc"> 
+        <headline>template</headline>
+        <para0>template function</para0>
+        <para1>template class</para1>
+        <para2>variadic</para2>
+    </body>
+    <body attr1="def"> 
+        <headline>polymorphism</headline>
+        <para0>runtime</para0>
+        <para1>base and derived</para1>
+        <para2>virtual table</para2>
+        <other>
+            <para0>hard code cannot handle this 0</para0>
+            <para1>hard code cannot handle this 1</para1>
+        </other>
+    </body>
+    <text_cannot_be_element_name> 
+        <para0>text0</para0>
+        <para1>text1</para1>
+        <para2>text2</para2>
+    </text_cannot_be_element_name>
+    <ending> 
+        <headline>conclusion</headline>
+        <para0>c++14</para0>
+        <para1>c++17</para1>
+        <para2>c++20</para2>
+        <para3>c++23</para3>
+    </ending>
+</book>

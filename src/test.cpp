@@ -99,7 +99,8 @@ void test_K_merge();        // citadel UK
 void test_tree_checker();   // optiver
 
 // DAL : xml
-void test_xml();
+void test_xml0();
+void test_xml1();
 
 // YLib : C-poly / event-handler / message-handler / PSQL / reckless / yaml
 void test_cat_cut();
@@ -216,7 +217,8 @@ int main(int argc, char* argv[])
     // *********** //
     // *** DAL *** //
     // *********** //
-    test_xml();
+    test_xml0();
+    test_xml1();
     
     // ************ //
     // *** YLib *** //
