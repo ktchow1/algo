@@ -102,6 +102,9 @@ void test_tree_checker();   // optiver
 void test_xml0();
 void test_xml1();
 
+#include <template_specialization_in_header.h> // include this header to create<F28> multi-definition error
+void test_template_specialization_in_header();
+
 // YLib : C-poly / event-handler / message-handler / PSQL / reckless / yaml
 void test_cat_cut();
 void test_cpoly(); 
@@ -217,8 +220,9 @@ int main(int argc, char* argv[])
     // *********** //
     // *** DAL *** //
     // *********** //
-    test_xml0();
-    test_xml1();
+//  test_xml0();
+//  test_xml1();
+    test_template_specialization_in_header();
     
     // ************ //
     // *** YLib *** //
