@@ -103,7 +103,8 @@ void test_xml0();
 void test_xml1();
 
 #include <template_specialization_in_header.h> // include this header to create<F28> multi-definition error
-void test_template_specialization_in_header();
+void test_template_specialization_in_header0();
+void test_template_specialization_in_header1();
 
 // YLib : C-poly / event-handler / message-handler / PSQL / reckless / yaml
 void test_cat_cut();
@@ -222,7 +223,8 @@ int main(int argc, char* argv[])
     // *********** //
 //  test_xml0();
 //  test_xml1();
-    test_template_specialization_in_header();
+    test_template_specialization_in_header0();
+    test_template_specialization_in_header1();
     
     // ************ //
     // *** YLib *** //
