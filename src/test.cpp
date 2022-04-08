@@ -16,6 +16,7 @@ void test_declval1();
 void test_deleter();
 void test_deleter_for_pool();
 void test_enum();
+void test_fileio();
 void test_filesystem();
 void test_function_array_arg();
 void test_function_macro();
@@ -142,6 +143,7 @@ int main(int argc, char* argv[])
         test_deleter();
         test_deleter_for_pool();
         test_enum(); 
+        test_fileio();
         test_filesystem(); 
         test_function_array_arg();
         test_function_macro();
@@ -217,14 +219,15 @@ int main(int argc, char* argv[])
         test_variant_CTAD(); 
         test_variant_with_decltype();
     }
+    test_fileio();
 
     // *********** //
     // *** DAL *** //
     // *********** //
 //  test_xml0();
 //  test_xml1();
-    test_template_specialization_in_header0();
-    test_template_specialization_in_header1();
+//  test_template_specialization_in_header0();
+//  test_template_specialization_in_header1();
     
     // ************ //
     // *** YLib *** //
