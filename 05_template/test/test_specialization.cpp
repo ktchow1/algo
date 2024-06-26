@@ -26,7 +26,7 @@ struct sample_class<std::pair<U0,U1>, std::pair<U1,U2>, std::pair<U2,U3>> // <--
     using output_type = std::tuple<U0,U1,U2,U3>;
 }; 
 
-void test_template_class_specialization()
+void test_class_specialization()
 {
     using Y0 = sample_class<std::uint32_t, std::string, std::vector<std::uint32_t>>::output_type;
     static_assert(std::is_same_v<Y0, std::tuple<std::uint32_t, 
@@ -77,7 +77,7 @@ void sample_function(const T0& x0, const T1& x1, const T2& x2, const T3& x3)
     std::cout << "\nsample function = overrload 3";
 }
 
-void test_template_function_specialization()
+void test_function_specialization()
 {
     // invoke 0,0,1,2,0 respectively
     sample_function(std::uint32_t{1});
@@ -90,8 +90,8 @@ void test_template_function_specialization()
     sample_function(std::make_tuple(1,2,3));   // unfornately, 0 is invoked
 }
 
-void test_template()
+void test_specialization()
 {
-    test_template_class_specialization();
-    test_template_function_specialization();
+    test_class_specialization();
+    test_function_specialization();
 }
