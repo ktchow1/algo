@@ -1,4 +1,5 @@
 #include<iostream>
+#include<cstdint>
 // **************************************** //
 // List functions
 // 1. insert head

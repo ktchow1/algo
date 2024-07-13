@@ -1,9 +1,11 @@
 #include<iostream>
+#include<cstdint>
 #include<vector>
 #include<string>
 #include<stack>
 #include<optional>
 #include<unordered_map>
+#include<algorithm>
 
 std::uint32_t longest_non_duplicated_substr(const std::string& str)
 {

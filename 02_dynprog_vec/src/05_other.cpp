@@ -1,5 +1,7 @@
 #include<iostream>
+#include<cstdint>
 #include<vector>
+#include<algorithm>
 
 
 // Bisection as outer loop, using index x0,x1.

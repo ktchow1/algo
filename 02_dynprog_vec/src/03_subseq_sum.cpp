@@ -1,7 +1,9 @@
 #include<iostream>
+#include<cstdint>
 #include<vector>
 #include<map>
 #include<unordered_map>
+#include<algorithm>
 
 std::int32_t max_subseq_sum(const std::vector<std::int32_t>& vec)
 {
