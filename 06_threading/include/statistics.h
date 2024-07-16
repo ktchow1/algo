@@ -1,23 +1,16 @@
-
 #pragma once
 #include<sstream>
 #include<iomanip>
+#include<cmath>
 #include<set>
-#include<time.h> // clock_gettime
-#include<math.h> 
 
-inline timespec now()
-{
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts;
-}
-
+// Todo : replace by diff of 2 timespec, move to timer.h
 inline std::uint64_t to_nanosec(const timespec& ts)
 {
     std::uint64_t ns = ts.tv_sec * 1e9 + ts.tv_nsec;
     return ns;
 }
+
 
 namespace alg
 {
@@ -81,10 +74,10 @@ namespace alg
             return sum/count;
         }
 
-        T get_stdd() const
+        T get_stddev() const
         {
             if (count==0) return 0;
-            return sqrt(sum_sq/count - (sum/count)*(sum/count));
+            return std::sqrt(sum_sq/count - (sum/count)*(sum/count));
         }
 
         T get_percentile(double r) const
@@ -113,7 +106,7 @@ namespace alg
             if (get_count() > 0)
             {
                 ss << "\naverage : " << get_mean();
-            //  ss << "\nstd dev : " << get_stdd();
+                ss << "\nstd dev : " << get_stddev();
                 ss << "\npercent : ";
                 for(auto x : {0.001, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999})
                 {

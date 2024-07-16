@@ -1,104 +1,89 @@
 
 #include<iostream>
-#include<thread.h>
-#include<statistics.h> 
 #include<future>
+#include<thread.h>
+#include<timer.h>
+#include<statistics.h> 
 
-void timer_resolution()
+
+void test_timer_resolution()
 {
-    constexpr std::uint32_t N = 1000;
     alg::statistics<std::uint64_t> stat;
-    for(std::uint32_t n=0; n!=N; ++n)
-    {
-        timespec ts0;
-        timespec ts1;
-        clock_gettime(CLOCK_MONOTONIC, &ts0);
-        clock_gettime(CLOCK_MONOTONIC, &ts1);
-        stat.add(to_nanosec(ts1)-to_nanosec(ts0));
-    }
+    alg::timer timer;
 
-    std::cout << "\nTimer resolution : ";
-    std::cout << stat.get_string();
+    for(std::uint32_t n=0; n!=1000; ++n)
+    {
+        timer.click(); 
+        timer.click(); 
+        stat.add(timer.time_elapsed_in_nsec());
+    }
+    std::cout << "\nTimer resolution : " << stat.get_string();
     std::cout << "\n";
 }
 
-void time_thread_create()
+void time_thread_creation()
 {
-    constexpr std::uint32_t N = 1000;
     alg::statistics<std::uint64_t> stat;
-    for(std::uint32_t n=0; n!=N; ++n)
-    {
-        timespec ts0;
-        timespec ts1;
-        clock_gettime(CLOCK_MONOTONIC, &ts0);
+    alg::timer timer;
 
+    for(std::uint32_t n=0; n!=1000; ++n)
+    {
+        timer.click();
         std::thread t([&]()
         {
-            clock_gettime(CLOCK_MONOTONIC, &ts1);
+            timer.click();
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         });
 
         t.join();
-        stat.add(to_nanosec(ts1)-to_nanosec(ts0));
+        stat.add(timer.time_elapsed_in_nsec());
     }
-
-    std::cout << "\nThread creation time : ";
-    std::cout << stat.get_string();
+    std::cout << "\nThread creation time : " << stat.get_string();
     std::cout << "\n";
 }
 
-void time_thread_created_by_async_call()
+void time_thread_creation_by_async_call()
 {
-    constexpr std::uint32_t N = 1000;
     alg::statistics<std::uint64_t> stat;
-    for(std::uint32_t n=0; n!=N; ++n)
-    {
-        timespec ts0;
-        clock_gettime(CLOCK_MONOTONIC, &ts0);
+    alg::timer timer;
 
-        std::future<timespec> future = std::async([]()
+    for(std::uint32_t n=0; n!=1000; ++n)
+    {
+        timer.click();
+        std::future<std::uint64_t> future = std::async([&timer]()
         {
-            timespec ts;
-            clock_gettime(CLOCK_MONOTONIC, &ts);
+            timer.click();
             std::this_thread::sleep_for(std::chrono::microseconds(1));
-            return ts;
+            return timer.time_elapsed_in_nsec();
         });
 
-        timespec ts1 = future.get(); // thread join inside
-        stat.add(to_nanosec(ts1)-to_nanosec(ts0));
+        stat.add(future.get()); // thread join inside
     }
-
-    std::cout << "\nAsync call time : ";
-    std::cout << stat.get_string();
+    std::cout << "\nThreead creation by async call time : " << stat.get_string();
     std::cout << "\n";
 }
 
 void time_mutex_lock_and_unlock()
 {
     std::mutex mutex;
-
-    constexpr std::uint32_t N = 1000;
     alg::statistics<std::uint64_t> stat0;
     alg::statistics<std::uint64_t> stat1;
-    for(std::uint32_t n=0; n!=N; ++n)
+    alg::timer timer;
+
+    for(std::uint32_t n=0; n!=1000; ++n)
     {
-        timespec ts0, ts1, ts2;
-        clock_gettime(CLOCK_MONOTONIC, &ts0);
+        timer.click();
         mutex.lock();
-        clock_gettime(CLOCK_MONOTONIC, &ts1);
+        timer.click();
+        stat0.add(timer.time_elapsed_in_nsec());
+
+        timer.click();
         mutex.unlock();
-        clock_gettime(CLOCK_MONOTONIC, &ts2);
-
-        stat0.add(to_nanosec(ts1)-to_nanosec(ts0));
-        stat1.add(to_nanosec(ts2)-to_nanosec(ts1));
+        timer.click();
+        stat1.add(timer.time_elapsed_in_nsec());
     }
-
-    std::cout << "\nMutex lock time : ";
-    std::cout << stat0.get_string();
-    std::cout << "\n";
-    std::cout << "\nMutex unlock time : ";
-    std::cout << stat1.get_string();
-    std::cout << "\n";
+    std::cout << "\nMutex lock time : " << stat0.get_string() << "\n";
+    std::cout << "\nMutex unlock time : " << stat1.get_string() << "\n";
 }
 
 auto synchronization_with_atomic(std::uint32_t cpu0, std::uint32_t cpu1)
@@ -192,4 +177,14 @@ void time_synchronization_with_atomic()
     std::cout << "\n[stat0M]" << stat0M.get_string() << "\n";
     std::cout << "\n[statM1]" << statM1.get_string() << "\n";
 }
+
+
+void test_thread()
+{
+    test_timer_resolution();
+    time_thread_creation();
+    time_thread_creation_by_async_call();
+    time_mutex_lock_and_unlock();
+}
+
 

@@ -197,7 +197,7 @@ namespace alg
     class sync_semaphore
     {
     public:
-        sync_semaphore() // : semaphore(0) // initial count is zero, i.e. consumer must wait 
+        sync_semaphore() : semaphore(0) // initial count is zero, i.e. consumer must wait 
         {
         }
 
@@ -210,16 +210,16 @@ namespace alg
     public:
         inline void wait()
         {
-        //  semaphore.acquire();
+            semaphore.acquire();
         }
 
         inline void notify()
         {
-        //  semaphore.release();
+            semaphore.release();
         }
 
     private:
-    //  std::counting_semaphore<1> semaphore;
+        std::counting_semaphore<1> semaphore;
     };   
 
     // ********************************************* //

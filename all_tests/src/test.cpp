@@ -40,6 +40,8 @@ void test_variant();
 // *** 06_threading *** //
 void test_synchronization();
 void test_thread();
+void test_jthread();
+void test_pthread();
 
 int main()
 {
@@ -80,6 +82,8 @@ int main()
     // *** 06_threading *** //
     test_synchronization();
     test_thread();
+    test_jthread();
+//  test_pthread();
 
     // *** interview *** //
 //  interview::test_alphagrep_max_min_diff_in_subset();

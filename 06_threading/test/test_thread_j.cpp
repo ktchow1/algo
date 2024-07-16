@@ -4,12 +4,6 @@
 #include<functional> // for std::placeholders
 
 
-
-void test_thread()
-{
-}
-
-
 // ***************************** //
 // Jthread is for RAII, as it :
 // 1. stop on destructor
@@ -74,3 +68,9 @@ void test_jthread1()
 
     std::cout << "\n\n";
 } 
+
+void test_jthread()
+{
+    test_jthread0();
+    test_jthread1();
+}

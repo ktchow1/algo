@@ -189,7 +189,7 @@ namespace alg
     // ***************** //
     // *** To string *** //
     // ***************** //
-    std::string to_string(const timespec& ts)
+    inline std::string to_string(const timespec& ts)
     {
         std::stringstream ss;
         std::time_t tt = ts.tv_sec;             // just an integer of seconds
@@ -213,7 +213,7 @@ namespace alg
         }
     }
 
-    std::string to_string(const time_pod& pod)
+    inline std::string to_string(const time_pod& pod)
     {
         std::stringstream ss;
         ss << std::setfill('0') << std::setw(4) << pod.year    << "-"
@@ -237,15 +237,20 @@ namespace alg
         {
         }
 
-        void click()
+        inline void click()
         {
             ts0 = ts1;
             ts1 = std::chrono::system_clock::now();
         }
 
-        std::chrono::nanoseconds time_elapsed() const
+        inline std::chrono::nanoseconds time_elapsed() const
         {
             return std::chrono::duration_cast<std::chrono::nanoseconds>(ts1-ts0);
+        }
+    
+        inline std::uint64_t time_elapsed_in_nsec() const
+        {
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(ts1-ts0).count();
         }
 
     private:

@@ -59,7 +59,7 @@ void* thread_fct(void* arg)
     return NULL;
 }
 
-void test_pthread_affinity_and_priority()
+void test_pthread()
 {
     constexpr std::uint32_t num_threads = 3;
     alg::statistics<std::uint64_t> aff_stat;               // time for changing affinity 

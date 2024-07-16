@@ -1,6 +1,4 @@
-
-#ifndef __EXPERIMENTAL_THREAD_H__
-#define __EXPERIMENTAL_THREAD_H__
+#pragma once
 #include<iostream>
 #include<vector>
 #include<thread>         //  std::thread
@@ -82,4 +80,3 @@ inline void set_this_thread_policy(auto policy)
     set_thread_policy(pthread_self(), policy);
 }
 
-#endif
