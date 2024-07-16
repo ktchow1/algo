@@ -1,13 +1,13 @@
 
 #include<iostream>
 #include<thread.h>
-#include<stat.h> 
+#include<statistics.h> 
 #include<future>
 
 void timer_resolution()
 {
     constexpr std::uint32_t N = 1000;
-    statistics<std::uint64_t> stat;
+    alg::statistics<std::uint64_t> stat;
     for(std::uint32_t n=0; n!=N; ++n)
     {
         timespec ts0;
@@ -25,7 +25,7 @@ void timer_resolution()
 void time_thread_create()
 {
     constexpr std::uint32_t N = 1000;
-    statistics<std::uint64_t> stat;
+    alg::statistics<std::uint64_t> stat;
     for(std::uint32_t n=0; n!=N; ++n)
     {
         timespec ts0;
@@ -50,7 +50,7 @@ void time_thread_create()
 void time_thread_created_by_async_call()
 {
     constexpr std::uint32_t N = 1000;
-    statistics<std::uint64_t> stat;
+    alg::statistics<std::uint64_t> stat;
     for(std::uint32_t n=0; n!=N; ++n)
     {
         timespec ts0;
@@ -78,8 +78,8 @@ void time_mutex_lock_and_unlock()
     std::mutex mutex;
 
     constexpr std::uint32_t N = 1000;
-    statistics<std::uint64_t> stat0;
-    statistics<std::uint64_t> stat1;
+    alg::statistics<std::uint64_t> stat0;
+    alg::statistics<std::uint64_t> stat1;
     for(std::uint32_t n=0; n!=N; ++n)
     {
         timespec ts0, ts1, ts2;
@@ -112,9 +112,9 @@ auto synchronization_with_atomic(std::uint32_t cpu0, std::uint32_t cpu1)
     timespec ts0;
     timespec ts1;
     timespec tsM;
-    statistics<std::uint64_t> stat01;
-    statistics<std::uint64_t> stat0M;
-    statistics<std::uint64_t> statM1;
+    alg::statistics<std::uint64_t> stat01;
+    alg::statistics<std::uint64_t> stat0M;
+    alg::statistics<std::uint64_t> statM1;
 
     // *************** //
     // *** Reactor *** //
@@ -172,9 +172,9 @@ auto synchronization_with_atomic(std::uint32_t cpu0, std::uint32_t cpu1)
 
 void time_synchronization_with_atomic()
 {
-    statistics<std::uint64_t> stat01;
-    statistics<std::uint64_t> stat0M;
-    statistics<std::uint64_t> statM1;
+    alg::statistics<std::uint64_t> stat01;
+    alg::statistics<std::uint64_t> stat0M;
+    alg::statistics<std::uint64_t> statM1;
 
     for(std::uint32_t n=0; n!=7; ++n)
     {

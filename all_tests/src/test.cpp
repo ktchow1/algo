@@ -38,6 +38,7 @@ void test_variadic();
 void test_variant();
 
 // *** 06_threading *** //
+void test_synchronization();
 void test_thread();
 
 int main()
@@ -77,6 +78,7 @@ int main()
     test_variant();   */
     
     // *** 06_threading *** //
+    test_synchronization();
     test_thread();
 
     // *** interview *** //

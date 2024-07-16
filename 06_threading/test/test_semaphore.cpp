@@ -1,8 +1,8 @@
 
 #include<iostream>
 #include<thread.h>
-#include<sync.h>
-#include<stat.h>
+#include<synchronization.h>
+#include<statistics.h>
 #include<atomic>
 #include<vector>
 
@@ -17,7 +17,7 @@ void test_semaphore()
 {
     // *** Sync mechanism *** //
     std::mutex mcout;  
-    sync_psemaphore s;
+    alg::sync_psemaphore s;
     std::atomic<std::uint32_t> ready = 0;
 
 

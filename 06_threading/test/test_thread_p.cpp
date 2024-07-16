@@ -1,7 +1,7 @@
 
 #include<iostream>
 #include<thread.h>
-#include<stat.h>
+#include<statistics.h>
 #include<unordered_set>
 
 // ***************************** //
@@ -62,8 +62,8 @@ void* thread_fct(void* arg)
 void test_pthread_affinity_and_priority()
 {
     constexpr std::uint32_t num_threads = 3;
-    statistics<std::uint64_t> aff_stat;                    // time for changing affinity 
-    statistics<std::uint64_t> pri_stat;                    // time for changing priority      
+    alg::statistics<std::uint64_t> aff_stat;               // time for changing affinity 
+    alg::statistics<std::uint64_t> pri_stat;               // time for changing priority      
     std::unordered_set<std::uint32_t> cores0[num_threads]; // core-id before setting affinity
     std::unordered_set<std::uint32_t> cores1[num_threads]; // core-id after  setting affinity
 

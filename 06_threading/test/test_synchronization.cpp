@@ -1,11 +1,8 @@
-
-#ifndef __EXPERIMENTAL_SYNC_TEST_H__
-#define __EXPERIMENTAL_SYNC_TEST_H__
 #include<iostream>
-#include<thread.h>
-#include<sync.h>
-#include<stat.h>
 #include<atomic>
+#include<synchronization.h>
+#include<thread.h>
+#include<statistics.h>
 
 
 template<typename SYNC>
@@ -18,14 +15,14 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
     // *** Measurement *** //
     timespec ts0;
     timespec ts1;
-    statistics<std::uint64_t> stat{};
+    alg::statistics<std::uint64_t> stat{};
 
     std::thread consumer
     (
         [&]()
         {
             set_this_thread_affinity(2);
-            set_this_thread_priority(SCHED_FIFO);
+            set_this_thread_priority();
             for(std::uint32_t n=0; n!=N; ++n)
             {
                 ready.fetch_add(1); // *** sync point
@@ -41,7 +38,7 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
     // *** Producer *** //
     {
         set_this_thread_affinity(4);
-        set_this_thread_priority(SCHED_FIFO);
+        set_this_thread_priority();
         for(std::uint32_t n=0; n!=N; ++n)
         {
             // Yield inside while loop is necessary in real-time mode, or consumer fails to fetch-add.
@@ -62,4 +59,7 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
     std::cout << "\n";
 }
 
-#endif
+void test_synchronization()
+{
+
+}
