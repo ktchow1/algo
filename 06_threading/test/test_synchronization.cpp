@@ -21,8 +21,8 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
     (
         [&]()
         {
-            set_this_thread_affinity(2);
-            set_this_thread_priority();
+            alg::set_this_thread_affinity(2);
+            alg::set_this_thread_priority();
             for(std::uint32_t n=0; n!=N; ++n)
             {
                 ready.fetch_add(1); // *** sync point
@@ -37,8 +37,8 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
 
     // *** Producer *** //
     {
-        set_this_thread_affinity(4);
-        set_this_thread_priority();
+        alg::set_this_thread_affinity(4);
+        alg::set_this_thread_priority();
         for(std::uint32_t n=0; n!=N; ++n)
         {
             // Yield inside while loop is necessary in real-time mode, or consumer fails to fetch-add.
@@ -61,5 +61,14 @@ void sync_test(const std::string& label, std::uint32_t N, std::uint32_t us)
 
 void test_synchronization()
 {
-
+    constexpr std::uint32_t N = 1000; // must be compile time const for sync_promfut
+    constexpr std::uint32_t us = 1000;
+    sync_test<alg::sync_futex>("Synchronization with sync_futex", N, us);
+    sync_test<alg::sync_mutex>("Synchronization with sync_mutex", N, us);
+    sync_test<alg::sync_pmutex>("Synchronization with sync_pmutex", N, us);
+    sync_test<alg::sync_HansBarz>("Synchronization with sync_HansBarz", N, us);
+    sync_test<alg::sync_semaphore>("Synchronization with sync_semaphore", N, us);
+    sync_test<alg::sync_psemaphore>("Synchronization with sync_psemaphore", N, us);
+    sync_test<alg::sync_condvar>("Synchronization with sync_condvar", N, us);
+    sync_test<alg::sync_promfut<N>>("Synchronization with sync_promfut", N, us);
 }

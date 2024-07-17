@@ -81,8 +81,8 @@ int main()
     
     // *** 06_threading *** //
     test_synchronization();
-    test_thread();
-    test_jthread();
+//  test_thread();
+//  test_jthread();
 //  test_pthread();
 
     // *** interview *** //

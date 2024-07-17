@@ -1,5 +1,4 @@
 #pragma once
-#include<iostream>
 #include<vector>
 #include<thread>         //  std::thread
 #include<pthread.h>      // posix thread
@@ -8,75 +7,87 @@
 #include<sys/resource.h> // priority
 #include<sys/syscall.h>  // tid
 
-/*  Recall that :
- *
- *  pthread_self() == std::this_thread::native_handle()
- *  policy         =  SCHED_RR / SCHED_FIFO 
- */
+//  Remark :
+//
+// 1. pthread_self() == std::this_thread::native_handle()
+// 2. policy         =  SCHED_RR / SCHED_FIFO 
 
 
 // **************** //
 // *** Affinity *** //
 // **************** //
-inline void set_thread_affinity(auto thread_handle, const std::vector<std::uint32_t>& affinity)
+namespace alg
 {
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    for(const auto& x:affinity)
+    inline bool set_thread_affinity(auto thread_handle, const std::vector<std::uint32_t>& affinity)
     {
-        CPU_SET(x, &cpuset);  
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        for(const auto& x:affinity)
+        {
+            CPU_SET(x, &cpuset);  
+        }
+        auto rc = pthread_setaffinity_np(thread_handle, sizeof(cpuset), &cpuset); 
+        if (rc != 0)
+        {
+            return false;
+        }
+        return true;
     }
-    auto rc = pthread_setaffinity_np(thread_handle, sizeof(cpuset), &cpuset); 
-    if (rc != 0)
+
+    inline bool set_this_thread_affinity(const std::vector<std::uint32_t>& affinity)
     {
-        std::cout << "*** cannot set affinity ***\n" << std::flush;
+        return set_thread_affinity(pthread_self(), affinity);
+    }
+
+    inline bool set_thread_affinity(auto thread_handle, std::uint32_t affinity)
+    {
+        return set_thread_affinity(thread_handle, std::vector<std::uint32_t>{affinity});
+    }
+
+    inline bool set_this_thread_affinity(std::uint32_t affinity)
+    {
+        return set_thread_affinity(pthread_self(), affinity);
     }
 }
 
-inline void set_this_thread_affinity(const std::vector<std::uint32_t>& affinity)
-{
-    set_thread_affinity(pthread_self(), affinity);
-}
-
-inline void set_thread_affinity(auto thread_handle, std::uint32_t affinity)
-{
-    set_thread_affinity(thread_handle, std::vector<std::uint32_t>{affinity});
-}
-
-inline void set_this_thread_affinity(std::uint32_t affinity)
-{
-    set_thread_affinity(pthread_self(), affinity);
-}
 
 // ***************************** //
 // *** Priority (nice value) *** //
 // ***************************** //
-inline bool set_this_thread_priority() 
+namespace alg
 {
-    if (setpriority(PRIO_PROCESS, 0, -20) < 0)
+    inline bool set_this_thread_priority() 
     {
-        return false;
+        if (setpriority(PRIO_PROCESS, 0, -20) < 0)
+        {
+            return false;
+        }
+        return true;
     }
-    return true;
 }
+
 
 // ************** //
 // *** Policy *** //
 // ************** //
-inline void set_thread_policy(auto thread_handle, auto policy) 
+namespace alg
 {
-    struct sched_param sp;
-    sp.sched_priority = sched_get_priority_max(policy);
-
-    auto rc = pthread_setschedparam(thread_handle, policy, &sp);
-    if (rc != 0)
+    inline bool set_thread_policy(auto thread_handle, auto policy) 
     {
-        std::cout << "*** cannot set priority ***\n" << std::flush;
-    }   
-}
+        struct sched_param sp;
+        sp.sched_priority = sched_get_priority_max(policy);
 
-inline void set_this_thread_policy(auto policy) 
-{
-    set_thread_policy(pthread_self(), policy);
+        auto rc = pthread_setschedparam(thread_handle, policy, &sp);
+        if (rc != 0)
+        {
+            return false;
+        }   
+        return true;
+    }
+
+    inline bool set_this_thread_policy(auto policy) 
+    {
+        return set_thread_policy(pthread_self(), policy);
+    }
 }
 
