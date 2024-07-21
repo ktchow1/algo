@@ -29,8 +29,8 @@ namespace alg
     class sync_futex
     {
     public:
-        // This thread is blocked when futex == blocking_value.
-        sync_futex() : blocking_value(0)
+        // This thread is blocked when m_futex == m_blocking_value.
+        sync_futex() : m_blocking_value(0)
         {
         }
 
@@ -43,19 +43,19 @@ namespace alg
     public: 
         void wait()
         {
-            syscall(SYS_futex, &futex, FUTEX_WAIT, blocking_value, NULL, NULL, 0); 
-            ++blocking_value;
+            syscall(SYS_futex, &m_futex, FUTEX_WAIT, m_blocking_value, NULL, NULL, 0); 
+            ++m_blocking_value;
         }
 
         void notify()
         {
-            futex.fetch_add(1);
-            syscall(SYS_futex, &futex, FUTEX_WAKE, 1, NULL, NULL, 0); 
+            m_futex.fetch_add(1);
+            syscall(SYS_futex, &m_futex, FUTEX_WAKE, 1, NULL, NULL, 0); 
         }
 
     private:
-        std::atomic<std::int32_t> futex;
-        std::int32_t blocking_value;
+        std::atomic<std::int32_t> m_futex;
+        std::int32_t m_blocking_value;
     };
 
 
@@ -65,14 +65,14 @@ namespace alg
     class sync_mutex
     {
     public:
-        sync_mutex() : mutex()
+        sync_mutex() : m_mutex()
         {
-            mutex.lock();
+            m_mutex.lock();
         }
 
        ~sync_mutex() 
         {
-            mutex.unlock();
+            m_mutex.unlock();
         }
 
         sync_mutex(const sync_mutex&) = delete;
@@ -83,16 +83,16 @@ namespace alg
     public:
         inline void wait()
         {
-            mutex.lock(); 
+            m_mutex.lock(); 
         }
 
         inline void notify()
         {
-            mutex.unlock(); 
+            m_mutex.unlock(); 
         }
 
     private:
-        std::mutex mutex;
+        std::mutex m_mutex;
     };
 
 
@@ -104,14 +104,14 @@ namespace alg
     public:
         sync_pmutex()
         {
-            pthread_mutex_init(&mutex, NULL);
-            pthread_mutex_lock(&mutex);
+            pthread_mutex_init(&m_mutex, NULL);
+            pthread_mutex_lock(&m_mutex);
         }
 
        ~sync_pmutex() 
         {
-            pthread_mutex_unlock(&mutex);
-            pthread_mutex_destroy(&mutex);
+            pthread_mutex_unlock(&m_mutex);
+            pthread_mutex_destroy(&m_mutex);
         }
 
         sync_pmutex(const sync_pmutex&) = delete;
@@ -122,16 +122,16 @@ namespace alg
     public:
         inline void wait()
         {
-            pthread_mutex_lock(&mutex);
+            pthread_mutex_lock(&m_mutex);
         }
 
         inline void notify()
         {
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&m_mutex);
         }
 
     private:
-        pthread_mutex_t mutex;
+        pthread_mutex_t m_mutex;
     };
 
 
@@ -146,18 +146,18 @@ namespace alg
     class sync_HansBarz  
     {
     public:
-        sync_HansBarz() : count(0)
+        sync_HansBarz() : m_count(0)
         {
-            pthread_mutex_init(&cs_mutex, NULL);
-            pthread_mutex_init(&pv_mutex, NULL);
-            pthread_mutex_lock(&pv_mutex);
+            pthread_mutex_init(&m_cs_mutex, NULL);
+            pthread_mutex_init(&m_pv_mutex, NULL);
+            pthread_mutex_lock(&m_pv_mutex);
         }
 
        ~sync_HansBarz() 
         {
-            pthread_mutex_unlock (&pv_mutex);
-            pthread_mutex_destroy(&pv_mutex);
-            pthread_mutex_destroy(&cs_mutex);
+            pthread_mutex_unlock (&m_pv_mutex);
+            pthread_mutex_destroy(&m_pv_mutex);
+            pthread_mutex_destroy(&m_cs_mutex);
         }
 
         sync_HansBarz(const sync_HansBarz&) = delete;
@@ -168,31 +168,31 @@ namespace alg
     public:
         inline void wait()
         {
-            pthread_mutex_lock(&pv_mutex); // wait ... 
-            pthread_mutex_lock(&cs_mutex);
-            --count;
-            if (count > 0)
+            pthread_mutex_lock(&m_pv_mutex); // wait ... 
+            pthread_mutex_lock(&m_cs_mutex);
+            --m_count;
+            if (m_count > 0)
             {
-                pthread_mutex_unlock(&pv_mutex);
+                pthread_mutex_unlock(&m_pv_mutex);
             }
-            pthread_mutex_unlock(&cs_mutex);
+            pthread_mutex_unlock(&m_cs_mutex);
         }
 
         inline void notify()
         {
-            pthread_mutex_lock(&cs_mutex);
-            ++count;
-            if (count == 1)
+            pthread_mutex_lock(&m_cs_mutex);
+            ++m_count;
+            if (m_count == 1)
             {
-                pthread_mutex_unlock(&pv_mutex); // notify ... 
+                pthread_mutex_unlock(&m_pv_mutex); // notify ... 
             }
-            pthread_mutex_unlock(&cs_mutex);
+            pthread_mutex_unlock(&m_cs_mutex);
         }
 
     private:
-        std::int32_t count;
-        pthread_mutex_t cs_mutex; // for critical session protection
-        pthread_mutex_t pv_mutex; // for signaling, i.e. p and v
+        std::int32_t m_count;
+        pthread_mutex_t m_cs_mutex; // for critical session protection
+        pthread_mutex_t m_pv_mutex; // for signaling, i.e. p and v
     }; 
       
 
@@ -202,7 +202,7 @@ namespace alg
     class sync_semaphore
     {
     public:
-        sync_semaphore() : semaphore(0) // initial count is zero, i.e. consumer must wait 
+        sync_semaphore() : m_semaphore(0) // initial count is zero, i.e. consumer must wait 
         {
         }
 
@@ -215,16 +215,16 @@ namespace alg
     public:
         inline void wait()
         {
-            semaphore.acquire();
+            m_semaphore.acquire();
         }
 
         inline void notify()
         {
-            semaphore.release();
+            m_semaphore.release();
         }
 
     private:
-        std::counting_semaphore<1> semaphore;
+        std::counting_semaphore<1> m_semaphore;
     };   
 
 
@@ -236,14 +236,14 @@ namespace alg
     public:
         sync_psemaphore()
         {
-            sem_init(&semaphore, 0, 0); 
+            sem_init(&m_semaphore, 0, 0); 
             // arg[1] : 0 for multi-thread, 1 for multi-process
             // arg[2] : initial value
         }
 
        ~sync_psemaphore() 
         {
-            sem_destroy(&semaphore);
+            sem_destroy(&m_semaphore);
         }
 
         sync_psemaphore(const sync_psemaphore&) = delete;
@@ -254,23 +254,23 @@ namespace alg
     public:
         inline void wait()
         {
-            sem_wait(&semaphore);
+            sem_wait(&m_semaphore);
         }
 
         inline void notify()
         {
-           sem_post(&semaphore);
+           sem_post(&m_semaphore);
         }
 
         inline auto peek_value() 
         {
             std::int32_t x;
-            sem_getvalue(&semaphore, &x);
+            sem_getvalue(&m_semaphore, &x);
             return x;
         }
 
     private:
-        sem_t semaphore;
+        sem_t m_semaphore;
     };
 
 
@@ -280,7 +280,7 @@ namespace alg
     class sync_condvar
     {
     public:
-        sync_condvar() : count(0)
+        sync_condvar() : m_count(0)
         {
         }
 
@@ -293,24 +293,24 @@ namespace alg
     public: 
         void wait()
         {
-            std::unique_lock<std::mutex> lock(mutex);
-            while(count == 0) cv.wait(lock); 
-            --count;
+            std::unique_lock<std::mutex> lock(m_mutex);
+            while(m_count == 0) m_cv.wait(lock); 
+            --m_count;
         }
 
         void notify()
         {
             {
-                std::lock_guard<std::mutex> lock(mutex);
-                ++count;
+                std::lock_guard<std::mutex> lock(m_mutex);
+                ++m_count;
             }
-            cv.notify_one();
+            m_cv.notify_one();
         }
 
     private:
-        std::mutex mutex;
-        std::condition_variable cv;
-        std::uint32_t count; // emulate a semaphore
+        std::mutex m_mutex;
+        std::condition_variable m_cv;
+        std::uint32_t m_count; // emulate a semaphore
     };
 
 
@@ -321,11 +321,11 @@ namespace alg
     class sync_promfut
     {
     public:
-        sync_promfut() : p_index(0), f_index(0), promises{}, futures{}
+        sync_promfut() : m_pindex(0), m_findex(0), m_promises{}, m_futures{}
         {
             for(std::uint32_t n=0; n!=N ; ++n)
             {
-                futures[n] = promises[n].get_future();
+                m_futures[n] = m_promises[n].get_future();
             }
         }
 
@@ -338,27 +338,27 @@ namespace alg
     public:
         void wait()
         {
-            auto n = f_index.fetch_add(1);
+            auto n = m_findex.fetch_add(1);
             if (n < N) 
             {
-                futures[n].get();
+                m_futures[n].get();
             }
         }
 
         void notify()
         {
-            auto n = p_index.fetch_add(1);
+            auto n = m_pindex.fetch_add(1);
             if (n < N)
             {
-                promises[n].set_value();
+                m_promises[n].set_value();
             }
         }
 
     private:
-        std::atomic<std::uint32_t> p_index;
-        std::atomic<std::uint32_t> f_index;
-        std::array<std::promise<void>, N> promises;
-        std::array<std::future<void>, N> futures;
+        std::atomic<std::uint32_t> m_pindex;
+        std::atomic<std::uint32_t> m_findex;
+        std::array<std::promise<void>, N> m_promises;
+        std::array<std::future <void>, N> m_futures;
     };
     
 
@@ -396,100 +396,4 @@ namespace alg
     private:
         std::atomic<bool> m_flag;
     };
-
-
-
-
-
-    /*
-    auto synchronization_with_atomic(std::uint32_t cpu0, std::uint32_t cpu1)
-    {
-        // *** Sync mechanism *** //
-        std::atomic<std::uint32_t> trigger = 0;
-        std::atomic<std::uint32_t> response = 0;
-        constexpr std::uint32_t N = 1000;
-
-        // *** Measurement *** //
-        timespec ts0;
-        timespec ts1;
-        timespec tsM;
-        alg::statistics<std::uint64_t> stat0M;
-        alg::statistics<std::uint64_t> statM1;
-
-        // *************** //
-        // *** Reactor *** //
-        // *************** //
-        std::thread reactor([&]()
-        {
-            alg::set_this_thread_affinity(cpu0);        
-            alg::set_this_thread_policy(SCHED_FIFO);        
-            for(std::uint32_t n=0; n!=N; ++n)
-            {
-                while(trigger.load()!=n+1) 
-                {
-                    __builtin_ia32_pause();
-                //  std::this_thread::yield(); // very slow response time
-                }
-                clock_gettime(CLOCK_MONOTONIC, &tsM);
-                response.fetch_add(1);
-            }
-        });
-
-        // ***************** //
-        // *** Initiator *** //
-        // ***************** //
-        alg::set_this_thread_affinity(cpu1);        
-        alg::set_this_thread_policy(SCHED_FIFO);        
-        for(std::uint32_t n=0; n!=N; ++n)
-        {
-            clock_gettime(CLOCK_MONOTONIC, &ts0);
-            trigger.fetch_add(1);
-            while(response.load()!=n+1) 
-            {
-                __builtin_ia32_pause();
-            //  std::this_thread::yield(); // very slow response time 
-            }
-            clock_gettime(CLOCK_MONOTONIC, &ts1);
-
-
-            // *** Print measurement *** //
-            std::uint64_t ns0 = to_nanosec(ts0);
-            std::uint64_t ns1 = to_nanosec(ts1);
-            std::uint64_t nsM = to_nanosec(tsM);
-            stat01.add(ns1 - ns0);
-            stat0M.add(nsM - ns0);
-            statM1.add(ns1 - nsM);
-
-            // *************************************************************************** //
-            // There is no way to block initiator before each round, thus we have to wait. //
-            // *************************************************************************** //
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        }
-
-        reactor.join();
-        return std::make_tuple(stat01, stat0M, statM1);
-    }
-
-    void time_synchronization_with_atomic()
-    {
-        alg::statistics<std::uint64_t> stat01;
-        alg::statistics<std::uint64_t> stat0M;
-        alg::statistics<std::uint64_t> statM1;
-
-        for(std::uint32_t n=0; n!=7; ++n)
-        {
-            for(std::uint32_t m=n+1; m!=8; ++m)
-            {
-                auto [a,b,c] = synchronization_with_atomic(n,m);     
-                auto [d,e,f] = synchronization_with_atomic(m,n);     
-                stat01 += a += d; 
-                stat0M += b += e; 
-                statM1 += c += f; 
-            }
-        }
-        std::cout << "\nSynchonization with atomic : all-in-one";
-        std::cout << "\n[stat01]" << stat01.get_string() << "\n";
-        std::cout << "\n[stat0M]" << stat0M.get_string() << "\n";
-        std::cout << "\n[statM1]" << statM1.get_string() << "\n";
-    } */
 }
