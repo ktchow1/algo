@@ -22,6 +22,7 @@ namespace alg
         x.notify();
     };
 
+
     // ********************************* //
     // *** Implementation with futex *** //
     // ********************************* //
@@ -56,6 +57,7 @@ namespace alg
         std::atomic<std::int32_t> futex;
         std::int32_t blocking_value;
     };
+
 
     // ******************************************************** //
     // *** Implementation with std::mutex (single consumer) *** //
@@ -92,6 +94,7 @@ namespace alg
     private:
         std::mutex mutex;
     };
+
 
     // *********************************************************** //
     // *** Implementation with pthread mutex (single consumer) *** //
@@ -131,10 +134,11 @@ namespace alg
         pthread_mutex_t mutex;
     };
 
+
     // ******************************************************** //
     // *** Implementation with pthread mutex (Hans W. Barz) *** //
     // ******************************************************* //
-    // 1. count is protected by cs_mutex, hence its inc/dec are atomic
+    // 1. count is protected by cs_mutex, hence inc/dec are atomic
     // 2. waiting threads on P are waked either by :
     // -- other threads completing P and count N->N-1, where N>1
     // -- other threads completing V and count 0->1
@@ -191,6 +195,7 @@ namespace alg
         pthread_mutex_t pv_mutex; // for signaling, i.e. p and v
     }; 
       
+
     // ***************************************** //
     // *** Implementation with std semaphore *** //
     // ***************************************** //
@@ -221,6 +226,7 @@ namespace alg
     private:
         std::counting_semaphore<1> semaphore;
     };   
+
 
     // ********************************************* //
     // *** Implementation with pthread semaphore *** //
@@ -267,6 +273,7 @@ namespace alg
         sem_t semaphore;
     };
 
+
     // ********************************************** //
     // *** Implementation with condition variable *** //
     // ********************************************** //
@@ -305,6 +312,7 @@ namespace alg
         std::condition_variable cv;
         std::uint32_t count; // emulate a semaphore
     };
+
 
     // ********************************************** //
     // *** Implementation with promise and future *** //
@@ -352,4 +360,136 @@ namespace alg
         std::array<std::promise<void>, N> promises;
         std::array<std::future<void>, N> futures;
     };
+    
+
+    // ********************************** //
+    // *** Implementation with atomic *** //
+    // ********************************** //
+    class sync_atomic
+    {
+    public:
+        sync_atomic() : m_flag(false)
+        {
+        }
+
+       ~sync_atomic() = default;
+        sync_atomic(const sync_atomic&) = delete;
+        sync_atomic(sync_atomic&&) = default;
+        sync_atomic& operator=(const sync_atomic&) = delete;
+        sync_atomic& operator=(sync_atomic&&) = default;
+
+    public: 
+        void wait()
+        {
+            while(!m_flag.load(std::memory_order_acquire))
+            {
+                std::this_thread::yield();
+            }
+            m_flag.store(false, std::memory_order_release); // Don't forget this
+        }
+
+        void notify()
+        {
+            m_flag.store(true, std::memory_order_release);
+        }
+
+    private:
+        std::atomic<bool> m_flag;
+    };
+
+
+
+
+
+    /*
+    auto synchronization_with_atomic(std::uint32_t cpu0, std::uint32_t cpu1)
+    {
+        // *** Sync mechanism *** //
+        std::atomic<std::uint32_t> trigger = 0;
+        std::atomic<std::uint32_t> response = 0;
+        constexpr std::uint32_t N = 1000;
+
+        // *** Measurement *** //
+        timespec ts0;
+        timespec ts1;
+        timespec tsM;
+        alg::statistics<std::uint64_t> stat0M;
+        alg::statistics<std::uint64_t> statM1;
+
+        // *************** //
+        // *** Reactor *** //
+        // *************** //
+        std::thread reactor([&]()
+        {
+            alg::set_this_thread_affinity(cpu0);        
+            alg::set_this_thread_policy(SCHED_FIFO);        
+            for(std::uint32_t n=0; n!=N; ++n)
+            {
+                while(trigger.load()!=n+1) 
+                {
+                    __builtin_ia32_pause();
+                //  std::this_thread::yield(); // very slow response time
+                }
+                clock_gettime(CLOCK_MONOTONIC, &tsM);
+                response.fetch_add(1);
+            }
+        });
+
+        // ***************** //
+        // *** Initiator *** //
+        // ***************** //
+        alg::set_this_thread_affinity(cpu1);        
+        alg::set_this_thread_policy(SCHED_FIFO);        
+        for(std::uint32_t n=0; n!=N; ++n)
+        {
+            clock_gettime(CLOCK_MONOTONIC, &ts0);
+            trigger.fetch_add(1);
+            while(response.load()!=n+1) 
+            {
+                __builtin_ia32_pause();
+            //  std::this_thread::yield(); // very slow response time 
+            }
+            clock_gettime(CLOCK_MONOTONIC, &ts1);
+
+
+            // *** Print measurement *** //
+            std::uint64_t ns0 = to_nanosec(ts0);
+            std::uint64_t ns1 = to_nanosec(ts1);
+            std::uint64_t nsM = to_nanosec(tsM);
+            stat01.add(ns1 - ns0);
+            stat0M.add(nsM - ns0);
+            statM1.add(ns1 - nsM);
+
+            // *************************************************************************** //
+            // There is no way to block initiator before each round, thus we have to wait. //
+            // *************************************************************************** //
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+        }
+
+        reactor.join();
+        return std::make_tuple(stat01, stat0M, statM1);
+    }
+
+    void time_synchronization_with_atomic()
+    {
+        alg::statistics<std::uint64_t> stat01;
+        alg::statistics<std::uint64_t> stat0M;
+        alg::statistics<std::uint64_t> statM1;
+
+        for(std::uint32_t n=0; n!=7; ++n)
+        {
+            for(std::uint32_t m=n+1; m!=8; ++m)
+            {
+                auto [a,b,c] = synchronization_with_atomic(n,m);     
+                auto [d,e,f] = synchronization_with_atomic(m,n);     
+                stat01 += a += d; 
+                stat0M += b += e; 
+                statM1 += c += f; 
+            }
+        }
+        std::cout << "\nSynchonization with atomic : all-in-one";
+        std::cout << "\n[stat01]" << stat01.get_string() << "\n";
+        std::cout << "\n[stat0M]" << stat0M.get_string() << "\n";
+        std::cout << "\n[statM1]" << statM1.get_string() << "\n";
+    } */
 }
