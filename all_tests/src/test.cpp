@@ -80,10 +80,10 @@ int main()
     test_variant();   */
     
     // *** 06_threading *** //
-    test_synchronization();
+//  test_synchronization();
 //  test_thread();
 //  test_jthread();
-//  test_pthread();
+    test_pthread();
 
     // *** interview *** //
 //  interview::test_alphagrep_max_min_diff_in_subset();

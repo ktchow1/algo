@@ -1,5 +1,4 @@
 #include<iostream>
-#include<atomic>
 #include<thread.h>
 #include<synchronization.h>
 #include<timer.h>

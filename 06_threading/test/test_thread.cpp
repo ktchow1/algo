@@ -16,7 +16,7 @@ void test_timer_resolution()
         timer.click(); 
         stat.add(timer.time_elapsed_in_nsec());
     }
-    std::cout << "\nTimer resolution : " << stat.get_string();
+    std::cout << "\n[Timer resolution]" << stat.get_string();
     std::cout << "\n";
 }
 
@@ -37,7 +37,7 @@ void time_thread_creation()
         t.join();
         stat.add(timer.time_elapsed_in_nsec());
     }
-    std::cout << "\nThread creation time : " << stat.get_string();
+    std::cout << "\n[Thread creation time]" << stat.get_string();
     std::cout << "\n";
 }
 
@@ -58,7 +58,7 @@ void time_thread_creation_by_async_call()
 
         stat.add(future.get()); // thread join inside
     }
-    std::cout << "\nThreead creation by async call time : " << stat.get_string();
+    std::cout << "\n[Threead creation by async call time]" << stat.get_string();
     std::cout << "\n";
 }
 
@@ -81,8 +81,8 @@ void time_mutex_lock_and_unlock()
         timer.click();
         stat1.add(timer.time_elapsed_in_nsec());
     }
-    std::cout << "\nMutex lock time : " << stat0.get_string() << "\n";
-    std::cout << "\nMutex unlock time : " << stat1.get_string() << "\n";
+    std::cout << "\n[Mutex lock time]" << stat0.get_string() << "\n";
+    std::cout << "\n[Mutex unlock time]" << stat1.get_string() << "\n";
 }
 
 void test_thread()

@@ -1,6 +1,4 @@
-
-#ifndef __EXPERIMENTAL_LOCKFREE_QUEUE_H__
-#define __EXPERIMENTAL_LOCKFREE_QUEUE_H__
+#pragma once
 #include<iostream>
 #include<array>
 #include<atomic>
@@ -212,4 +210,3 @@ void lockfree_queue<T, N, CONSTRAINT>::debug() const noexcept
     }
 }
 
-#endif
