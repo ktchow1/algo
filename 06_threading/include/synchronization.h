@@ -215,12 +215,12 @@ namespace alg
     public:
         inline void wait()
         {
-            m_semaphore.acquire();
+            m_semaphore.acquire(); // if (count>0) --count; else blocked()
         }
 
         inline void notify()
         {
-            m_semaphore.release();
+            m_semaphore.release(); // ++count
         }
 
     private:
@@ -385,7 +385,7 @@ namespace alg
             {
                 std::this_thread::yield();
             }
-            m_flag.store(false, std::memory_order_release); // Don't forget this
+            m_flag.store(false, std::memory_order_release); // notify one thread only
         }
 
         void notify()

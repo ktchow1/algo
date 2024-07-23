@@ -1,7 +1,7 @@
 #include<iostream>
 #include<atomic>
-#include<synchronization.h>
 #include<thread.h>
+#include<synchronization.h>
 #include<timer.h>
 #include<statistics.h>
 
@@ -41,10 +41,9 @@ void sync_test(const std::string& test_name, std::uint32_t N, std::uint32_t us)
         alg::set_this_thread_priority();
         for(std::uint32_t n=0; n!=N; ++n)
         {
-            // Yield inside while loop is necessary in real-time mode, or consumer fails to fetch-add.
             while(ready.load()!=n+1) 
             {
-                std::this_thread::yield(); // <--- sync point
+                std::this_thread::yield(); // <--- sync point (yield allows consumer to fetch-add)
             }
             std::this_thread::sleep_for(std::chrono::microseconds(us)); // <--- wait until consumer is blocked
 
