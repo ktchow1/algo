@@ -1,67 +1,40 @@
-
 #include<iostream>
+#include<cassert>
 #include<thread>
-#include<atomic>
+#include<future>
+#include<promise_future.h>
 
-// ****************************************************** //
-// *** Promise and future is just publication pattern *** //
-// ****************************************************** //
-template<typename T>
-struct future
+
+template<template<typename> typename PROMISE>
+void test_promise_future_impl(const std::string& test_name)
 {
-    future(const T& x, const std::atomic<bool>& f) : publication(x), flag(f) {}
-
-    const T& get() const
+    std::cout << "\n" << test_name;
+    for(std::uint32_t n=0; n!=20; ++n)
     {
-        while(!flag.load(std::memory_order_acquire));
-        return publication;
+        PROMISE<std::uint32_t> p;
+        auto f = p.get_future();
+
+        std::thread t0([&]()
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            p.set_value(n+123);
+        });
+
+        std::thread t1([&]()
+        {
+            assert(f.get() == n+123);
+        });
+
+        t0.join(); 
+        t1.join(); 
+        std::cout << "\nprogress = " << n << "/20";
     }
-
-    const T& publication;
-    const std::atomic<bool>& flag;
-};
-
-template<typename T>
-struct promise
-{
-    promise() : flag(false){}
-
-    future<T> get_future() const
-    {
-        return { publication, flag };
-    }
-
-    void set(const T& x)
-    {
-        publication = x;
-        flag.store(true, std::memory_order_release);
-    }
-
-    T publication;
-    std::atomic<bool> flag;
-};
-
-void test_promise_and_future()
-{
-    std::cout << "\nPromise and future is just publication pattern.";
-
-    promise<std::uint32_t> p;
-    auto f = p.get_future();
-
-    std::thread t0([&]()
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        p.set(123);
-    });
-
-    std::thread t1([&]()
-    {
-        std::cout << "\nwait .... " << std::flush;
-        std::cout << "I got " << f.get() << std::flush;
-    });
-
-    t0.join(); 
-    t1.join(); 
-    std::cout << "\n\n";
+    std::cout << "\n";
 }
 
+
+void test_promise_future()
+{
+    test_promise_future_impl<std::promise>("[Promise-future std version]");
+    test_promise_future_impl<alg::promise>("[Promise-future alg version]");
+}

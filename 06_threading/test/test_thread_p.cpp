@@ -56,7 +56,7 @@ void test_pthread()
         results[n].id = n;
     }
 
-    std::cout << "\nNext test progress ";
+    std::cout << "\nNext test in progress ";
     for(std::uint32_t n=0; n!=1000; ++n)
     {
         if (n%20==0) std::cout << "." << std::flush;        

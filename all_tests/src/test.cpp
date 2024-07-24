@@ -38,10 +38,12 @@ void test_variadic();
 void test_variant();
 
 // *** 06_threading *** //
-void test_synchronization();
 void test_thread();
 void test_jthread();
 void test_pthread();
+void test_promise_future();
+void test_semaphore();
+void test_synchronization();
 
 int main()
 {
@@ -80,10 +82,12 @@ int main()
     test_variant();   */
     
     // *** 06_threading *** //
-//  test_synchronization();
 //  test_thread();
 //  test_jthread();
-    test_pthread();
+//  test_pthread();
+    test_promise_future();
+//  test_semaphore();
+//  test_synchronization();
 
     // *** interview *** //
 //  interview::test_alphagrep_max_min_diff_in_subset();

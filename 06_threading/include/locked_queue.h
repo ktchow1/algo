@@ -1,110 +1,76 @@
-
-#ifndef __EXPERIMENTAL_LOCKED_QUEUE_H__
-#define __EXPERIMENTAL_LOCKED_QUEUE_H__
-#include<iostream>
+#pragma once
+#include<optional>
 #include<queue>
 #include<mutex>
-#include<optional>
+#include<spinlock.h>
 
-class spinlock final
+
+namespace alg
 {
-public:
-    spinlock()
+    template<typename T, typename LOCK> class locked_queue final
     {
-        pthread_spin_init(&impl, PTHREAD_PROCESS_PRIVATE); // for threads inside same process only
-    }
+    public:
+        using value_type = T;
+        using this_type = locked_queue<T, LOCK>;
 
-    ~spinlock()
-    {
-        pthread_spin_destroy(&impl);
-    }
+    public:
+        locked_queue() = default;
+       ~locked_queue() = default;
+        locked_queue(const this_type&) = delete;
+        locked_queue(this_type&&) = default;
+        this_type& operator=(const this_type&) = delete;
+        this_type& operator=(this_type&&) = default;
 
-    spinlock(const spinlock&) = delete;
-    spinlock(spinlock&&) = delete;
-    spinlock& operator=(const spinlock&) = delete;
-    spinlock& operator=(spinlock&&) = delete;
-
-public:
-    inline void lock() noexcept
-    {
-        pthread_spin_lock(&impl);
-    }
-
-    inline void unlock() noexcept
-    {
-        pthread_spin_unlock(&impl);
-    }
-
-private:
-    pthread_spinlock_t impl;
-};
-
-
-template<typename T, typename LOCK> class locked_queue final
-{
-public:
-    using value_type = T;
-    using this_type = locked_queue<T, LOCK>;
-
-public:
-    locked_queue() = default;
-   ~locked_queue() = default;
-    locked_queue(const this_type&) = delete;
-    locked_queue(this_type&&) = default;
-    this_type& operator=(const this_type&) = delete;
-    this_type& operator=(this_type&&) = default;
-
-public:
-    template<typename... ARGS> 
-    bool emplace(ARGS&&... args) noexcept
-    {
-        std::lock_guard<LOCK> lock(impl);  
-        queue.emplace(std::forward<ARGS>(args)...);
-        return true;
-    }
-
-    std::optional<T> pop() noexcept
-    {
-        std::lock_guard<LOCK> lock(impl); 
-        if (queue.size() == 0) return std::nullopt;
-        
-        T output = std::move(queue.front());
-        queue.pop();
-        return std::make_optional(output);
-    }
-
-    // *** boost::lockfree interface *** //
-    bool push(const T& item) noexcept
-    {
-        return emplace(item);
-    }
-
-    bool pop(T& item) noexcept
-    {
-        auto result = pop();
-        if (result)
+    public:
+        template<typename... ARGS> 
+        bool emplace(ARGS&&... args) noexcept
         {
-            item = std::move(*result); 
+            std::lock_guard<LOCK> lock(impl);  
+            queue.emplace(std::forward<ARGS>(args)...);
             return true;
         }
-        else return false;
-    }
 
-public:
-    std::uint32_t peek_size() const noexcept
-    {
-        std::lock_guard<LOCK> lock(impl);
-        return queue.size();
-    }
-    
-private:
-    std::queue<T> queue;
-    mutable LOCK impl; // mutex or spinlock
-};
+        std::optional<T> pop() noexcept
+        {
+            std::lock_guard<LOCK> lock(impl); 
+            if (queue.size() == 0) return std::nullopt;
+            
+            T output = std::move(queue.front());
+            queue.pop();
+            return std::make_optional(output);
+        }
 
-template<typename T>
-using mutex_locked_queue = locked_queue<T, std::mutex>;
-template<typename T>
-using spin_locked_queue = locked_queue<T, spinlock>;
+        // *** boost::lockfree interface *** //
+        bool push(const T& item) noexcept
+        {
+            return emplace(item);
+        }
 
-#endif
+        bool pop(T& item) noexcept
+        {
+            auto result = pop();
+            if (result)
+            {
+                item = std::move(*result); 
+                return true;
+            }
+            else return false;
+        }
+
+    public:
+        std::uint32_t peek_size() const noexcept
+        {
+            std::lock_guard<LOCK> lock(impl);
+            return queue.size();
+        }
+        
+    private:
+        std::queue<T> queue;
+        mutable LOCK impl; // mutex or spinlock
+    };
+
+    template<typename T>
+    using mutex_locked_queue = locked_queue<T, std::mutex>;
+    template<typename T>
+    using spin_locked_queue = locked_queue<T, spinlock>;
+}
