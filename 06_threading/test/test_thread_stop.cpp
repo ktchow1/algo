@@ -4,7 +4,7 @@
 #include<functional> // for std::placeholders
 
 
-void test_stop_thread()
+void test_std_thread_stop()
 {
     std::cout << "\n[Stop source for std::thread]";
 
@@ -37,7 +37,7 @@ void test_stop_thread()
 // 1. stop on destructor
 // 2. join on destructor
 // ***************************** //
-void test_stop_jthread()
+void test_std_jthread_stop()
 {
     std::cout << "\n[Stop source for std::jthread]";
 
@@ -68,8 +68,9 @@ void test_stop_jthread()
     std::cout << "\n";
 } 
 
-void test_jthread()
+void test_thread_stop()
 {
-    test_stop_thread();
-    test_stop_jthread();
+    test_std_thread_stop();
+    test_std_jthread_stop();
+    std::cout << "\n";
 }

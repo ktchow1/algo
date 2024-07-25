@@ -47,7 +47,7 @@ void* thread_fct(void* arg)
     return NULL;
 }
 
-void test_pthread()
+void test_thread_create()
 {
     constexpr std::uint32_t num_threads = 3;
     thread_result results[num_threads];

@@ -38,9 +38,9 @@ void test_variadic();
 void test_variant();
 
 // *** 06_threading *** //
-void test_thread();
-void test_jthread();
-void test_pthread();
+void test_thread_create();
+void test_thread_stop();
+void test_thread_timing();
 void test_promise_future();
 void test_semaphore();
 void test_synchronization();
@@ -82,10 +82,10 @@ int main()
     test_variant();   */
     
     // *** 06_threading *** //
-//  test_thread();
-//  test_jthread();
-//  test_pthread();
-    test_promise_future();
+    test_thread_create();
+    test_thread_stop();
+    test_thread_timing();
+//  test_promise_future();
 //  test_semaphore();
 //  test_synchronization();
 
