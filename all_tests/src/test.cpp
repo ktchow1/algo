@@ -41,9 +41,11 @@ void test_variant();
 void test_thread_create();
 void test_thread_stop();
 void test_thread_timing();
-void test_promise_future();
-void test_semaphore();
+void test_spinlock_mutex();
 void test_synchronization();
+void test_semaphore();
+void test_singleton();
+void test_promise_future();
 
 int main()
 {
@@ -85,9 +87,11 @@ int main()
     test_thread_create();
     test_thread_stop();
     test_thread_timing();
-//  test_promise_future();
-//  test_semaphore();
+    test_spinlock_mutex();
 //  test_synchronization();
+//  test_semaphore();
+//  test_singleton();
+//  test_promise_future();
 
     // *** interview *** //
 //  interview::test_alphagrep_max_min_diff_in_subset();
