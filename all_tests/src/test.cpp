@@ -2,13 +2,11 @@
 #include<interview.h>
 
 void test_arithmetics();
+void test_bisection();
 void test_tree();
 void test_tree_variant();
 
-void test_subseq_sum_count();
-void test_substr();
-void test_stack_trick();
-void test_sorting_trick();
+void test_subseq_sum();
 
 void test_singly_link_subproblem();
 void test_multi_link_subproblem();
@@ -50,44 +48,42 @@ void test_promise_future();
 int main()
 {
 //  test_arithmetics();
+//  test_bisection();
 //  test_tree();
 //  test_tree_variant();
 //  
-//  test_subseq_sum_count();
-//  test_substr();
-//  test_stack_trick();
-//  test_sorting_trick();
+    test_subseq_sum();
 //
 //  test_singly_link_subproblem();
 //  test_multi_link_subproblem();
 //  test_time_state_diagram();
   
     // *** 04_fundalmental *** //
-/*  test_rvalue();
-    test_timer();
+//  test_rvalue();
+//  test_timer();
   
     // *** 05_template *** //
-    test_array();
-    test_function();
-    test_idx_seq();
-    test_metaprog();
-    test_optional_ref();
-    test_shared_ptr();
-    test_specialization(); 
-    test_template(); 
-    test_traits();
-    test_tuple();
-    test_type_erasure();
-    test_type_erasure_example();
-    test_unique_ptr();
-    test_variadic(); 
-    test_variant();   */
+//  test_array();
+//  test_function();
+//  test_idx_seq();
+//  test_metaprog();
+//  test_optional_ref();
+//  test_shared_ptr();
+//  test_specialization(); 
+//  test_template(); 
+//  test_traits();
+//  test_tuple();
+//  test_type_erasure();
+//  test_type_erasure_example();
+//  test_unique_ptr();
+//  test_variadic(); 
+//  test_variant();  
     
     // *** 06_threading *** //
-    test_thread_create();
-    test_thread_stop();
-    test_thread_timing();
-    test_spinlock_mutex();
+//  test_thread_create();
+//  test_thread_stop();
+//  test_thread_timing();
+//  test_spinlock_mutex();
 //  test_synchronization();
 //  test_semaphore();
 //  test_singleton();

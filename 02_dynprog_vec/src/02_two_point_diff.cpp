@@ -3,6 +3,20 @@
 #include<vector>
 #include<unordered_map>
 
+
+// if f(n) is pnl of :
+// * buying at any point before n and
+// * selling at point n
+//
+//   f(n)
+// = max{d(0,n), d(1,n), ..., d(n-2,n), d(n-1,n)}
+// = max{max[(d,n), d(1,n), ..., d(n-2,n)], d(n-1,n)}
+// = max{max[(d,n-1), d(1,n-1), ..., d(n-2,n-1)] + d(n-1,n), d(n-1,n)} 
+// = max{f(n-1) + d(n-1,n), d(n-1,n)}
+//
+// where d(m,n) = vec[n]-vec[m]
+
+
 std::int32_t max_profit(const std::vector<std::int32_t>& vec)
 {
     if (vec.size()<2) return 0;
