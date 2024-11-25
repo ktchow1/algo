@@ -175,20 +175,20 @@ namespace alg
     {
         if (vec.size()==0) return 0;
 
-        // case 1 : sum of positive numbers
-        if (std::all_of(vec.begin(), vec.end(), [](std::int32_t x) { return x > 0; }))
+        // case 1 : least negative number
+        if (std::all_of(vec.begin(), vec.end(), [](std::int32_t x) { return x < 0; }))
+        {
+            return *std::max_element(vec.begin(), vec.end()); 
+        }
+        // case 2 : sum of positive numbers
+        else 
         {
             std::int32_t ans = 0;
             std::for_each(vec.begin(), vec.end(), [&ans](std::int32_t x)
             {
-                if (x > 0) ans += x;
+                if (x >= 0) ans += x;
             });
             return ans;
-        }
-        // case 2 : least negative number
-        else 
-        {
-            return *std::max_element(vec.begin(), vec.end()); 
         }
     }
 
@@ -326,7 +326,7 @@ namespace alg
         //  else if (auto iter=index.lower_bound(std::ceil((double)cum/target)); iter!=index.end())  // <--- incorrect 
         //  else if (auto iter=index.upper_bound(std::ceil((double)cum/target)); iter!=index.end())  // <--- incorrect
         //  else if (auto iter=index.lower_bound(cum/target); iter!=index.end())                     // <--- incorrect 
-            else if (auto iter=index.upper_bound(cum/target); iter!=index.end())                     // <---   correct
+            else if (auto iter=index.upper_bound(cum/target); iter!=index.end())                     // <---   correct (please check why, not known yet)
             {
                 ans += n-iter->second;
             }
