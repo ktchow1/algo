@@ -326,7 +326,7 @@ namespace alg
         //  else if (auto iter=index.lower_bound(std::ceil((double)cum/target)); iter!=index.end())  // <--- incorrect 
         //  else if (auto iter=index.upper_bound(std::ceil((double)cum/target)); iter!=index.end())  // <--- incorrect
         //  else if (auto iter=index.lower_bound(cum/target); iter!=index.end())                     // <--- incorrect 
-            else if (auto iter=index.upper_bound(cum/target); iter!=index.end())                     // <---   correct (please check why, not known yet)
+            else if (auto iter=index.upper_bound(cum/target); iter!=index.end())                     // <---   correct (why? see remark)
             {
                 ans += n-iter->second;
             }
@@ -338,6 +338,18 @@ namespace alg
         }
         return ans;
     }
+
+    // Remark : Consider target = 10
+    //
+    // cum  | cum / target | min n in hist, such that cum / n < target 
+    // -----+--------------+-------------------------------------------
+    // 28   | 2.8          | 3     as 28 / 3 < 10
+    // 29   | 2.9          | 3     as 29 / 3 < 10
+    // 30   | 3.0          | 4     as 30 / 4 < 10
+    // 31   | 3.1          | 4     as 31 / 4 < 10
+    // 32   | 3.2          | 4     as 32 / 4 < 10
+    //
+    // hence we have : n = upper_bound(cum/target)
 }
 
 

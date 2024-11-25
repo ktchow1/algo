@@ -107,8 +107,6 @@ void test_subseq_sum()
                       alg::max_non_contiguous_subseq_sum,           
                       alg::max_non_contiguous_subseq_sum_bmk,  
                       10, 50, -30, +0); // all negative
-
-
     /*
     test_count_subseq("count_target_subseq_sum",           
                       gen_random_signed_vec, 
