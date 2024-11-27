@@ -1,37 +1,5 @@
-// *********************** // 
-// *** Max 2-point sum *** //
-// *********************** // 
 namespace hackerrank
 {
-    //   max vec[n]+vec[m]+(m-n) where n<=m (equality makes this question easier)
-    // = max vec[n]+n + max vec[m]-m
-    // = max vec[n]+n for n>k
-    // + max vec[m]-m for m<k, where k = arg max vec 
-    template<typename ITER>
-    auto max_2_sum_distance(ITER begin, ITER end) 
-    {
-        using VALUE = typename std::iterator_traits<ITER>::value_type;
-        auto max_iter = std::max_element(begin, end);
-        auto max_iter_dist = std::distance(begin, max_iter);
-        auto max0 = *begin + 0;
-        auto max1 = *max_iter - max_iter_dist;
-
-        int n=0;
-        for(auto i=begin; i!=max_iter+1; ++i, ++n)
-        {
-            if (max0 < *i + n)
-                max0 = *i + n;
-        }
-
-        n = max_iter_dist;
-        for(auto i=max_iter; i!=end; ++i, ++n)
-        {
-            if (max1 < *i - n)
-                max1 = *i - n;
-        }
-        return max0 + max1;
-    }
-
 
     int sum_of_digits(int x)
     {

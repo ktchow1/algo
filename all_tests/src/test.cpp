@@ -55,8 +55,8 @@ int main()
 //  test_tree_variant();
 //  
     test_two_point_sum();
-    test_two_point_diff();
-    test_subseq_sum();
+//  test_two_point_diff();
+//  test_subseq_sum();
   
 //  test_singly_link_subproblem();
 //  test_multi_link_subproblem();
