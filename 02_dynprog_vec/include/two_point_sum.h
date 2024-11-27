@@ -58,7 +58,11 @@ namespace alg
             if (sum <  target) return false;
             else               --m;
         }
-        return false;
+
+        // BUG : Dont miss this case, when n=vec0.size()-1 and m=0
+        std::int32_t sum = vec0[n]+vec1[m];
+        if (sum == target) return true;
+        else               return false;
     }
 
     std::uint32_t count_target_2_point_sum(const std::vector<std::int32_t>& vec, std::int32_t target)
