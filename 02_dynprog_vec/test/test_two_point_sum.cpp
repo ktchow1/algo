@@ -12,7 +12,7 @@ void test_two_point_sum()
                            gen_random_signed_vec, 
                            alg::max_2_point_sum_distance,           
                            alg::max_2_point_sum_distance_bmk,
-                           num_trial, 50, -30, +30, print_each_test_case); 
+                           num_trial, 100, -100, +100, print_each_test_case); 
 
 
 

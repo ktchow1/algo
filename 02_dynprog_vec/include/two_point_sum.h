@@ -43,18 +43,18 @@ namespace alg
             ans = std::max(*max_iter + (std::int32_t)max_index + max_value1, ans);
             return ans;
         }
-        else if (max_value0 != min_limit)
+        else if (max_value0 != min_limit) // BUG : ignoring this case will fail
         {
             return max_value0 + *max_iter - max_index;
         }
-        else if (max_value1 != min_limit)
+        else if (max_value1 != min_limit) // BUG : ignoring this case will fail
         {
             return *max_iter + max_index + max_value1;
         }
         else
         {
             throw std::runtime_error("impossible, must be a bug");
-        }
+        }   
     }
 }
 
