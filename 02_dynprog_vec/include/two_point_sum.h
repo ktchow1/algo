@@ -1,0 +1,244 @@
+#include<iostream>
+#include<cstdint>
+#include<cmath>
+#include<vector>
+#include<unordered_map>
+#include<algorithm>
+
+
+// **************** //
+// *** Counting *** //
+// **************** //
+namespace alg
+{
+    bool check_target_2_point_sum_in_1_sorted_vec(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<2) return false;
+
+        std::uint32_t n = 0;
+        std::uint32_t m = vec.size()-1;
+        while(n!=m)
+        {
+            std::int32_t sum = vec[n]+vec[m];
+            if (sum == target) return true;
+            if (sum <  target) ++n;
+            else               --m;
+        }
+        return false;
+    }
+
+    bool check_target_2_point_sum_in_2_sorted_vec(const std::vector<std::int32_t>& vec0, 
+                                                  const std::vector<std::int32_t>& vec1,
+                                                  std::int32_t target)
+    {
+        if (vec0.size()==0) return false;
+        if (vec1.size()==0) return false;
+
+        std::uint32_t n = 0;
+        std::uint32_t m = vec1.size()-1;
+        while(n!=vec0.size()-1 && m!=0)
+        {
+            std::int32_t sum = vec0[n]+vec1[m];
+            if (sum == target) return true;
+            if (sum <  target) ++n;
+            else               --m;
+        }
+        while(n!=vec0.size()-1)
+        {
+            std::int32_t sum = vec0[n]+vec1[m];
+            if (sum == target) return true;
+            if (sum <  target) ++n;
+            else               return false;
+        }
+
+        while(m!=0)
+        {
+            std::int32_t sum = vec0[n]+vec1[m];
+            if (sum == target) return true;
+            if (sum <  target) return false;
+            else               --m;
+        }
+        return false;
+    }
+
+    std::uint32_t count_target_2_point_sum(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<2) return false;
+        std::unordered_map<std::int32_t,std::uint32_t> hist;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            if (auto iter=hist.find(target-vec[n]); iter!=hist.end()) 
+            {
+                ans += iter->second;
+            }
+
+            // Cache vec[n], ensure index_in_hist < n
+            if (auto iter=hist.find(vec[n]); iter!=hist.end()) 
+            {
+                ++iter->second;
+            }
+            else
+            {
+                hist[vec[n]] = 1;
+            }
+        }
+        return ans;
+    }
+
+    std::uint32_t count_target_3_point_sum(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<3) return false;
+        std::unordered_map<std::int32_t,std::uint32_t> hist;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                if (auto iter=hist.find(target-vec[n]-vec[m]); iter!=hist.end()) 
+                {
+                    ans += iter->second;
+                }
+            }
+
+            // cache vec[n], not vec[m], ensure index_in_hist < n < m
+            if (auto iter=hist.find(vec[n]); iter!=hist.end()) 
+            {
+                ++iter->second;
+            }
+            else
+            {
+                hist[vec[n]] = 1; 
+            }
+        }
+        return ans;
+    }
+    
+    std::uint32_t count_target_4_point_sum(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<4) return false;
+        std::unordered_map<std::int32_t,std::uint32_t> hist;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                for(std::uint32_t k=m+1; k!=vec.size(); ++k)
+                {
+                    if (auto iter=hist.find(target-vec[n]-vec[m]-vec[k]); iter!=hist.end()) 
+                    {
+                        ans += iter->second;
+                    }
+                }
+            }
+
+            // cache vec[n], not vec[m], not vec[k], ensure index_in_hist < n < m < k
+            if (auto iter=hist.find(vec[n]); iter!=hist.end()) 
+            {
+                ++iter->second;
+            }
+            else
+            {
+                hist[vec[n]] = 1; 
+            }
+        }
+        return ans;
+    }
+}
+
+
+
+// ******************************************* //
+// *** Counting - benchmark implementation *** //
+// ******************************************* //
+namespace alg
+{
+    bool check_target_2_point_sum_in_1_sorted_vec_bmk(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<2) return false;
+
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                if (vec[n]+vec[m] == target) return true;
+            }
+        }
+        return false;
+    }
+
+    bool check_target_2_point_sum_in_2_sorted_vec_bmk(const std::vector<std::int32_t>& vec0, 
+                                                      const std::vector<std::int32_t>& vec1,
+                                                      std::int32_t target)
+    {
+        if (vec0.size()==0) return false;
+        if (vec1.size()==0) return false;
+
+        for(std::uint32_t n=0; n!=vec0.size(); ++n)
+        {
+            for(std::uint32_t m=0; m!=vec1.size(); ++m)
+            {
+                if (vec0[n]+vec1[m] == target) return true;
+            }
+        }
+        return false;
+    }
+
+    std::uint32_t count_target_2_point_sum_bmk(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<2) return false;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                if (vec[n]+vec[m] == target) ++ans;
+            }
+        }
+        return ans;
+    }
+
+    std::uint32_t count_target_3_point_sum_bmk(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<3) return false;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                for(std::uint32_t k=m+1; k!=vec.size(); ++k)
+                {
+                    if (vec[n]+vec[m]+vec[k] == target) ++ans;
+                }
+            }
+        }
+        return ans;
+    }
+    
+    std::uint32_t count_target_4_point_sum_bmk(const std::vector<std::int32_t>& vec, std::int32_t target)
+    {
+        if (vec.size()<4) return false;
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=vec.size(); ++m)
+            {
+                for(std::uint32_t k=m+1; k!=vec.size(); ++k)
+                {
+                    for(std::uint32_t l=k+1; l!=vec.size(); ++l)
+                    {
+                        if (vec[n]+vec[m]+vec[k]+vec[l] == target) ++ans;
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
+

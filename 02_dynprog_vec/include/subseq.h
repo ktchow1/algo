@@ -227,7 +227,6 @@ namespace alg
                 hist[cum] = 1;
             }
         }
-
         return ans;
     }
 

@@ -5,6 +5,15 @@
 #include<unordered_map>
 #include<algorithm>
 
+// ****************************************** //
+// Main variables used for different problems 
+//
+// max   two point : sub       
+// count two point : hist 
+// max   subseq    : sub
+// count subseq    : cum + hist
+// ****************************************** //
+
 
 // ******************** //
 // *** Maximization *** //
