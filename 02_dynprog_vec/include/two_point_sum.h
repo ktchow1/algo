@@ -25,14 +25,14 @@ namespace alg
         std::int32_t max_value0 = min_limit;
         for(std::uint32_t n=max_index+1; n!=vec.size(); ++n)
         {
-            max_value0 = std::max(max_value0, vec[n]+(std::int32_t)n);
+            max_value0 = std::max(max_value0, vec[n] + (std::int32_t)n);
         }
 
         // *** [step 3] find max(vec[n]-n) *** //
         std::int32_t max_value1 = min_limit;
         for(std::uint32_t n=0; n!=max_index; ++n)
         {
-            max_value1 = std::max(max_value1, vec[n]-(std::int32_t)n);
+            max_value1 = std::max(max_value1, vec[n] - (std::int32_t)n);
         }
         
         // *** [step 4] return max of these cases *** //
@@ -102,6 +102,12 @@ namespace alg
     // *************************** //
     // *** Non attacking rooks *** //
     // *************************** //
+    // Todo
+    std::uint32_t max_2_point_sum_with_non_attacking_rooks(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans = 0;
+        return ans;
+    }
 }
 
 
@@ -141,6 +147,13 @@ namespace alg
                 }
             }
         }
+        return ans;
+    }
+
+    // Todo
+    std::uint32_t max_2_point_sum_with_non_attacking_rooks_bmk(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans = 0;
         return ans;
     }
 }
