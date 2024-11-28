@@ -29,7 +29,7 @@ namespace alg
         for(std::uint32_t n=2; n!=vec.size(); ++n)
         {
             sub = std::max(sub-vec[n-1]+vec[n], vec[n]-vec[n-1]);
-            ans = std::max(sub, ans);
+            ans = std::max(ans, sub);
         }
         return ans;
     }
@@ -51,7 +51,7 @@ namespace alg
         {
             for(std::uint32_t m=n+1; m!=vec.size(); ++m) 
             {
-                ans = std::max(vec[m]-vec[n], ans);
+                ans = std::max(ans, vec[m]-vec[n]);
             }
         }
         return ans;

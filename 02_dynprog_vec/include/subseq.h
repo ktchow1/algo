@@ -21,7 +21,7 @@ namespace alg
         for(std::uint32_t n=1; n!=vec.size(); ++n)
         {
             sub = std::max(sub + vec[n], vec[n]);
-            ans = std::max(sub, ans);
+            ans = std::max(ans, sub);
         }
         return ans;
     }
@@ -39,7 +39,7 @@ namespace alg
             auto tmp1 = sub1 * vec[n];
             sub0 = std::max(std::max(tmp0, tmp1), vec[n]);
             sub1 = std::min(std::min(tmp0, tmp1), vec[n]);
-            ans  = std::max(sub0, ans);
+            ans  = std::max(ans, sub0);
         }
         return ans;
     }
@@ -63,7 +63,7 @@ namespace alg
             auto tmp1 = sub1;
             sub0 = std::max(tmp0, tmp1);
             sub1 = std::max(std::max(tmp0 + vec[n], tmp1 + vec[n]), vec[n]);
-            ans  = std::max(sub1, ans);
+            ans  = std::max(ans, sub1);
         }
         return ans;
     }
@@ -81,7 +81,7 @@ namespace alg
             auto tmp1 = sub1;
             sub0 = std::max(tmp0, tmp1);
             sub1 = std::max(tmp0 + vec[n], vec[n]);
-            ans  = std::max(sub1, ans);
+            ans  = std::max(ans, sub1);
         }
         return ans;
     }
@@ -117,13 +117,13 @@ namespace alg
                 auto x = iter->first*iter->second;
                 sub0 = std::max(tmp0, tmp1); 
                 sub1 = std::max(tmp0 + x, x);
-                ans  = std::max(sub1, ans);
+                ans  = std::max(ans, sub1);
             }
             else
             {
                 sub0 = std::max(tmp0, tmp1); 
                 sub1 = 0;
-                ans  = std::max(sub1, ans); // should be no change
+                ans  = std::max(ans, sub1); // should be no change
             }
         }
         return ans;
@@ -148,7 +148,7 @@ namespace alg
             for(std::uint32_t m=n; m!=vec.size(); ++m) 
             {
                 cum += vec[m];
-                ans = std::max(cum, ans);
+                ans = std::max(ans, cum);
             }
         }
         return ans;
@@ -165,7 +165,7 @@ namespace alg
             for(std::uint32_t m=n; m!=vec.size(); ++m) 
             {
                 cum *= vec[m];
-                ans = std::max(cum, ans);
+                ans = std::max(ans, cum);
             }
         }
         return ans;

@@ -1,16 +1,6 @@
 namespace hackerrank
 {
 
-    int sum_of_digits(int x)
-    {
-        int sum = 0;
-        while(x > 0)
-        {
-            sum += x % 10;
-            x = x/10;
-        }
-        return sum;
-    }
 
     template<typename ITER>
     auto max_2_sum_with_same_digit_sum(ITER begin, ITER end) // Assume all numbers are positive
