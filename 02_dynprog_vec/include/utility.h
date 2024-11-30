@@ -5,6 +5,17 @@
 #include<algorithm>
 
 
+inline std::string gen_random_str(std::uint32_t size)
+{
+    std::string ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        char c = 'a' + std::rand() % 26;
+        ans.push_back(c);
+    }
+    return ans;
+}
+
 inline std::vector<std::int32_t> gen_random_signed_vec(std::uint32_t size, std::int32_t min, std::int32_t max)
 {
     std::vector<std::int32_t> ans;
@@ -41,16 +52,57 @@ inline std::vector<std::uint32_t> gen_random_unsigned_sorted_vec(std::uint32_t s
     return ans;
 }
 
+
+
+// *************************** //
+// *** Test loop functions *** //
+// *************************** //
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
+void benchmark_str(const std::string&  test_name,
+                   const GEN_FUNCTION& gen_function, 
+                   const ALG_FUNCTION& alg_function, 
+                   const BMK_FUNCTION& bmk_function, 
+                   std::uint32_t       trial, 
+                   std::uint32_t       size,
+                   bool                print_each_test_case)
+{
+    std::uint32_t success = 0;
+    if (print_each_test_case) std::cout << "\n";
+
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        auto str  = gen_function(size);
+        auto ans0 = alg_function(str);
+        auto ans1 = bmk_function(str); 
+        bool flag = (ans0 == ans1);
+        if (flag) ++success;
+
+        if (print_each_test_case)
+        {
+            std::cout << "\n" << test_name
+                      << " : ans0 = " << ans0 
+                      <<  ", ans1 = " << ans1 
+                      <<  ", successful rate = " << success
+                      <<  "/" << trial
+                      <<  " " << (flag? "OK":"ERROR") << " " << str;
+        }
+    }
+    if (!print_each_test_case)
+    {
+        std::cout << "\n" << std::setw(40) << test_name << ", successful rate = " << success << "/" << trial;
+    }
+}
+
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE>
-void maximization_benchmark(const std::string&  test_name,
-                            const GEN_FUNCTION& gen_function, 
-                            const ALG_FUNCTION& alg_function, 
-                            const BMK_FUNCTION& bmk_function, 
-                            std::uint32_t       trial, 
-                            std::uint32_t       size,
-                            INPUT_TYPE          min_value,
-                            INPUT_TYPE          max_value, 
-                            bool                print_each_test_case)
+void benchmark_vec(const std::string&  test_name,
+                   const GEN_FUNCTION& gen_function, 
+                   const ALG_FUNCTION& alg_function, 
+                   const BMK_FUNCTION& bmk_function, 
+                   std::uint32_t       trial, 
+                   std::uint32_t       size,
+                   INPUT_TYPE          min_value,
+                   INPUT_TYPE          max_value, 
+                   bool                print_each_test_case)
 {
     std::uint32_t success = 0;
     if (print_each_test_case) std::cout << "\n";
@@ -80,16 +132,16 @@ void maximization_benchmark(const std::string&  test_name,
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename TARGET_TYPE>
-void counting_benchmark(const std::string&  test_name,
-                        const GEN_FUNCTION& gen_function, 
-                        const ALG_FUNCTION& alg_function, 
-                        const BMK_FUNCTION& bmk_function, 
-                        std::uint32_t       trial, 
-                        std::uint32_t       size,
-                        INPUT_TYPE          min_value,
-                        INPUT_TYPE          max_value,
-                        TARGET_TYPE         target,
-                        bool                print_each_test_case)
+void benchmark_vec_with_target(const std::string&  test_name,
+                               const GEN_FUNCTION& gen_function, 
+                               const ALG_FUNCTION& alg_function, 
+                               const BMK_FUNCTION& bmk_function, 
+                               std::uint32_t       trial, 
+                               std::uint32_t       size,
+                               INPUT_TYPE          min_value,
+                               INPUT_TYPE          max_value,
+                               TARGET_TYPE         target,
+                               bool                print_each_test_case)
 {
     std::uint32_t success = 0;
     if (print_each_test_case) std::cout << "\n";
@@ -119,16 +171,16 @@ void counting_benchmark(const std::string&  test_name,
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename TARGET_TYPE>
-void counting_2_vec_benchmark(const std::string&  test_name,
-                              const GEN_FUNCTION& gen_function, 
-                              const ALG_FUNCTION& alg_function, 
-                              const BMK_FUNCTION& bmk_function, 
-                              std::uint32_t       trial, 
-                              std::uint32_t       size,
-                              INPUT_TYPE          min_value,
-                              INPUT_TYPE          max_value,
-                              TARGET_TYPE         target,
-                              bool                print_each_test_case)
+void benchmark_2_vec_with_target(const std::string&  test_name,
+                                 const GEN_FUNCTION& gen_function, 
+                                 const ALG_FUNCTION& alg_function, 
+                                 const BMK_FUNCTION& bmk_function, 
+                                 std::uint32_t       trial, 
+                                 std::uint32_t       size,
+                                 INPUT_TYPE          min_value,
+                                 INPUT_TYPE          max_value,
+                                 TARGET_TYPE         target,
+                                 bool                print_each_test_case)
 {
     std::uint32_t success = 0;
     if (print_each_test_case) std::cout << "\n";

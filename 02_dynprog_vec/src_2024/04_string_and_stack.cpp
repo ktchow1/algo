@@ -22,12 +22,6 @@ namespace hackerrank
         return ans;
     }
    
-    int longest_palindrome_substr(const std::string& str)
-    {
-        // see algo folder ... but that implementation handles one case only
-        // case 1 : mirror at a char
-        // case 2 : mirror in between two char 
-    }
 }
 
 // ******************* //

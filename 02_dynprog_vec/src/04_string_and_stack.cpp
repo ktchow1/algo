@@ -7,52 +7,6 @@
 #include<unordered_map>
 #include<algorithm>
 
-std::uint32_t longest_non_duplicated_substr(const std::string& str)
-{
-    std::unordered_map<char, std::uint32_t> index; // can be replaced by std::array 
-
-    std::uint32_t ans=0;
-    for(std::uint32_t n=0; n!=str.size(); ++n) 
-    {
-        if (auto iter=index.find(str[n]); iter!=index.end())
-        {
-            ans = std::max(ans, n-iter->second);
-        }
-        index[str[n]] = n;
-    }
-    return ans;
-}
-
-// This is nearly a exhaustive search, but probably a fast one. There is no promising dynprog.
-std::uint32_t longest_palindrome_substr(const std::string& str) 
-{
-    std::uint32_t ans=1;
-    for(std::uint32_t n=1; n!=str.size()-1; ++n) 
-    {
-        // case 1 : when str[n] is the mirror
-        std::uint32_t m=1;
-        while(true)
-        {
-            if (n<m || n+m>=str.size()) 
-            {
-                break;
-            }
-            else if (str[n-m]==str[n+m])
-            {
-                ans = std::max(ans, 2*m+1);
-                ++m;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        // case 2 : when str[n-1] str[n] is the mirror
-        // please implement ... 
-    }
-    return ans;
-}
 
 std::uint32_t length_of_minimum_sorting(const std::vector<std::uint32_t>& vec)
 {
@@ -284,24 +238,6 @@ std::string gen_palindrome_input(std::uint32_t length_of_one_side)
     return str;
 }
 
-void test_longest_palindrome_substr()
-{
-    for(std::uint32_t n=0; n!=100; ++n)
-    {
-        std::uint32_t length_of_one_side = rand()%5 + 5;
-        std::string   str = gen_palindrome_input(length_of_one_side);
-        std::uint32_t ans = longest_palindrome_substr(str);
-        std::cout << "\n" << 2*length_of_one_side+1
-                  << ", " << ans
-                  << ": " << str 
-                  << (ans!=2*length_of_one_side+1? " [ERROR]":"");
-    }
-}
-
-void test_substr()
-{
-    test_longest_palindrome_substr();
-}
 
 // ********************** //
 // *** Test for stack *** //
