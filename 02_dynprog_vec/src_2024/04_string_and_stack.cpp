@@ -1,29 +1,3 @@
-// ********************** //
-// *** Longest string *** //
-// ********************** //
-namespace hackerrank
-{
-    // As oppose to longest_target_subseq_sum
-    // in which we use a map to store the first index of a specific sum
-    // in here we use a map to store the latest index of a specific char
-    int longest_non_duplicating_substr(const std::string& str)
-    {
-        std::unordered_map<char,int> index;
-        int ans = 0;
-        int n = 0;
-        for(auto i = str.begin(); i!= str.end(); ++i, ++n)
-        {
-            if (auto iter = index.find(*i); iter != index.end())
-            {
-                ans = std::max(ans, n-iter->second);
-            }
-            index[*i] = n;
-        }
-        return ans;
-    }
-   
-}
-
 // ******************* //
 // *** Stack trick *** // 
 // ******************* //

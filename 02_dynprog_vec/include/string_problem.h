@@ -1,7 +1,7 @@
 #include<iostream>
 #include<string>
+#include<array>
 #include<vector>
-#include<unordered_set>
 #include<unordered_map>
 #include<algorithm>
 
@@ -13,16 +13,34 @@ namespace alg
 {
     std::uint32_t longest_non_duplicated_substr(const std::string& str)
     {
+        if (str.size()==0) return 0;
         std::unordered_map<char, std::uint32_t> index; 
 
-        std::uint32_t ans=0;
-        for(std::uint32_t n=0; n!=str.size(); ++n) 
+        std::int32_t sub = 0;
+        std::int32_t ans = sub;
+        for(std::uint32_t n=0; n!=str.size(); ++n)
         {
             if (auto iter=index.find(str[n]); iter!=index.end())
             {
-                ans = std::max(ans, n-iter->second);
+                if (iter->second < n-sub)
+                {
+                    sub = sub + 1;
+                    ans = std::max(ans, sub);
+                    iter->second = n;
+                }
+                else
+                {
+                    sub = n - iter->second;
+                    ans = std::max(ans, sub);
+                    iter->second = n;
+                }
             }
-            index[str[n]] = n;
+            else
+            {
+                sub = sub + 1;
+                ans = std::max(ans, sub);
+                index[str[n]] = n;
+            }
         }
         return ans;
     }
@@ -71,14 +89,16 @@ namespace alg
         if (str.size()==0) return 0;
 
         std::uint32_t ans = 0;
-        for(std::uint32_t n=0; n!=str.size(); ++n) // consider substr starting with n 
+        for(std::uint32_t n=0; n!=str.size(); ++n) // consider substr starting with n, and reaches as far as possible 
         {
-            std::unordered_set<char> hist;
+            std::array<char,26> hist;
+            hist.fill(false);
+
             for(std::uint32_t m=n; m!=str.size(); ++m) 
             {
-                if (auto iter=hist.find(str[m]); iter==hist.end()) 
+                if (!hist[str[m]-'a']) 
                 {
-                    hist.insert(str[m]);
+                    hist[str[m]-'a'] = true;
                     ans = std::max(ans,m-n+1);
                 }
                 else break;

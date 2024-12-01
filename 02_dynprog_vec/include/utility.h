@@ -16,6 +16,16 @@ inline std::string gen_random_str(std::uint32_t size)
     return ans;
 }
 
+inline std::string gen_random_palindrome_str(std::uint32_t size)
+{
+    auto ans = gen_random_str(size);
+
+
+//  while()
+    
+    return ans;
+}
+
 inline std::vector<std::int32_t> gen_random_signed_vec(std::uint32_t size, std::int32_t min, std::int32_t max)
 {
     std::vector<std::int32_t> ans;
