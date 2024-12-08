@@ -6,7 +6,7 @@
 void test_string_problem()
 {
     std::uint32_t num_trial = 1000;
-    bool print_each_test_case = true;
+    bool print_each_test_case = false;
 
     benchmark_str("longest_non_duplicate_substr",           
                   gen_random_str, 
