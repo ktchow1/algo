@@ -81,6 +81,62 @@ namespace alg
         {
             std::uint32_t r;
 
+            if (n <= parent_centre + parent_radius) 
+            {
+                std::uint32_t n_image = parent_centre - (n - parent_centre); // ensure n > parent_centre
+
+                // case A1  
+                if (n + radii[n_image] < parent_centre + parent_radius)
+                {
+                    radii[n] = radii[n_image];
+                    continue;
+                }
+                // case A2 
+                else if (n + radii[n_image] == parent_centre + parent_radius)
+                {
+                    r = radii[n_image];
+                }
+                // case A3 
+                else
+                {
+                    radii[n] = parent_centre + parent_radius - n; // i.e. RHS sub-palindrome cannot exceed parent-palindrome
+                    continue;
+                }
+            }
+            else 
+            {
+                r = 0; 
+            }
+
+
+            ++r;
+            for(; n>=r && n+r<str.size(); ++r)
+            {
+                if (str[n-r] == str[n+r])
+                {
+                    radii[n] = r;
+                }
+                else break;
+            }   
+
+            parent_centre = n;
+            parent_radius = radii[n];
+        }
+       
+        auto iter = std::max_element(radii.begin(), radii.end()); 
+        return 2 * (*iter) + 1;
+    } 
+
+    std::uint32_t longest_odd_palindrome_substr_optimized(const std::string& str) 
+    {
+        std::vector<uint32_t> radii(str.size(), 0);
+        std::uint32_t parent_centre = 0;
+        std::uint32_t parent_radius = 0;
+
+        for(std::uint32_t n=0; n!=str.size(); ++n) 
+        {
+            std::uint32_t r;
+
             // ************************************************ //
             // *** case A : str[n] inside parent-palindrome *** //
             // ************************************************ //

@@ -30,9 +30,9 @@ inline void gen_mirror_image(std::string& str, std::uint32_t centre, std::uint32
     
 }
 
-inline std::string gen_random_str_containing_palindrome(std::uint32_t size)
+inline std::string gen_random_palindrome(std::uint32_t size, std::uint32_t alphabet_set)
 {
-    auto ans = gen_random_str(size, 26);
+    auto ans = gen_random_str(size, alphabet_set);
 
 
     
@@ -90,7 +90,7 @@ void benchmark_str(const std::string&  test_name,
                    std::uint32_t       alphabet_set,
                    bool                print_each_test_case)
 {
-    std::uint32_t success = 0;
+    std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
 
     for(std::uint32_t t=0; t!=trial; ++t)
@@ -99,21 +99,21 @@ void benchmark_str(const std::string&  test_name,
         auto ans0 = alg_function(str);
         auto ans1 = bmk_function(str); 
         bool flag = (ans0 == ans1);
-        if (flag) ++success;
+        if (!flag) ++error;
 
         if (print_each_test_case)
         {
             std::cout << "\n" << test_name
                       << " : ans0 = " << ans0 
                       <<  ", ans1 = " << ans1 
-                      <<  ", successful rate = " << success
+                      <<  ", error rate = " << error
                       <<  "/" << trial
                       <<  " " << (flag? "OK":"ERROR") << " " << str;
         }
     }
     if (!print_each_test_case)
     {
-        std::cout << "\n" << std::setw(40) << test_name << ", successful rate = " << success << "/" << trial;
+        std::cout << "\n" << std::setw(40) << test_name << ", error rate = " << error << "/" << trial;
     }
 }
 
@@ -128,7 +128,7 @@ void benchmark_vec(const std::string&  test_name,
                    INPUT_TYPE          max_value, 
                    bool                print_each_test_case)
 {
-    std::uint32_t success = 0;
+    std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
 
     for(std::uint32_t t=0; t!=trial; ++t)
@@ -137,21 +137,21 @@ void benchmark_vec(const std::string&  test_name,
         auto ans0 = alg_function(vec);
         auto ans1 = bmk_function(vec); 
         bool flag = (ans0 == ans1);
-        if (flag) ++success;
+        if (!flag) ++error;
 
         if (print_each_test_case)
         {
             std::cout << "\n" << test_name
                       << " : ans0 = " << ans0 
                       <<  ", ans1 = " << ans1 
-                      <<  ", successful rate = " << success
+                      <<  ", error rate = " << error
                       <<  "/" << trial
                       <<  " " << (flag? "OK":"ERROR");
         }
     }
     if (!print_each_test_case)
     {
-        std::cout << "\n" << std::setw(40) << test_name << ", successful rate = " << success << "/" << trial;
+        std::cout << "\n" << std::setw(40) << test_name << ", error rate = " << error << "/" << trial;
     }
 }
 
@@ -167,7 +167,7 @@ void benchmark_vec_with_target(const std::string&  test_name,
                                TARGET_TYPE         target,
                                bool                print_each_test_case)
 {
-    std::uint32_t success = 0;
+    std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
 
     for(std::uint32_t t=0; t!=trial; ++t)
@@ -176,21 +176,21 @@ void benchmark_vec_with_target(const std::string&  test_name,
         auto ans0 = alg_function(vec, target);
         auto ans1 = bmk_function(vec, target); 
         bool flag = (ans0 == ans1);
-        if (flag) ++success;
+        if (!flag) ++error;
 
         if (print_each_test_case)
         {
             std::cout << "\n" << test_name
                       << " : ans0 = " << ans0 
                       <<  ", ans1 = " << ans1 
-                      <<  ", successful rate = " << success
+                      <<  ", error rate = " << error
                       <<  "/" << trial
                       <<  " " << (flag? "OK":"ERROR");
         }
     }
     if (!print_each_test_case)
     {
-        std::cout << "\n" << std::setw(40) << test_name << ", successful rate = " << success << "/" << trial;
+        std::cout << "\n" << std::setw(40) << test_name << ", error rate = " << error << "/" << trial;
     }
 }
 
@@ -206,7 +206,7 @@ void benchmark_2_vec_with_target(const std::string&  test_name,
                                  TARGET_TYPE         target,
                                  bool                print_each_test_case)
 {
-    std::uint32_t success = 0;
+    std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
 
     for(std::uint32_t t=0; t!=trial; ++t)
@@ -216,20 +216,21 @@ void benchmark_2_vec_with_target(const std::string&  test_name,
         auto ans0 = alg_function(vec0, vec1, target);
         auto ans1 = bmk_function(vec0, vec1, target); 
         bool flag = (ans0 == ans1);
-        if (flag) ++success;
+        if (!flag) ++error;
 
         if (print_each_test_case)
         {
             std::cout << "\n" << test_name
                       << " : ans0 = " << ans0 
                       <<  ", ans1 = " << ans1 
-                      <<  ", successful rate = " << success
+                      <<  ", error rate = " << error
                       <<  "/" << trial
                       <<  " " << (flag? "OK":"ERROR");
         }
     }
     if (!print_each_test_case)
     {
-        std::cout << "\n" << std::setw(40) << test_name << ", successful rate = " << success << "/" << trial;
+        std::cout << "\n" << std::setw(40) << test_name << ", error rate = " << error << "/" << trial;
     }
 }
+
