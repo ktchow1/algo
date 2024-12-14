@@ -12,6 +12,6 @@ void test_string_problem()
                   gen_random_str, 
                   alg::longest_non_duplicated_substr,           
                   alg::longest_non_duplicated_substr_bmk,
-                  num_trial, 20, print_each_test_case);
+                  num_trial, 20, 26, print_each_test_case);
 }
   

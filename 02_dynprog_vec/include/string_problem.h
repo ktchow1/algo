@@ -58,7 +58,7 @@ namespace alg
     // case A2. when LHS sub-palindrome   barely lies inside parent-palindrome, like M.ABA.T.ABA.T 
     // case A3. when LHS sub-palindrome     extrudes outside parent-palindrome, like T.ABA.T.ABA.N
     //
-    // we can copy LHS-palindrome-radius to RHS-palindrome-radius for position [7-11] : 
+    // we can copy LHS-palindrome-radius to RHS-palindrome-radius for position [8-11] : 
     //
     // A1. M*ABA.T.ABA*N     when 9 + rad[3] < 6 + rad[6] 
     //      001005~~x~~      x = rad[9]   = rad[3]   = 1        no further growing

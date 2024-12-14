@@ -5,23 +5,36 @@
 #include<algorithm>
 
 
-inline std::string gen_random_str(std::uint32_t size)
+inline std::string gen_random_str(std::uint32_t size, std::uint32_t alphabet_set) // 1-26
 {
+    std::uint32_t alphabet_set_size = 26;
+    if (alphabet_set >= 1 && alphabet_set <= 26) 
+    {
+        alphabet_set_size = alphabet_set;
+    }
+
     std::string ans;
     for(std::uint32_t n=0; n!=size; ++n)
     {
-        char c = 'a' + std::rand() % 26;
+        char c = 'a' + std::rand() % alphabet_set_size;
         ans.push_back(c);
     }
     return ans;
 }
 
-inline std::string gen_random_palindrome_str(std::uint32_t size)
+inline void gen_mirror_image(std::string& str, std::uint32_t centre, std::uint32_t radius)
 {
-    auto ans = gen_random_str(size);
 
 
-//  while()
+
+    
+}
+
+inline std::string gen_random_str_containing_palindrome(std::uint32_t size)
+{
+    auto ans = gen_random_str(size, 26);
+
+
     
     return ans;
 }
@@ -74,6 +87,7 @@ void benchmark_str(const std::string&  test_name,
                    const BMK_FUNCTION& bmk_function, 
                    std::uint32_t       trial, 
                    std::uint32_t       size,
+                   std::uint32_t       alphabet_set,
                    bool                print_each_test_case)
 {
     std::uint32_t success = 0;
@@ -81,7 +95,7 @@ void benchmark_str(const std::string&  test_name,
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        auto str  = gen_function(size);
+        auto str  = gen_function(size, alphabet_set);
         auto ans0 = alg_function(str);
         auto ans1 = bmk_function(str); 
         bool flag = (ans0 == ans1);
