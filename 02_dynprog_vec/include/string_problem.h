@@ -74,53 +74,43 @@ namespace alg
     std::uint32_t longest_odd_palindrome_substr(const std::string& str) 
     {
         std::vector<uint32_t> radii(str.size(), 0);
-        std::uint32_t parent_centre = 0;
-        std::uint32_t parent_radius = 0;
+        std::uint32_t n = 0;
+        std::uint32_t r = 0;
 
-        for(std::uint32_t n=0; n!=str.size(); ++n) 
+        while(n < str.size()) 
         {
-            std::uint32_t r;
-
-            if (n <= parent_centre + parent_radius) 
+            while(n >= r+1 && n+(r+1) < str.size() && str[n-(r+1)] == str[n+(r+1)])
             {
-                std::uint32_t n_image = parent_centre - (n - parent_centre); // ensure n > parent_centre
+                ++r;
+            }
 
-                // case A1  
-                if (n + radii[n_image] < parent_centre + parent_radius)
+            radii[n] = r;
+            std::uint32_t parent_centre = n;
+            std::uint32_t parent_radius = r;
+            ++n;
+            r = 0;
+
+            while(n <= parent_centre + parent_radius)
+            {
+                std::uint32_t n_image = parent_centre - (n - parent_centre);
+                std::uint32_t r_limit = parent_centre + parent_radius - n;
+
+                if (radii[n_image] < r_limit)
                 {
                     radii[n] = radii[n_image];
-                    continue;
+                    ++n;
                 }
-                // case A2 
-                else if (n + radii[n_image] == parent_centre + parent_radius)
+                else if (radii[n_image] > r_limit)
                 {
-                    r = radii[n_image];
+                    radii[n] = r_limit;
+                    ++n;
                 }
-                // case A3 
                 else
                 {
-                    radii[n] = parent_centre + parent_radius - n; // i.e. RHS sub-palindrome cannot exceed parent-palindrome
-                    continue;
+                    r = r_limit;
+                    break;
                 }
             }
-            else 
-            {
-                r = 0; 
-            }
-
-
-            ++r;
-            for(; n>=r && n+r<str.size(); ++r)
-            {
-                if (str[n-r] == str[n+r])
-                {
-                    radii[n] = r;
-                }
-                else break;
-            }   
-
-            parent_centre = n;
-            parent_radius = radii[n];
         }
        
         auto iter = std::max_element(radii.begin(), radii.end()); 
@@ -135,6 +125,10 @@ namespace alg
 
         for(std::uint32_t n=0; n!=str.size(); ++n) 
         {
+            std::cout << "\n[DEBUG] n=" << n << ", parent=" << parent_centre << "+" << parent_radius << ", radii="; 
+            for(const auto& x:radii) std::cout << x << ",";
+
+
             std::uint32_t r;
 
             // ************************************************ //
