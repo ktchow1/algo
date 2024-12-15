@@ -16,9 +16,9 @@ void test_string_problem()
 
     benchmark_str("longest_odd_palindrome_substr",           
                   gen_random_palindrome, 
-                  alg::longest_odd_palindrome_substr_optimized,           
+                  alg::longest_odd_palindrome_substr,           
                   alg::longest_odd_palindrome_substr_bmk,
-                  num_trial, 200, 3, print_each_test_case); 
+                  num_trial, 200, 5, print_each_test_case); 
 
 
     // **************************** //

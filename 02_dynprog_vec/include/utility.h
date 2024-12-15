@@ -24,19 +24,29 @@ inline std::string gen_random_str(std::uint32_t size, std::uint32_t alphabet_set
 
 inline void gen_mirror_image(std::string& str, std::uint32_t centre, std::uint32_t radius)
 {
-
-
-
-    
+    for(std::uint32_t r=0; r!=radius; ++r)
+    {
+        if (centre >= r && centre+r < str.size())
+        {
+            str[centre-r] = str[centre+r];
+        }
+        else break;
+    }
 }
 
 inline std::string gen_random_palindrome(std::uint32_t size, std::uint32_t alphabet_set)
 {
-    auto ans = gen_random_str(size, alphabet_set);
+    std::uint32_t num_image = 5;
+    std::uint32_t max_radius = size<3 ?  size : size/3;
 
-
-    
-    return ans;
+    auto str = gen_random_str(size, alphabet_set);
+    for(std::uint32_t n=0; n!=num_image; ++n)
+    {
+        std::uint32_t centre = rand() % str.size();
+        std::uint32_t radius = rand() % max_radius + 1;
+        gen_mirror_image(str, centre, radius);
+    }
+    return str;
 }
 
 inline std::vector<std::int32_t> gen_random_signed_vec(std::uint32_t size, std::int32_t min, std::int32_t max)

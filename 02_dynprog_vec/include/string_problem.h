@@ -74,72 +74,11 @@ namespace alg
     std::uint32_t longest_odd_palindrome_substr(const std::string& str) 
     {
         std::vector<uint32_t> radii(str.size(), 0);
-        std::uint32_t n = 0;
-        std::uint32_t r = 0;
-
-        while(n < str.size()) 
-        {
-            while(n >= r+1 && n+(r+1) < str.size() && str[n-(r+1)] == str[n+(r+1)])
-            {
-                ++r;
-            }
-
-            radii[n] = r;
-            std::uint32_t parent_centre = n;
-            std::uint32_t parent_radius = r;
-            ++n;
-            r = 0;
-
-            while(n <= parent_centre + parent_radius)
-            {
-                std::uint32_t n_image = parent_centre - (n - parent_centre);
-                std::uint32_t r_limit = parent_centre + parent_radius - n;
-
-                if (radii[n_image] < r_limit)
-                {
-                    radii[n] = radii[n_image];
-                    ++n;
-                }
-                else if (radii[n_image] > r_limit)
-                {
-                    radii[n] = r_limit;
-                    ++n;
-                }
-                else
-                {
-                    r = r_limit;
-                    break;
-                }
-            }
-        }
-       
-        auto iter = std::max_element(radii.begin(), radii.end()); 
-        return 2 * (*iter) + 1;
-    } 
-
-    std::uint32_t longest_odd_palindrome_substr_optimized(const std::string& str) 
-    {
-        std::vector<uint32_t> radii(str.size(), 0);
         std::uint32_t parent_centre = 0;
         std::uint32_t parent_radius = 0;
 
         for(std::uint32_t n=0; n!=str.size(); ++n) 
         {
-/*
-            std::cout << "\n[DEBUG] n=" << n << ", parent=" << parent_centre << "+" << parent_radius << ", radii="; 
-            std::cout << "\nstr=";    for(std::uint32_t m=0; m!=str.size();   ++m) std::cout << str[m]  << ",";
-            std::cout << "\nrad=";    for(std::uint32_t m=0; m!=radii.size(); ++m) std::cout << radii[m] << ",";
-            std::cout << "\n    ";
-            std::uint32_t lhs = 0;               if (parent_centre > parent_radius)              lhs = parent_centre-parent_radius;
-            std::uint32_t rhs = radii.size()-1;  if (parent_centre + parent_radius < str.size()) rhs = parent_centre+parent_radius; 
-            for(std::uint32_t m=0; m!=radii.size(); ++m) 
-            {
-                if      (m==n)              std::cout << "^ ";
-                else if (m==parent_centre)  std::cout << "* ";
-                else if (m>=lhs && m<=rhs)  std::cout << "- ";
-                else                        std::cout << "  ";
-            } */
-
             std::uint32_t r;
 
             // ************************************************ //
@@ -176,12 +115,10 @@ namespace alg
                 r = 0; 
             }
 
-
             // ************************************************ //
             // *** Growing of radius for case A2 and case B *** //
             // ************************************************ //
             ++r;
-
             for(; n>=r && n+r<str.size(); ++r)
             {
                 if (str[n-r] == str[n+r])
@@ -191,11 +128,54 @@ namespace alg
                 else break;
             }   
 
-            // ************************************ //
-            // *** Update new parent-palindrome *** //
-            // ************************************ //
             parent_centre = n;
             parent_radius = radii[n];
+        }
+       
+        auto iter = std::max_element(radii.begin(), radii.end()); 
+        return 2 * (*iter) + 1;
+    } 
+
+    std::uint32_t longest_odd_palindrome_substr_wiki(const std::string& str) // same as above, for debugging only
+    {
+        std::vector<uint32_t> radii(str.size(), 0);
+        std::uint32_t n = 0; // centre 
+        std::uint32_t r = 0; // radius
+
+        while(n < str.size()) 
+        {
+            while(n >= r+1 && n+(r+1) < str.size() && str[n-(r+1)] == str[n+(r+1)])
+            {
+                ++r;
+            }
+
+            radii[n] = r;
+            std::uint32_t parent_centre = n;
+            std::uint32_t parent_radius = r;
+            ++n;
+            r = 0;
+
+            while(n <= parent_centre + parent_radius)
+            {
+                std::uint32_t n_image = parent_centre - (n - parent_centre);
+                std::uint32_t r_limit = parent_centre + parent_radius - n;
+
+                if (radii[n_image] < r_limit)
+                {
+                    radii[n] = radii[n_image];
+                    ++n;
+                }
+                else if (radii[n_image] > r_limit)
+                {
+                    radii[n] = r_limit;
+                    ++n;
+                }
+                else
+                {
+                    r = r_limit;
+                    break;
+                }
+            }
         }
        
         auto iter = std::max_element(radii.begin(), radii.end()); 
