@@ -8,43 +8,6 @@
 #include<algorithm>
 
 
-std::uint32_t length_of_minimum_sorting(const std::vector<std::uint32_t>& vec)
-{
-    // *** Forward *** //
-    bool push = true;
-
-    std::stack<std::uint32_t> s0;
-    for(std::uint32_t n=0; n!=vec.size(); ++n)
-    {
-        while(!s0.empty() && vec[n] < s0.top()) 
-        {
-            push = false;
-            s0.pop(); 
-        }
-        if (push) 
-        {
-            s0.push(vec[n]);
-        }
-    }
-
-    // *** Backward *** //
-    push = true;
-
-    std::stack<std::uint32_t> s1;
-    for(std::uint32_t n=0; n!=vec.size(); ++n)
-    {
-        while(!s1.empty() && vec[vec.size()-1-n] > s1.top())
-        {
-            push = false;
-            s1.pop();
-        }
-        if (push)
-        {
-            s1.push(vec[vec.size()-1-n]);
-        }
-    }
-    return vec.size()-s0.size()-s1.size();
-}
 
 /*
     Given hist[0:N-1]

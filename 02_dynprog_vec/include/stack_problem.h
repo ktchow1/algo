@@ -12,27 +12,19 @@ namespace alg
         // *** Forward *** //
         // *************** //
         std::stack<std::uint32_t> s0;
-        bool flag0 = true;
+        bool push0 = true;
 
         for(std::uint32_t n=0; n!=vec.size(); ++n)
         {
-
             const auto& x = vec[n];
-            if (s0.empty())
+            while(!s0.empty() && x < s0.top())
             {
-                if (flag0) s0.push(x);
+                push0 = false;
+                s0.pop();
             }
-            else if (x >= s0.top())
+            if (push0)
             {
-                if (flag0) s0.push(x);
-            }
-            else
-            {
-                while(!s0.empty() && x < s0.top())
-                {
-                    s0.pop();
-                }
-                flag0 = false;
+                s0.push(x);
             }
         }
         if (s0.size()==vec.size()) return 0;
@@ -41,26 +33,19 @@ namespace alg
         // *** Backward *** //
         // **************** //
         std::stack<std::uint32_t> s1;
-        bool flag1 = true;
+        bool push1 = true;
 
         for(std::uint32_t n=0; n!=vec.size(); ++n)
         {
             const auto& x = vec[vec.size()-n-1];
-            if (s1.empty())
+            while(!s1.empty() && x > s1.top())
             {
-                if (flag1) s1.push(x);
+                push1 = false;
+                s1.pop();
             }
-            else if (x <= s1.top())
+            if (push1)
             {
-                if (flag1) s1.push(x);
-            }
-            else
-            {
-                while(!s1.empty() && x > s1.top())
-                {
-                    s1.pop();
-                }
-                flag1 = false;
+                s1.push(x);
             }
         }
         if (s1.size()==vec.size()) return 0; // <---- should never happen
@@ -75,26 +60,35 @@ namespace alg
 
         for(std::uint32_t n=0; n!=vec.size(); ++n)
         {
+            const auto& x = vec[n];
+
+            // Tried to re-order following if-case like the above algo, unfortunately does not work.
             if (s.empty())
             {
-                if (vec[n] > 0)
+                if (x > 0) 
                 {
-                    ans += vec[n];
-                    s.push(vec[n]);
+                    ans += x;
+                    s.push(x);
                 }
             }
-            else if (vec[n] > s.top()) 
+            else if (x > s.top())
             {
-                ans += vec[n]-s.top();
-                s.push(vec[n]);
+                if (x > 0) 
+                {
+                    ans += x-s.top();
+                    s.push(x);
+                }
             }
             else
             {
-                while(!s.empty() && vec[n] <= s.top()) 
+                while(!s.empty() && x <= s.top()) 
                 {
                     s.pop();
                 }
-                s.push(vec[n]);
+                if (x > 0) 
+                {
+                    s.push(x);
+                }
             }
         }
         return ans;
