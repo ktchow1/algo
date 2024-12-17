@@ -5,6 +5,12 @@
 
 namespace alg
 {
+    std::uint32_t shortest_unsorted_subseq(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans = 0;
+        return ans;
+    }
+
     std::uint32_t count_stroke_in_histogram(const std::vector<std::uint32_t>& vec)
     {
         std::stack<std::uint32_t> stack;
@@ -51,6 +57,12 @@ namespace alg
 // ******************************** //
 namespace alg
 {
+    std::uint32_t shortest_unsorted_subseq_bmk(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans = 0;
+        return ans;
+    }
+
     std::uint32_t count_stroke_in_histogram_bmk(const std::vector<std::uint32_t>& vec)
     {
         std::uint32_t ans = 0;

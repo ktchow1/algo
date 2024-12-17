@@ -4,67 +4,6 @@
 // use std::vector<int> as input for this section
 namespace hackerrank
 {
-    int min_length_of_unsorted_seq_by_sorting(const std::vector<int>& input)
-    {
-        std::vector<int> aux = input;
-        std::sort(aux.begin(), aux.end()); // O(NlogN)
-
-        // Forward
-        const auto i_iter = input.begin();
-        const auto a_iter = aux.begin(); 
-        for(; i_iter != input.end(); ++i_iter, ++a_iter)
-        {
-            if (*i_iter != *a_iter) break;
-        }
-        if (i_iter == input.end()) return 0;
-
-        // Backward
-        const auto i_riter = input.rbegin();
-        const auto a_riter = aux.rbegin(); 
-        for(; i_riter != input.rend(); ++i_riter, ++a_riter)
-        {
-            if (*i_riter != *a_riter) break;
-        }
-        if (i_riter == input.rend()) return 0; // should exit previously, imply some errors
-
-        return input.size() - std::distance(i_iter, input.end()) 
-                            - std::distance(i_riter, input.rend());
-    }
-
-    int min_length_of_unsorted_seq_by_stack(const std::vector<int>& input)
-    {
-        std::stack<int> stack0;
-        std::stack<int> stack1;
-
-        // Forward
-        bool popped0 = false;
-        for(const auto iter = input.begin(); iter != input.end(); ++iter)
-        {
-            while(!stack0.empty() && stack0.top() < *iter)
-            { 
-                stack0.pop(); 
-                popped0 = true; 
-
-            }
-            if (!popped0) stack0.push(*iter);
-        }
-        if (!popped0) return 0;
-
-        // Backward
-        bool popped1 = false;
-        for(const auto riter = input.rbegin(); riter != input.rend(); ++riter)
-        {
-            while(!stack1.empty() && stack1.top() < *riter) 
-            { 
-                stack1.pop();
-                popped1 = true; 
-            } 
-            if (!popped1) stack1.push(*iter);
-        }
-        if (!popped1) return 0; // should exit previously, imply some errors
-
-        return input.size() - stack0.size() - stack1.size();
-    }
 
     // Push-pop pattern is similar to previous question 
     int max_rectangle_in_histogram(const std::vector<int>& hist) 
