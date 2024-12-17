@@ -35,6 +35,7 @@ namespace alg
                 flag0 = false;
             }
         }
+        if (s0.size()==vec.size()) return 0;
 
         // **************** //
         // *** Backward *** //
@@ -62,6 +63,8 @@ namespace alg
                 flag1 = false;
             }
         }
+        if (s1.size()==vec.size()) return 0; // <---- should never happen
+
         return vec.size() - s0.size() - s1.size();
     }
 
@@ -94,6 +97,12 @@ namespace alg
                 s.push(vec[n]);
             }
         }
+        return ans;
+    }
+
+    std::uint32_t biggest_rectangle_in_histogram(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans;
         return ans;
     }
 }
@@ -180,6 +189,12 @@ namespace alg
             if (is_empty) break;
             ++lvl;
         }
+        return ans;
+    }
+
+    std::uint32_t biggest_rectangle_in_histogram_bmk(const std::vector<std::uint32_t>& vec)
+    {
+        std::uint32_t ans;
         return ans;
     }
 }

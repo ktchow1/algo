@@ -87,13 +87,16 @@ inline std::vector<std::uint32_t> gen_random_unsigned_sorted_vec(std::uint32_t s
 
 inline std::vector<std::uint32_t> gen_random_unsigned_partial_sorted_vec(std::uint32_t size, std::uint32_t min, std::uint32_t max)
 {
-    auto ans = gen_random_unsigned_vec(size, min, max);
-    std::uint32_t n0 = rand() % (size/3);
-    std::uint32_t n1 = size - rand() % (size/3);
-    auto iter0 = ans.begin() + n0;
-    auto iter1 = ans.begin() + n1;
-    std::sort(ans.begin(), iter0);
-    std::sort(iter1, ans.end());
+    auto ans = gen_random_unsigned_sorted_vec(size, min, max);
+
+    std::uint32_t N0 =        rand() % (size/2);
+    std::uint32_t N1 = size - rand() % (size/2);
+    for(std::uint32_t t=0; t!=N1-N0; ++t)
+    {
+        std::uint32_t n0 = rand() & (N1-N0) + N0; 
+        std::uint32_t n1 = rand() & (N1-N0) + N0; 
+        std::swap(ans[n0], ans[n1]);
+    }
     return ans;
 }
 
