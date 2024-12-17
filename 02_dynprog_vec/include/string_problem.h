@@ -135,52 +135,6 @@ namespace alg
         auto iter = std::max_element(radii.begin(), radii.end()); 
         return 2 * (*iter) + 1;
     } 
-
-    std::uint32_t longest_odd_palindrome_substr_wiki(const std::string& str) // same as above, for debugging only
-    {
-        std::vector<uint32_t> radii(str.size(), 0);
-        std::uint32_t n = 0; // centre 
-        std::uint32_t r = 0; // radius
-
-        while(n < str.size()) 
-        {
-            while(n >= r+1 && n+(r+1) < str.size() && str[n-(r+1)] == str[n+(r+1)])
-            {
-                ++r;
-            }
-
-            radii[n] = r;
-            std::uint32_t parent_centre = n;
-            std::uint32_t parent_radius = r;
-            ++n;
-            r = 0;
-
-            while(n <= parent_centre + parent_radius)
-            {
-                std::uint32_t n_image = parent_centre - (n - parent_centre);
-                std::uint32_t r_limit = parent_centre + parent_radius - n;
-
-                if (radii[n_image] < r_limit)
-                {
-                    radii[n] = radii[n_image];
-                    ++n;
-                }
-                else if (radii[n_image] > r_limit)
-                {
-                    radii[n] = r_limit;
-                    ++n;
-                }
-                else
-                {
-                    r = r_limit;
-                    break;
-                }
-            }
-        }
-       
-        auto iter = std::max_element(radii.begin(), radii.end()); 
-        return 2 * (*iter) + 1;
-    } 
 }
 
 

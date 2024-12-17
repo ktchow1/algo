@@ -10,6 +10,7 @@ void test_two_point_sum();
 void test_two_point_diff();
 void test_subseq_sum();
 void test_string_problem();
+void test_stack_problem();
 
 void test_singly_link_subproblem();
 void test_multi_link_subproblem();
@@ -58,7 +59,8 @@ int main()
 //  test_two_point_sum();
 //  test_two_point_diff();
 //  test_subseq_sum();
-    test_string_problem();
+//  test_string_problem();
+    test_stack_problem();
   
 //  test_singly_link_subproblem();
 //  test_multi_link_subproblem();

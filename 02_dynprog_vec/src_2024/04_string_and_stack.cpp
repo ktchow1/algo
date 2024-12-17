@@ -4,33 +4,6 @@
 // use std::vector<int> as input for this section
 namespace hackerrank
 {
-    int min_num_of_stroke(const std::vector<int>& input)
-    {
-        int count = 0;
-        std::stack<int> stack;
-
-        for(const auto iter = input.begin(); iter != input.end(); ++iter)
-        {
-            if (stack.empty())
-            {
-                count += *iter; // easy to miss this
-                stack.push(*iter);
-            }
-            else if (stack.top() < *iter)
-            {
-                count += *iter - stack.top();
-                stack.push(*iter);
-            }
-            else if (stack.top() > *iter)
-            {
-                while (stack.top() > *iter) stack.pop();
-            //  no need to push *iter
-            }
-        //  else no need to push *iter
-        } 
-        return count;
-    }
-
     int min_length_of_unsorted_seq_by_sorting(const std::vector<int>& input)
     {
         std::vector<int> aux = input;
