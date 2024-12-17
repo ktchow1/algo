@@ -1,7 +1,3 @@
-// ******************* //
-// *** Stack trick *** // 
-// ******************* //
-// use std::vector<int> as input for this section
 namespace hackerrank
 {
 
@@ -42,31 +38,4 @@ namespace hackerrank
         return max_area;
     }
 
-    // No stack trick needed
-    int area_trapped_in_histogram(const std::vector<int>& hist)
-    {
-        std::vector<int> profile0(0, hist.size());
-        std::vector<int> profile1(0, hist.size());
-
-        int max0 = 0;
-        for(int n=0; n!=hist.size(); ++n)
-        {
-            if (max0 < hist[n]) max0 = hist[n];
-            profile0[n] = max0;
-        }
-        
-        int max1 = 0;
-        for(int n=hist.size()-1; n>=0; --n)
-        {
-            if (max1 < hist[n]) max1 = hist[n];
-            profile1[n] = max1;
-        }
-
-        int ans = 0;
-        for(int n=0; n!=hist.size(); ++n)
-        {
-            ans += std::min(profile0[n], profile1[n]);
-        }
-        return ans;
-    }
 }

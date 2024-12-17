@@ -61,8 +61,6 @@ namespace alg
         for(std::uint32_t n=0; n!=vec.size(); ++n)
         {
             const auto& x = vec[n];
-
-            // Tried to re-order following if-case like the above algo, unfortunately does not work.
             if (s.empty())
             {
                 if (x > 0) 

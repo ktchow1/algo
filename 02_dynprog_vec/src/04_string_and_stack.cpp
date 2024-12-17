@@ -1,13 +1,9 @@
 #include<iostream>
 #include<cstdint>
 #include<vector>
-#include<string>
 #include<stack>
 #include<optional>
-#include<unordered_map>
 #include<algorithm>
-
-
 
 /*
     Given hist[0:N-1]
@@ -83,33 +79,6 @@ std::uint32_t biggest_rect_in_histogram(const std::vector<std::uint32_t>& vec)
             ans = std::max(ans, area);
         }
         s.pop();
-    }
-    return ans;
-}
-
-std::uint32_t max_depth_of_puddle(const std::vector<std::uint32_t>& vec)
-{
-    std::vector<std::uint32_t> LHS_profile(vec.size(), 0);
-    std::vector<std::uint32_t> RHS_profile(vec.size(), 0);
-    std::uint32_t LHS_max;
-    std::uint32_t RHS_max;
-
-    for(std::uint32_t n=0; n!=vec.size(); ++n)
-    {
-        LHS_max = std::max(LHS_max, vec[n]);
-        LHS_profile[n] = LHS_max;
-    }
-    for(std::uint32_t n=0; n!=vec.size(); ++n)
-    {
-        RHS_max = std::max(RHS_max, vec[vec.size()-n-1]);
-        RHS_profile[vec.size()-n-1] = RHS_max;
-    }
-
-    std::uint32_t ans=0;
-    for(std::uint32_t n=0; n!=vec.size(); ++n)
-    {
-        auto temp = std::min(LHS_profile[n], RHS_profile[n]) - vec[n];
-        ans = std::max(ans, temp);
     }
     return ans;
 }

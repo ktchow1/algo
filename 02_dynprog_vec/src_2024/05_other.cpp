@@ -89,9 +89,3 @@ namespace hackerrank
     }
 }
 
-// ************* //
-// *** Other *** //
-// ************* //
-namespace hackerrank
-{
-}
