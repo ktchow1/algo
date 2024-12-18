@@ -203,6 +203,37 @@ namespace alg
         }
         return ans;
     }
+
+    // ********************************** //
+    // *** No benchmark for this algo *** //
+    // ********************************** //
+    std::uint32_t total_trapped_water(const std::vector<std::uint32_t>& vec)
+    {
+        std::vector<std::uint32_t> LHS_profile(vec.size());
+        std::vector<std::uint32_t> RHS_profile(vec.size());
+
+        std::uint32_t LHS_max = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            LHS_max = std::max(LHS_max,vec[n]);
+            LHS_profile[n] = LHS_max;
+        }
+
+        std::uint32_t RHS_max = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            std::uint32_t m = vec.size()-1-n;
+            RHS_max = std::max(RHS_max,vec[m]);
+            RHS_profile[m] = RHS_max;
+        }
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+            ans += std::min(LHS_profile[n], RHS_profile[n]) - vec[n];
+        }
+        return ans;
+    }
 }
 
 
