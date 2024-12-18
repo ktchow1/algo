@@ -1,4 +1,5 @@
 #include<iostream>
+#include<limits>
 #include<stack>
 #include<vector>
 #include<algorithm>
@@ -48,7 +49,7 @@ namespace alg
                 s1.push(x);
             }
         }
-        if (s1.size()==vec.size()) return 0; // <---- should never happen
+        if (s1.size()==vec.size()) return 0; // <--- should never happen
 
         return vec.size() - s0.size() - s1.size();
     }
@@ -79,6 +80,7 @@ namespace alg
             }
             else
             {
+                // This part is similar to shortest_unsorted_subseq.
                 while(!s.empty() && x <= s.top()) 
                 {
                     s.pop();
@@ -92,9 +94,16 @@ namespace alg
         return ans;
     }
 
-    std::uint32_t biggest_rectangle_in_histogram(const std::vector<std::uint32_t>& vec)
+    std::uint32_t biggest_rect_in_hist(const std::vector<std::uint32_t>& vec)
     {
-        std::uint32_t ans;
+        std::stack<std::pair<std::uint32_t,std::uint32_t>> s;
+        std::uint32_t ans = 0;
+
+        for(std::uint32_t n=0; n!=vec.size(); ++n)
+        {
+        }
+
+
         return ans;
     }
 }
@@ -136,7 +145,7 @@ namespace alg
                 break;
             }
         }
-        if (unsorted_last == vec.size()) return 0; // <---- should never happen
+        if (unsorted_last == vec.size()) return 0; // <--- should never happen
 
         return unsorted_last - unsorted_begin + 1;
     }
@@ -184,9 +193,20 @@ namespace alg
         return ans;
     }
 
-    std::uint32_t biggest_rectangle_in_histogram_bmk(const std::vector<std::uint32_t>& vec)
+    std::uint32_t biggest_rect_in_hist_bmk(const std::vector<std::uint32_t>& vec)
     {
-        std::uint32_t ans;
+        std::uint32_t ans = 0;
+        for(std::uint32_t n=0; n!=vec.size(); ++n)                        // n = LHS-edge of rect (inclusive)
+        {
+            std::uint32_t h = std::numeric_limits<std::uint32_t>::max(); 
+            for(std::uint32_t m=n; m!=vec.size(); ++m)                    // m = RHS-edge of rect (inclusive)
+            {
+                h = std::min(h, vec[m]);                                  // h = min(vec[n], vec[n+1], ..., vec[m])
+
+                std::uint32_t area = h * (m-n+1);
+                ans = std::max(ans, area);
+            }
+        }
         return ans;
     }
 }
