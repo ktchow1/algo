@@ -5,14 +5,14 @@
   
 void test_string_problem()
 {
-    std::uint32_t num_trial = 100000;
-    bool print_each_test_case = true;
-/*
+    std::uint32_t num_trial = 10000;
+    bool print_each_test_case = false;
+  
     benchmark_str("longest_non_duplicate_substr",           
                   gen_random_str, 
                   alg::longest_non_duplicated_substr,           
                   alg::longest_non_duplicated_substr_bmk,
-                  num_trial, 20, 26, print_each_test_case); */
+                  num_trial, 20, 26, print_each_test_case); 
 
     benchmark_str("longest_odd_palindrome_substr",           
                   gen_random_palindrome, 

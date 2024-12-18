@@ -5,6 +5,9 @@
 #include<algorithm>
 
 
+// ************************* //
+// *** Random generators *** //
+// ************************* //
 inline std::string gen_random_str(std::uint32_t size, std::uint32_t alphabet_set) // 1-26
 {
     std::uint32_t alphabet_set_size = 26;
@@ -49,45 +52,30 @@ inline std::string gen_random_palindrome(std::uint32_t size, std::uint32_t alpha
     return str;
 }
 
-inline std::vector<std::int32_t> gen_random_signed_vec(std::uint32_t size, std::int32_t min, std::int32_t max)
+template<typename T>
+inline std::vector<T> gen_random_vec(std::uint32_t size, T min, T max)
 {
-    std::vector<std::int32_t> ans;
+    std::vector<T> ans;
     for(std::uint32_t n=0; n!=size; ++n)
     {
-        std::int32_t x = min + std::rand() % (max-min);
+        T x = min + std::rand() % (max-min);
         ans.push_back(x);
     }
     return ans;
 }
 
-inline std::vector<std::uint32_t> gen_random_unsigned_vec(std::uint32_t size, std::uint32_t min, std::uint32_t max)
+template<typename T>
+inline std::vector<T> gen_random_sorted_vec(std::uint32_t size, T min, T max)
 {
-    std::vector<std::uint32_t> ans;
-    for(std::uint32_t n=0; n!=size; ++n)
-    {
-        std::uint32_t x = min + std::rand() % (max-min);
-        ans.push_back(x);
-    }
-    return ans;
-}
-
-inline std::vector<std::int32_t> gen_random_signed_sorted_vec(std::uint32_t size, std::int32_t min, std::int32_t max)
-{
-    auto ans = gen_random_signed_vec(size, min, max);
+    auto ans = gen_random_vec(size, min, max);
     std::sort(ans.begin(), ans.end());
     return ans;
 }
 
-inline std::vector<std::uint32_t> gen_random_unsigned_sorted_vec(std::uint32_t size, std::uint32_t min, std::uint32_t max)
+template<typename T>
+inline std::vector<T> gen_random_partial_sorted_vec(std::uint32_t size, T min, T max)
 {
-    auto ans = gen_random_unsigned_vec(size, min, max);
-    std::sort(ans.begin(), ans.end());
-    return ans;
-}
-
-inline std::vector<std::uint32_t> gen_random_unsigned_partial_sorted_vec(std::uint32_t size, std::uint32_t min, std::uint32_t max)
-{
-    auto ans = gen_random_unsigned_sorted_vec(size, min, max);
+    auto ans = gen_random_sorted_vec(size, min, max);
 
     std::uint32_t N0 =        rand() % (size/2);
     std::uint32_t N1 = size - rand() % (size/2);
@@ -98,6 +86,44 @@ inline std::vector<std::uint32_t> gen_random_unsigned_partial_sorted_vec(std::ui
         std::swap(ans[n0], ans[n1]);
     }
     return ans;
+}
+
+
+
+// **************** //
+// *** Printing *** //
+// **************** //
+template<typename OUTPUT>
+void print_one_case(const std::string& test_name, 
+                    OUTPUT ans0, 
+                    OUTPUT ans1, 
+                    std::uint32_t error,
+                    std::uint32_t trial, 
+                    bool flag, 
+                    const std::string& str)
+{
+    std::cout << "\n" << test_name
+              << " : ans0 = " << ans0 
+              <<  ", ans1 = " << ans1 
+              <<  ", error rate = " << error
+              <<  "/" << trial
+              <<  " " << (flag? "OK":"ERROR") << str;
+}
+
+template<typename OUTPUT>
+void print_one_case(const std::string& test_name, 
+                    OUTPUT ans0, 
+                    OUTPUT ans1, 
+                    std::uint32_t error,
+                    std::uint32_t trial, 
+                    bool flag) 
+{
+    std::cout << "\n" << test_name
+              << " : ans0 = " << ans0 
+              <<  ", ans1 = " << ans1 
+              <<  ", error rate = " << error
+              <<  "/" << trial
+              <<  " " << (flag? "OK":"ERROR");
 }
 
 
@@ -124,17 +150,9 @@ void benchmark_str(const std::string&  test_name,
         auto ans0 = alg_function(str);
         auto ans1 = bmk_function(str); 
         bool flag = (ans0 == ans1);
-        if (!flag) ++error;
 
-        if (print_each_test_case)
-        {
-            std::cout << "\n" << test_name
-                      << " : ans0 = " << ans0 
-                      <<  ", ans1 = " << ans1 
-                      <<  ", error rate = " << error
-                      <<  "/" << trial
-                      <<  " " << (flag? "OK":"ERROR") << " " << str;
-        }
+        if (!flag) ++error;
+        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag, str);
     }
     if (!print_each_test_case)
     {
@@ -162,17 +180,9 @@ void benchmark_vec(const std::string&  test_name,
         auto ans0 = alg_function(vec);
         auto ans1 = bmk_function(vec); 
         bool flag = (ans0 == ans1);
-        if (!flag) ++error;
 
-        if (print_each_test_case)
-        {
-            std::cout << "\n" << test_name
-                      << " : ans0 = " << ans0 
-                      <<  ", ans1 = " << ans1 
-                      <<  ", error rate = " << error
-                      <<  "/" << trial
-                      <<  " " << (flag? "OK":"ERROR");
-        }
+        if (!flag) ++error;
+        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
     if (!print_each_test_case)
     {
@@ -201,17 +211,9 @@ void benchmark_vec_with_target(const std::string&  test_name,
         auto ans0 = alg_function(vec, target);
         auto ans1 = bmk_function(vec, target); 
         bool flag = (ans0 == ans1);
-        if (!flag) ++error;
 
-        if (print_each_test_case)
-        {
-            std::cout << "\n" << test_name
-                      << " : ans0 = " << ans0 
-                      <<  ", ans1 = " << ans1 
-                      <<  ", error rate = " << error
-                      <<  "/" << trial
-                      <<  " " << (flag? "OK":"ERROR");
-        }
+        if (!flag) ++error;
+        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
     if (!print_each_test_case)
     {
@@ -241,17 +243,9 @@ void benchmark_2_vec_with_target(const std::string&  test_name,
         auto ans0 = alg_function(vec0, vec1, target);
         auto ans1 = bmk_function(vec0, vec1, target); 
         bool flag = (ans0 == ans1);
-        if (!flag) ++error;
 
-        if (print_each_test_case)
-        {
-            std::cout << "\n" << test_name
-                      << " : ans0 = " << ans0 
-                      <<  ", ans1 = " << ans1 
-                      <<  ", error rate = " << error
-                      <<  "/" << trial
-                      <<  " " << (flag? "OK":"ERROR");
-        }
+        if (!flag) ++error;
+        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
     if (!print_each_test_case)
     {
