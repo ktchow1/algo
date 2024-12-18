@@ -54,6 +54,10 @@ namespace alg
         return vec.size() - s0.size() - s1.size();
     }
 
+    // ******************************************************************** //
+    // The while-loop inside count_stroke_in_histogram() is similar to ...
+    // the while-loop inside shortest_unsorted_subseq()
+    // ******************************************************************** //
     std::uint32_t count_stroke_in_histogram(const std::vector<std::uint32_t>& vec)
     {
         std::stack<std::uint32_t> s;
@@ -80,7 +84,6 @@ namespace alg
             }
             else
             {
-                // This part is similar to shortest_unsorted_subseq.
                 while(!s.empty() && x <= s.top()) 
                 {
                     s.pop();
@@ -94,16 +97,106 @@ namespace alg
         return ans;
     }
 
+    // ************************************************************************************** //
+    // [Explanation about biggest rect in hist]
+    // ************************************************************************************** //
+    // To define a rect in hist, we need 3 parameters :
+    // * LHS edge of rect
+    // * RHS edge of rect
+    // * height of rect
+    //  
+    // In O(N2) exhaustive search :
+    // * iterate vec[n] as LHS edge in outer for-loop
+    // * iterate vec[m] as RHS edge in inner for-loop
+    // * find max height such that h <= vec[n,n+1,...,m]
+    //
+    // In O(N) dynprog search :
+    // * iterate vec[n] as height
+    // * extend LHS-edge to as far as possible, keeping height const at vec[n]
+    // * extend RHS-edge to as far as possible, keeping height const at vec[n]
+    // 
+    // When we are at vec[n], using it as height, if hist is increasing, then :
+    // * LHS-edge is vec[n]
+    // * RHS-edge is vec[vec.size()-1]
+    //
+    // When we are at vec[n], using it as height, if hist is decreasing (local crest), then :
+    // * remove the crest, because when using any vec[m] inside crest as height ...
+    // * RHS-edge cannot be extended to vec[n]       or beyond (as vec[m] > vec[n])
+    // * LHS-edge cannot be extended to vec[s.top()] or beyond 
+    // 
+    // Hence we need to :
+    // * consider all rect inside crest, with height vec[m]
+    // * extract crest with help of stack s
+    // * flatten crest by const height vec[n]
+    // * unlike other algo, we store index n (instead of value vec[n]) in stack
+    //
+    // Consider the animation :
+    // * invert the histogram profile
+    // * water pumping from LHS and fill the trough
+    // * once 1st trough is full, water flows into 2nd trough
+    // * once 2nd trough is full, water flows ...
+    // * some troughs may merge to form larger trough
+    // * water will escape from RHS edge
+    // * remove all water-filled troughs (flatten them)
+    // * perform final scan of whole monotonic landscape
+    // ************************************************************************************** //
+    // A bin in hist is defined as :
+    //
+    // LHS edge = s.next_top()+1
+    // RHS edge = s.top()
+    // height   = vec[s.top()]
+    //
+    // where s stores index n
+    // ************************************************************************************** //
+    //
     std::uint32_t biggest_rect_in_hist(const std::vector<std::uint32_t>& vec)
     {
-        std::stack<std::pair<std::uint32_t,std::uint32_t>> s;
+        std::stack<std::uint32_t> s; // for index, not for value
         std::uint32_t ans = 0;
 
+        // ***************************** //
+        // *** Step 1 : Remove crest *** //
+        // ***************************** //
         for(std::uint32_t n=0; n!=vec.size(); ++n)
         {
+            while(!s.empty() && vec[n] < vec[s.top()])
+            {
+                std::uint32_t m = s.top();
+                s.pop();
+
+                if (s.empty())
+                {
+                    std::uint32_t area = vec[m] * m;
+                    ans = std::max(ans, area);
+                }
+                else
+                {
+                    std::uint32_t area = vec[m] * (m-s.top());
+                    ans = std::max(ans, area);
+                }
+            }
+            s.push(n); 
         }
 
+        // *************************** //
+        // *** Step 2 : Final scan *** //
+        // *************************** //
+        while(!s.empty())
+        {
+            std::uint32_t m = s.top();
+            s.pop();
 
+            if (s.empty())
+            {
+                std::uint32_t area = vec[m] * m;
+                ans = std::max(ans, area);
+            }
+            else
+            {
+                std::uint32_t area = vec[m] * (m-s.top());
+                ans = std::max(ans, area);
+            }
+        }
         return ans;
     }
 }
@@ -130,7 +223,7 @@ namespace alg
                 unsorted_begin = n;
                 break;
             }
-        }
+        } 
         if (unsorted_begin == vec.size()) return 0;
 
         // **************** //
@@ -195,6 +288,9 @@ namespace alg
 
     std::uint32_t biggest_rect_in_hist_bmk(const std::vector<std::uint32_t>& vec)
     {
+        std::cout << "\n[INPUT] ";
+        for(const auto& x:vec) std::cout << x << ",";
+
         std::uint32_t ans = 0;
         for(std::uint32_t n=0; n!=vec.size(); ++n)                        // n = LHS-edge of rect (inclusive)
         {
@@ -204,6 +300,15 @@ namespace alg
                 h = std::min(h, vec[m]);                                  // h = min(vec[n], vec[n+1], ..., vec[m])
 
                 std::uint32_t area = h * (m-n+1);
+                
+                if (area > ans)
+                {
+                    std::cout << "\n[BMK] orig=" << ans 
+                              <<        " area=" << area
+                              <<           " n=" << n
+                              <<           " m=" << m
+                              <<           " h=" << h;
+                }
                 ans = std::max(ans, area);
             }
         }
