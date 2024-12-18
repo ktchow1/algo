@@ -166,15 +166,19 @@ namespace alg
 
                 if (s.empty())
                 {
-                    std::uint32_t area = vec[m] * m;
+                    std::uint32_t area = vec[m] * ((n-1)+1); // BUG : cannot replace n-1 by m, see remark 1
                     ans = std::max(ans, area);
                 }
                 else
                 {
-                    std::uint32_t area = vec[m] * (m-s.top());
+                    std::uint32_t area = vec[m] * ((n-1)-s.top()); // BUG : cannot replace n-1 by m, see remark 1
                     ans = std::max(ans, area);
                 }
             }
+            // [Remark 1]
+            // It may involve multiple pop in while-loop, 
+            // m works in the 1st pop, but not for other.
+
             s.push(n); 
         }
 
@@ -188,12 +192,12 @@ namespace alg
 
             if (s.empty())
             {
-                std::uint32_t area = vec[m] * m;
+                std::uint32_t area = vec[m] * ((vec.size()-1)+1);
                 ans = std::max(ans, area);
             }
             else
             {
-                std::uint32_t area = vec[m] * (m-s.top());
+                std::uint32_t area = vec[m] * ((vec.size()-1)-s.top());
                 ans = std::max(ans, area);
             }
         }
@@ -288,9 +292,6 @@ namespace alg
 
     std::uint32_t biggest_rect_in_hist_bmk(const std::vector<std::uint32_t>& vec)
     {
-        std::cout << "\n[INPUT] ";
-        for(const auto& x:vec) std::cout << x << ",";
-
         std::uint32_t ans = 0;
         for(std::uint32_t n=0; n!=vec.size(); ++n)                        // n = LHS-edge of rect (inclusive)
         {
@@ -300,15 +301,6 @@ namespace alg
                 h = std::min(h, vec[m]);                                  // h = min(vec[n], vec[n+1], ..., vec[m])
 
                 std::uint32_t area = h * (m-n+1);
-                
-                if (area > ans)
-                {
-                    std::cout << "\n[BMK] orig=" << ans 
-                              <<        " area=" << area
-                              <<           " n=" << n
-                              <<           " m=" << m
-                              <<           " h=" << h;
-                }
                 ans = std::max(ans, area);
             }
         }

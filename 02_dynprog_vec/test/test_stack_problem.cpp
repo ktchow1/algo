@@ -5,7 +5,7 @@
   
 void test_stack_problem()
 {
-    std::uint32_t num_trial = 1;
+    std::uint32_t num_trial = 100000;
     bool print_each_test_case = true;
 /*
     benchmark_vec("shortest_unsorted_subseq",           
@@ -24,6 +24,6 @@ void test_stack_problem()
                   gen_random_vec<std::uint32_t>, 
                   alg::biggest_rect_in_hist,   
                   alg::biggest_rect_in_hist_bmk,
-                  num_trial, 20, 0, 20, print_each_test_case);  
+                  num_trial, 100, 0, 80, print_each_test_case);  
 }
   
