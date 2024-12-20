@@ -3,44 +3,6 @@
 // *************** //
 namespace hackerrank
 {
-    int find_kth_element(const std::vector<int>& input, int k) // in O(N)
-    {
-        if (input.size() == 0) return -1;
-        if (input.size() == 1) return 0;
-
-        int begin = 0;
-        int last = input.size()-1;
-        std::vector<int> sorted_input(input);
-
-        while (begin != last)
-        {
-            // quick sort (with i, j, k)
-            int i = begin;
-            int j = last;
-            while (i != j)
-            {
-                if (sorted_input[i] < sorted_input[j])
-                {
-                    --j;
-                }
-                else
-                {
-                    int temp = sorted_input[i];
-                    sorted_input[i] = sorted_input[j];
-                    sorted_input[j] = sorted_input[i+1];
-                    sorted_input[i+1] = temp;
-                    ++i;
-                }
-            }
-            
-            // bisection (with begin, last)
-            if      (k == i)   return sorted_input[k];
-            else if (k <  i)   last  = i;
-            else               begin = i;
-        }
-        return sorted_input[begin];
-    }
-
     enum class num_of_swap_method
     {
         LL, UR, LL_OPTIMIZED
