@@ -56,10 +56,23 @@ namespace alg
     // 1. bubble sort
     // 2. logic to skip useless comparison
     // *********************************** //
-    std::uint32_t min_number_adjacent_swap(const std::vector<std::uint32_t>& vec)
+    std::uint32_t min_number_adjacent_swap(const std::vector<std::uint32_t>& orig_pos)
     {
-        std::uint32_t ans;
-        return ans;
+        std::uint32_t num_swap = 0;
+        for(std::uint32_t n=0; n!=orig_pos.size(); ++n)
+        {
+            std::uint32_t m0 = 0;
+            if (orig_pos[n] > 2) m0 = orig_pos[n]-2;
+
+            for(std::uint32_t m=m0; m!=n; ++m) // m < n, i.e. orig_pos[m] overtook orig_pos[n]
+            {
+                if (orig_pos[m] > orig_pos[n]) ++num_swap;
+                // when this happens, 
+                // m > orig_pos[m]-2
+                //   > orig_pos[n]-2 <--- optimization is possible
+            }
+        }
+        return num_swap;
     }
 }
 
@@ -76,9 +89,35 @@ namespace alg
         return sorted_vec[kth_order];
     }
 
-    std::uint32_t min_number_adjacent_swap_bmk(const std::vector<std::uint32_t>& vec)
+    std::uint32_t min_number_adjacent_swap_bmk_UL(const std::vector<std::uint32_t>& orig_pos)
     {
-        std::uint32_t ans;
-        return ans;
+        std::uint32_t num_swap = 0;
+        for(std::uint32_t n=0; n!=orig_pos.size(); ++n)
+        {
+            for(std::uint32_t m=0; m!=n; ++m) // m < n, i.e. orig_pos[m] overtook orig_pos[n]
+            {
+                if (orig_pos[m] > orig_pos[n]) ++num_swap;
+                // when this happens, 
+                // m > orig_pos[m]-2
+                //   > orig_pos[n]-2 <--- optimization is possible
+            }
+        }
+        return num_swap;
+    }
+
+    std::uint32_t min_number_adjacent_swap_bmk_UR(const std::vector<std::uint32_t>& orig_pos)
+    {
+        std::uint32_t num_swap = 0;
+        for(std::uint32_t n=0; n!=orig_pos.size(); ++n)
+        {
+            for(std::uint32_t m=n+1; m!=orig_pos.size(); ++m) // m > n, i.e. orig_pos[n] overtook orig_pos[m] 
+            {
+                if (orig_pos[m] < orig_pos[n]) ++num_swap;
+                // when this happens, 
+                // n > orig_pos[n]-2
+                //   > orig_pos[m]-2 <--- no optimization
+            }
+        }
+        return num_swap;
     }
 }

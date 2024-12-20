@@ -88,6 +88,32 @@ inline std::vector<T> gen_random_partial_sorted_vec(std::uint32_t size, T min, T
     return ans;
 }
 
+// Generate swapped vector [0,1,2,3,...,N-1]
+inline std::vector<std::uint32_t> gen_random_swapped_order(std::uint32_t size)
+{
+    std::vector<std::uint32_t> ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        ans.push_back(n);
+    }
+
+    std::uint32_t N = rand()%size;
+    for(std::uint32_t n=0; n!=N; ++n)
+    {
+        std::uint32_t x = rand()%3;
+        if (x==1 && n>=1)
+        {
+            std::swap(ans[n], ans[n-1]);
+        }
+        else if (x==2 && n>=2)
+        {
+            std::swap(ans[n], ans[n-1]);
+            std::swap(ans[n-1], ans[n-2]);
+        }
+    }
+    return ans;
+}
+
 
 
 // **************** //
@@ -160,15 +186,15 @@ void benchmark_str(const std::string&  test_name,
     }
 }
 
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE>
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT>
 void benchmark_vec(const std::string&  test_name,
                    const GEN_FUNCTION& gen_function, 
                    const ALG_FUNCTION& alg_function, 
                    const BMK_FUNCTION& bmk_function, 
                    std::uint32_t       trial, 
                    std::uint32_t       size,
-                   INPUT_TYPE          min_value,
-                   INPUT_TYPE          max_value, 
+                   GEN_INPUT           min_value,
+                   GEN_INPUT           max_value, 
                    bool                print_each_test_case)
 {
     std::uint32_t error = 0;
@@ -190,17 +216,45 @@ void benchmark_vec(const std::string&  test_name,
     }
 }
 
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename ARG_TYPE>
-void benchmark_vec_with_arg(const std::string&  test_name,
-                            const GEN_FUNCTION& gen_function, 
-                            const ALG_FUNCTION& alg_function, 
-                            const BMK_FUNCTION& bmk_function, 
-                            std::uint32_t       trial, 
-                            std::uint32_t       size,
-                            INPUT_TYPE          min_value,
-                            INPUT_TYPE          max_value,
-                            ARG_TYPE            arg,
-                            bool                print_each_test_case)
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
+void benchmark_vec_without_input(const std::string&  test_name,
+                                 const GEN_FUNCTION& gen_function, 
+                                 const ALG_FUNCTION& alg_function, 
+                                 const BMK_FUNCTION& bmk_function, 
+                                 std::uint32_t       trial, 
+                                 std::uint32_t       size,
+                                 bool                print_each_test_case)
+{
+    std::uint32_t error = 0;
+    if (print_each_test_case) std::cout << "\n";
+
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        auto vec  = gen_function(size);
+        auto ans0 = alg_function(vec);
+        auto ans1 = bmk_function(vec); 
+        bool flag = (ans0 == ans1);
+
+        if (!flag) ++error;
+        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
+    }
+    if (!print_each_test_case)
+    {
+        std::cout << "\n" << std::setw(40) << test_name << ", error rate = " << error << "/" << trial;
+    }
+}
+
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
+void benchmark_vec_with_alg_input(const std::string&  test_name,
+                                  const GEN_FUNCTION& gen_function, 
+                                  const ALG_FUNCTION& alg_function, 
+                                  const BMK_FUNCTION& bmk_function, 
+                                  std::uint32_t       trial, 
+                                  std::uint32_t       size,
+                                  GEN_INPUT           min_value,
+                                  GEN_INPUT           max_value,
+                                  ALG_INPUT           arg,
+                                  bool                print_each_test_case)
 {
     std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
@@ -221,17 +275,17 @@ void benchmark_vec_with_arg(const std::string&  test_name,
     }
 }
 
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename ARG_TYPE>
-void benchmark_2_vec_with_arg(const std::string&  test_name,
-                              const GEN_FUNCTION& gen_function, 
-                              const ALG_FUNCTION& alg_function, 
-                              const BMK_FUNCTION& bmk_function, 
-                              std::uint32_t       trial, 
-                              std::uint32_t       size,
-                              INPUT_TYPE          min_value,
-                              INPUT_TYPE          max_value,
-                              ARG_TYPE            arg,
-                              bool                print_each_test_case)
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
+void benchmark_2_vec_with_alg_input(const std::string&  test_name,
+                                    const GEN_FUNCTION& gen_function, 
+                                    const ALG_FUNCTION& alg_function, 
+                                    const BMK_FUNCTION& bmk_function, 
+                                    std::uint32_t       trial, 
+                                    std::uint32_t       size,
+                                    GEN_INPUT           min_value,
+                                    GEN_INPUT           max_value,
+                                    ALG_INPUT           arg,
+                                    bool                print_each_test_case)
 {
     std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";

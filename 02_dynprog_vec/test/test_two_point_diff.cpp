@@ -14,15 +14,15 @@ void test_two_point_diff()
                   alg::max_profit_bmk,  
                   num_trial, 30, 100, 500, print_each_test_case); 
     
-    benchmark_vec_with_arg("count_target_profit", 
-                            gen_random_vec<std::int32_t>, 
-                            alg::count_target_profit,           
-                            alg::count_target_profit_bmk,  
-                            num_trial, 100, 100, 300, 40, print_each_test_case); 
+    benchmark_vec_with_alg_input("count_target_profit", 
+                                 gen_random_vec<std::int32_t>, 
+                                 alg::count_target_profit,           
+                                 alg::count_target_profit_bmk,  
+                                 num_trial, 100, 100, 300, 40, print_each_test_case); 
 
-    benchmark_vec_with_arg("count_target_abs_profit", 
-                            gen_random_vec<std::int32_t>, 
-                            alg::count_target_abs_profit,           
-                            alg::count_target_abs_profit_bmk,  
-                            num_trial, 100, 100, 300, 40, print_each_test_case); 
+    benchmark_vec_with_alg_input("count_target_abs_profit", 
+                                 gen_random_vec<std::int32_t>, 
+                                 alg::count_target_abs_profit,           
+                                 alg::count_target_abs_profit_bmk,  
+                                 num_trial, 100, 100, 300, 40, print_each_test_case); 
 }
