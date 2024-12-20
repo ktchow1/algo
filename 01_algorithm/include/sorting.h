@@ -144,5 +144,4 @@ namespace alg
         merge(begin, mid, mid, end, std::back_inserter(vec));
         std::copy(vec.begin(), vec.end(), begin);
     }
-
 }

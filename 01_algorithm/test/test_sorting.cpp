@@ -35,7 +35,7 @@ void print(const std::string& header, const CONTAINER& c)
 
 void test_sorting()
 {
-    std::uint32_t trial = 100;
+    std::uint32_t trial = 10000;
     std::uint32_t error0 = 0;
     std::uint32_t error1 = 0;
     std::uint32_t error2 = 0;
@@ -44,7 +44,7 @@ void test_sorting()
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        auto vec = gen_random_vec<std::uint32_t>(60, 0, 60);
+        auto vec = gen_random_vec<std::uint32_t>(200, 0, 200);
         auto ans{vec};
         std::sort(ans.begin(), ans.end());
 
@@ -79,7 +79,7 @@ void test_sorting()
         std::cout << " error2=" << error2;
         std::cout << " error3=" << error3;
         std::cout << " error4=" << error4;
-        print(", input=", vec);
+    //  print(", input=", vec);
     }
 
 
