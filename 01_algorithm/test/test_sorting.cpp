@@ -20,12 +20,16 @@ bool compare(const CONTAINER& c0, const CONTAINER& c1)
 template<typename CONTAINER>
 void print(const std::string& header, const CONTAINER& c)
 {
+    std::uint32_t n=0;
+    std::uint32_t N=c.size();
+
     std::cout << header << "["; 
     for(const auto& x:c)
     {
-        std::cout << x << ",";
+        if (n!=N) std::cout << x << ",";
+        else      std::cout << x << "]";
+        ++n;
     }
-    std::cout << "]"; 
 }
 
 
@@ -35,6 +39,8 @@ void test_sorting()
     std::uint32_t error0 = 0;
     std::uint32_t error1 = 0;
     std::uint32_t error2 = 0;
+    std::uint32_t error3 = 0;
+    std::uint32_t error4 = 0;
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
@@ -57,13 +63,23 @@ void test_sorting()
         bool flag2 = compare(ans, vec2);
         if (!flag2) ++error2;
 
+        auto vec3{vec};
+        alg::quick_sort(vec3.begin(), vec3.end());
+        bool flag3 = compare(ans, vec3);
+        if (!flag3) ++error3;
+
+        auto vec4{vec};
+        alg::merge_sort(vec4.begin(), vec4.end());
+        bool flag4 = compare(ans, vec4);
+        if (!flag4) ++error4;
 
         std::cout << "\n[Test " << t << "]";
         std::cout << " error0=" << error0;
         std::cout << " error1=" << error1;
         std::cout << " error2=" << error2;
-        print("   ", vec);
-        
+        std::cout << " error3=" << error3;
+        std::cout << " error4=" << error4;
+        print(", input=", vec);
     }
 
 

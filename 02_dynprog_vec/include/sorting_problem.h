@@ -17,7 +17,7 @@ namespace alg
         std::vector<std::uint32_t> v(vec);
         std::uint32_t lower = 0;
         std::uint32_t upper = v.size()-1;
-        while(lower != upper)
+        while(lower!=upper)
         {
             std::uint32_t i = lower;
             std::uint32_t j = upper;
