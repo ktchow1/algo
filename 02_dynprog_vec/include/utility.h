@@ -190,17 +190,17 @@ void benchmark_vec(const std::string&  test_name,
     }
 }
 
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename TARGET_TYPE>
-void benchmark_vec_with_target(const std::string&  test_name,
-                               const GEN_FUNCTION& gen_function, 
-                               const ALG_FUNCTION& alg_function, 
-                               const BMK_FUNCTION& bmk_function, 
-                               std::uint32_t       trial, 
-                               std::uint32_t       size,
-                               INPUT_TYPE          min_value,
-                               INPUT_TYPE          max_value,
-                               TARGET_TYPE         target,
-                               bool                print_each_test_case)
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename ARG_TYPE>
+void benchmark_vec_with_arg(const std::string&  test_name,
+                            const GEN_FUNCTION& gen_function, 
+                            const ALG_FUNCTION& alg_function, 
+                            const BMK_FUNCTION& bmk_function, 
+                            std::uint32_t       trial, 
+                            std::uint32_t       size,
+                            INPUT_TYPE          min_value,
+                            INPUT_TYPE          max_value,
+                            ARG_TYPE            arg,
+                            bool                print_each_test_case)
 {
     std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
@@ -208,8 +208,8 @@ void benchmark_vec_with_target(const std::string&  test_name,
     for(std::uint32_t t=0; t!=trial; ++t)
     {
         auto vec  = gen_function(size, min_value, max_value);
-        auto ans0 = alg_function(vec, target);
-        auto ans1 = bmk_function(vec, target); 
+        auto ans0 = alg_function(vec, arg);
+        auto ans1 = bmk_function(vec, arg); 
         bool flag = (ans0 == ans1);
 
         if (!flag) ++error;
@@ -221,17 +221,17 @@ void benchmark_vec_with_target(const std::string&  test_name,
     }
 }
 
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename TARGET_TYPE>
-void benchmark_2_vec_with_target(const std::string&  test_name,
-                                 const GEN_FUNCTION& gen_function, 
-                                 const ALG_FUNCTION& alg_function, 
-                                 const BMK_FUNCTION& bmk_function, 
-                                 std::uint32_t       trial, 
-                                 std::uint32_t       size,
-                                 INPUT_TYPE          min_value,
-                                 INPUT_TYPE          max_value,
-                                 TARGET_TYPE         target,
-                                 bool                print_each_test_case)
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename INPUT_TYPE, typename ARG_TYPE>
+void benchmark_2_vec_with_arg(const std::string&  test_name,
+                              const GEN_FUNCTION& gen_function, 
+                              const ALG_FUNCTION& alg_function, 
+                              const BMK_FUNCTION& bmk_function, 
+                              std::uint32_t       trial, 
+                              std::uint32_t       size,
+                              INPUT_TYPE          min_value,
+                              INPUT_TYPE          max_value,
+                              ARG_TYPE            arg,
+                              bool                print_each_test_case)
 {
     std::uint32_t error = 0;
     if (print_each_test_case) std::cout << "\n";
@@ -240,8 +240,8 @@ void benchmark_2_vec_with_target(const std::string&  test_name,
     {
         auto vec0 = gen_function(size, min_value, max_value);
         auto vec1 = gen_function(size, min_value, max_value);
-        auto ans0 = alg_function(vec0, vec1, target);
-        auto ans1 = bmk_function(vec0, vec1, target); 
+        auto ans0 = alg_function(vec0, vec1, arg);
+        auto ans1 = bmk_function(vec0, vec1, arg); 
         bool flag = (ans0 == ans1);
 
         if (!flag) ++error;
