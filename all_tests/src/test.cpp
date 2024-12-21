@@ -1,10 +1,7 @@
 #include<iostream>
 #include<interview.h>
 
-void test_arithmetics();
 void test_bisection();
-void test_tree();
-void test_tree_variant();
 void test_sorting();
 
 void test_two_point_sum();
@@ -53,11 +50,8 @@ void test_promise_future();
 
 int main()
 {
-//  test_arithmetics();
-//  test_bisection();
-//  test_tree();
-//  test_tree_variant();
-    test_sorting();
+    test_bisection();
+//  test_sorting();
   
 //  test_two_point_sum();
 //  test_two_point_diff();

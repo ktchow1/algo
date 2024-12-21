@@ -5,7 +5,7 @@
 
 namespace alg
 {
-    std::optional<double> bisection(std::function<double(double)>& fct, double x0, double x1)
+    std::optional<double> bisection(const std::function<double(double)>& fct, double x0, double x1)
     {
         // 1. check edge case (or init y in here)
         double y0 = fct(x0);
@@ -15,7 +15,7 @@ namespace alg
         if (y0 * y1 > 0) return std::nullopt;
 
         // 3. check stop condition
-        while(fabs(x0 - x1) < 0.0001)
+        while(fabs(x0 - x1) > 0.000000001)
         {
             // 4. mid point
             double xm = (x0 + x1) / 2;
@@ -35,12 +35,7 @@ namespace alg
         }            
 
         // 6. answer
-        return std::make_option((x0 + x1) / 2);
-    }
-
-    double bisection(const std::function<double(double)>& fct, double x0, double x1)
-    {
-        return 0;
+        return std::make_optional((x0 + x1) / 2);
     }
 }
 
