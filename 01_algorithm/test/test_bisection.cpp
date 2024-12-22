@@ -1,86 +1,165 @@
 #include<iostream>
+#include<iomanip>
+#include<cassert>
+#include<cmath>
 #include<utility.h>
-#include<sorting.h>
+#include<bisection.h>
+
+constexpr double pi      = 3.141592654;
+constexpr double epsilon = 0.000000001;
 
 
-template<typename CONTAINER>
-bool compare(const CONTAINER& c0, const CONTAINER& c1)
+bool equal(double answer, double truth)
 {
-    if (c0.size() != c1.size()) return false;
-
-    auto i0 = c0.begin();
-    auto i1 = c1.begin();
-    for(; i0!=c0.end(); ++i0, ++i1)
-    {
-        if (*i0 != *i1) return false;
-    }
-    return true;
+    return answer > truth - epsilon &&
+           answer < truth + epsilon;
 }
 
-template<typename CONTAINER>
-void print(const std::string& header, const CONTAINER& c)
+bool equal(std::uint32_t answer, std::uint32_t truth)
 {
-    std::uint32_t n=0;
-    std::uint32_t N=c.size();
+    return answer == truth;
+}
 
-    std::cout << header << "["; 
-    for(const auto& x:c)
+template<typename T>
+bool compare_and_print(const std::optional<T>& answer, 
+                       const std::optional<T>& truth)
+{
+    if (std::is_same_v<T,double>)
     {
-        if (n!=N) std::cout << x << ",";
-        else      std::cout << x << "]";
-        ++n;
+        std::cout << std::fixed << std::setprecision(6);
+    }
+    if (truth)
+    {
+        if (answer) 
+        {
+            if (equal(*answer, *truth))
+            {
+                std::cout << "\n[OK] answer = " << *answer << ", truth = " << *truth << std::flush;
+                return true;
+            }
+            else
+            {
+                std::cout << "\n[ERROR] answer = " << *answer << ", truth = " << *truth << std::flush;
+                return false;
+            }
+        }
+        else
+        {
+            std::cout << "\n[ERROR] answer = nullopt" << ", truth = " << *truth << std::flush;
+            return false;
+        }
+    }
+    else
+    {
+        if (answer) 
+        {
+            std::cout << "\n[ERROR] answer = " << *answer << ", truth = nullopt" << std::flush;
+            return false;
+        }
+        else
+        {
+            std::cout << "\n[OK] answer = nullopt, truth = nullopt" << std::flush;
+            return true;
+        }
     }
 }
 
-
-void test_sorting()
+void test_bisection()
 {
-    std::uint32_t trial = 10000;
-    std::uint32_t error0 = 0;
-    std::uint32_t error1 = 0;
-    std::uint32_t error2 = 0;
-    std::uint32_t error3 = 0;
-    std::uint32_t error4 = 0;
-
-    for(std::uint32_t t=0; t!=trial; ++t)
+    std::cout << "\n\nBisection of double function";
     {
-        auto vec = gen_random_vec<std::uint32_t>(200, 0, 200);
-        auto ans{vec};
-        std::sort(ans.begin(), ans.end());
-
-        auto vec0{vec};
-        alg::select_sort(vec0.begin(), vec0.end());
-        bool flag0 = compare(ans, vec0);
-        if (!flag0) ++error0;
-
-        auto vec1{vec};
-        alg::bubble_sort(vec1.begin(), vec1.end());
-        bool flag1 = compare(ans, vec1);
-        if (!flag1) ++error1;
-
-        auto vec2{vec};
-        alg::insert_sort(vec2.begin(), vec2.end());
-        bool flag2 = compare(ans, vec2);
-        if (!flag2) ++error2;
-
-        auto vec3{vec};
-        alg::quick_sort(vec3.begin(), vec3.end());
-        bool flag3 = compare(ans, vec3);
-        if (!flag3) ++error3;
-
-        auto vec4{vec};
-        alg::merge_sort(vec4.begin(), vec4.end());
-        bool flag4 = compare(ans, vec4);
-        if (!flag4) ++error4;
-
-        std::cout << "\n[Test " << t << "]";
-        std::cout << " error0=" << error0;
-        std::cout << " error1=" << error1;
-        std::cout << " error2=" << error2;
-        std::cout << " error3=" << error3;
-        std::cout << " error4=" << error4;
-    //  print(", input=", vec);
+        auto ans = alg::bisection([](double x) { return sin(x); }, -pi/2, +pi/2);        
+        assert(compare_and_print(ans, std::optional<double>{0.0}));
+    }
+    {
+        auto ans = alg::bisection([](double x) { return sin(x); }, +pi/2, 3*pi/2);
+        assert(compare_and_print(ans, std::optional<double>{+pi}));
+    }   
+    {
+        auto ans = alg::bisection([](double x) { return sin(x)-0.5; }, -pi/2, +pi/2);
+        assert(compare_and_print(ans, std::optional<double>{+pi/6}));
+    }
+    {
+        auto ans = alg::bisection([](double x) { return sin(x)-sqrt(3)/2; }, -pi/2, +pi/2);
+        assert(compare_and_print(ans, std::optional<double>{+pi/3}));
+    }
+    {
+        auto ans = alg::bisection([](double x) { return sin(x)-cos(x); }, -pi/2, +pi/2);
+        assert(compare_and_print(ans, std::optional<double>{+pi/4}));
+    }
+    {
+        auto ans = alg::bisection([](double x) { return sin(x)-cos(x); }, 2*pi/3, +pi/2);
+        assert(compare_and_print(ans, std::optional<double>{}));
     }
 
+    std::cout << "\n\nBisection of int vector";
+    {
+        std::vector<std::int32_t> vec{10}; // size = 1
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{1};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    {
+        std::vector<std::int32_t> vec{10,29}; // size = 2
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{1,10};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
+    }
+    {
+        std::vector<std::int32_t> vec{1,20};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    {
+        std::vector<std::int32_t> vec{10,20,30}; // size = 3
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{1,10,20};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
+    }
+    {
+        std::vector<std::int32_t> vec{1,2,10};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{2}));
+    }
+    {
+        std::vector<std::int32_t> vec{1,5,20};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    {
+        std::vector<std::int32_t> vec{10,11,12,15,18,20,24,28,30,32,36,40,45}; // size > 10
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,8,10,11,12,15,18,20};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{8}));
+    }
+    {
+        std::vector<std::int32_t> vec{-5,-4,-3,-2,-1,0,1,2,3,4,5,8,10};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{12}));
+    }
+    {
+        std::vector<std::int32_t> vec{-5,-4,-3,-2,-1,0,1,2,3,4,5,8,20,24,28,30,32};
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+
+    std::cout << "\n\nPeak bisection";
 
 }
+

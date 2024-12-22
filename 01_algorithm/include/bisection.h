@@ -41,28 +41,72 @@ namespace alg
 
 namespace alg
 {
-    std::optional<std::size_t> bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
+    std::optional<std::uint32_t> bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
     {
-        return std::nullopt;
-    }
+        // 1. check edge case 
+        if (vec.size() == 0) return std::nullopt; 
 
-    std::optional<std::size_t> bisection_impl(const std::vector<std::int32_t>& vec, std::int32_t target, std::size_t x0, std::size_t x1)
-    {
+        // 2. check solution existence
+        if (vec.front() < target && vec.back() < target) return std::nullopt;
+        if (vec.front() > target && vec.back() > target) return std::nullopt;
+
+        // 3. check stop condition
+        std::uint32_t x0 = 0;
+        std::uint32_t x1 = vec.size()-1;
+
+        while(x1 - x0 > 1)
+    //  while(x0!= x1) // BUG : infinite loop when x0+1=x1
+        {
+            // 4. mid point
+            std::uint32_t xm = (x0+x1)/2;
+            
+            // 5. bisection
+            if      (vec[x0] > target && vec[xm] > target) x0 = xm;
+            else if (vec[x0] < target && vec[xm] < target) x0 = xm;
+            else                                           x1 = xm;
+        }            
+
+        // 6. answer
+        if (vec[x0] == target) return std::make_optional(x0);
+        if (vec[x1] == target) return std::make_optional(x1);
         return std::nullopt;
     }
 }
 
 namespace alg
 {
-    std::optional<std::size_t> mode_bisection(const std::vector<std::int32_t>& vec)
+    // Find peak only
+    // * if vec is increasing, return std::nullopt
+    // * if vec is decreasing, return std::nullopt
+    // * if vec is valley,     return std::nullopt
+    // 
+    std::optional<std::uint32_t> peak_bisection(const std::vector<std::int32_t>& vec) 
     {
+        // 1. check edge case 
+        if (vec.size() < 3) return std::nullopt; 
+
+        // 2. check solution existence
+        if (vec[1] < vec[0])                       return std::nullopt;
+        if (vec[vec.size()-1] > vec[vec.size()-2]) return std::nullopt;
+
+        // 3. check stop condition
+        std::uint32_t x0 = 1;
+        std::uint32_t x1 = vec.size()-2;
+        while(x0 != x1)
+        {
+            // 4. mid point
+            
+            // 5. bisection
+        }            
+
+        // 6. answer
         return std::nullopt;
     }
 }
 
 namespace alg
 {
-    std::optional<std::size_t> rotated_bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
+    std::optional<std::uint32_t> rotated_bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
     {
         return std::nullopt;
     }
