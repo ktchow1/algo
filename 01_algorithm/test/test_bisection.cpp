@@ -144,9 +144,14 @@ void test_bisection()
         assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
     }
     {
-        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,8,10,11,12,15,18,20};
+        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,10,11,12,15,18,20};
         auto ans = alg::bisection(vec, 10);
-        assert(compare_and_print(ans, std::optional<std::uint32_t>{8}));
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{7})); // odd position
+    }
+    {
+        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,8,10,11,12,15,18,20}; 
+        auto ans = alg::bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{8})); // even position
     }
     {
         std::vector<std::int32_t> vec{-5,-4,-3,-2,-1,0,1,2,3,4,5,8,10};
