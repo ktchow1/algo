@@ -58,7 +58,7 @@ namespace alg
     //  while(x0!= x1) // BUG : infinite loop when x0+1=x1
         {
             // 4. mid point
-            std::uint32_t xm = (x0 + x1) / 2;
+            std::uint32_t xm = (x0 + x1) >> 1;
             
             // 5. bisection
             if      (vec[x0] > target && vec[xm] > target) x0 = xm;
@@ -79,6 +79,7 @@ namespace alg
     // * if vec is increasing, return std::nullopt
     // * if vec is decreasing, return std::nullopt
     // * if vec is valley,     return std::nullopt
+    // * 2 equal num in a row, return std::nullopt 
     // 
     std::optional<std::uint32_t> peak_bisection(const std::vector<std::int32_t>& vec) 
     {
@@ -90,20 +91,22 @@ namespace alg
         if (vec[vec.size()-1] > vec[vec.size()-2]) return std::nullopt; // reject  rising RHS edge
 
         // 3. check stop condition
-        std::uint32_t x0 = 0;             // vec[0]   & vec[1]   is the LHS edge
-        std::uint32_t x1 = vec.size()-2;  // vec[N-2] & vec[N-1] is the RHS edge
+        std::uint32_t x0 = 1;            
+        std::uint32_t x1 = vec.size()-2;
         while(x1 - x0 > 1)
      // while(x0!= x1) // BUG : infinite loop when x0+1=x1
         {
             // 4. mid point
-            std::uint32_t xm = (x0 + x1) / 2;
+            std::uint32_t xm = (x0 + x1) >> 1;
             
             // 5. bisection
-            if (x[m] < x[m+1])  x0 = xm;
-            else                x1 = xm;
+            if (vec[xm] > vec[xm-1])  x0 = xm;
+            else                      x1 = xm;
         }            
 
         // 6. answer
+        if (vec[x0] > vec[x0-1] && vec[x0] > vec[x0+1]) return x0;
+        if (vec[x1] > vec[x1-1] && vec[x1] > vec[x1+1]) return x1;
         return std::nullopt;
     }
 }

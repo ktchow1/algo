@@ -93,78 +93,119 @@ void test_bisection()
     }
 
     std::cout << "\n\nBisection of int vector";
-    {
-        std::vector<std::int32_t> vec{10}; // size = 1
+    // size = 1
+    {   
+        std::vector<std::int32_t> vec{10}; 
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
     }
     {
-        std::vector<std::int32_t> vec{1};
+        std::vector<std::int32_t> vec{0};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
     }
+    // size = 2
     {
-        std::vector<std::int32_t> vec{10,29}; // size = 2
+        std::vector<std::int32_t> vec{10,29}; 
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
     }
     {
-        std::vector<std::int32_t> vec{1,10};
+        std::vector<std::int32_t> vec{0,10};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
     }
     {
-        std::vector<std::int32_t> vec{1,20};
+        std::vector<std::int32_t> vec{0,20};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
     }
+    // size = 3
     {
-        std::vector<std::int32_t> vec{10,20,30}; // size = 3
+        std::vector<std::int32_t> vec{10,20,30}; 
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
     }
     {
-        std::vector<std::int32_t> vec{1,10,20};
+        std::vector<std::int32_t> vec{0,10,20};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
     }
     {
-        std::vector<std::int32_t> vec{1,2,10};
+        std::vector<std::int32_t> vec{0,5,10};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{2}));
     }
     {
-        std::vector<std::int32_t> vec{1,5,20};
+        std::vector<std::int32_t> vec{0,5,20};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
     }
+    // size > 3
     {
-        std::vector<std::int32_t> vec{10,11,12,15,18,20,24,28,30,32,36,40,45}; // size > 10
+        std::vector<std::int32_t> vec{10,11,12,13,14,15,16,17,18,19,20}; 
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
     }
     {
-        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,10,11,12,15,18,20};
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,8,10,11,12,13,15,20};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{7})); // odd position
     }
     {
-        std::vector<std::int32_t> vec{-2,-1,0,1,2,4,5,8,10,11,12,15,18,20}; 
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,8,10,11,12,13,15,20}; 
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{8})); // even position
     }
     {
-        std::vector<std::int32_t> vec{-5,-4,-3,-2,-1,0,1,2,3,4,5,8,10};
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,8,9,10};
         auto ans = alg::bisection(vec, 10);
-        assert(compare_and_print(ans, std::optional<std::uint32_t>{12}));
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{10}));
     }
     {
-        std::vector<std::int32_t> vec{-5,-4,-3,-2,-1,0,1,2,3,4,5,8,20,24,28,30,32};
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,8,11,12,13,14,15,18,20};
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
     }
 
     std::cout << "\n\nPeak bisection";
-
+    {
+        std::vector<std::int32_t> vec{9,8,7,6,5,4,3,2,1,0};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    {
+        std::vector<std::int32_t> vec{7,8,7,6,5,4,3,2,1,0};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
+    }
+    {
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,6,5,4,3,2,1,0};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{7})); // odd position
+    }
+    {
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,8,7,6,5,4,3,2};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{8})); // even position
+    }
+    {
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,8,7};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{8}));
+    }
+    {
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,8,9};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    {
+        std::vector<std::int32_t> vec{0,1,2,3,4,5,6,7,7,6,5,4,3,2};
+        auto ans = alg::peak_bisection(vec);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{})); 
+    }
+    std::cout << "\n\nRotated bisection";
+    {
+    }
 }
 
