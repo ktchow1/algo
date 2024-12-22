@@ -37,10 +37,10 @@ namespace alg
         // 6. answer
         return std::make_optional((x0 + x1) / 2);
     }
-}
 
-namespace alg
-{
+    // *********************************************************** //
+    // Find target in non-monotonic increasing (or decreasing) vec
+    // *********************************************************** //
     std::optional<std::uint32_t> bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
     {
         // 1. check edge case 
@@ -54,16 +54,15 @@ namespace alg
         std::uint32_t x0 = 0;
         std::uint32_t x1 = vec.size()-1;
 
-        while(x1 - x0 > 1)
-    //  while(x0!= x1) // BUG : infinite loop when x0+1=x1
+        while(x1 - x0 > 1) // BUG : Cannot replace by while(x0!=x1), otherwise lead to inf loop when x0+1=x1
         {
             // 4. mid point
             std::uint32_t xm = (x0 + x1) >> 1;
             
             // 5. bisection
-            if      (vec[x0] > target && vec[xm] > target) x0 = xm;
-            else if (vec[x0] < target && vec[xm] < target) x0 = xm;
-            else                                           x1 = xm;
+            if      (vec[x0] <= target && target <= vec[xm]) x1 = xm;
+            else if (vec[x0] >= target && target >= vec[xm]) x1 = xm;
+            else                                             x0 = xm;
         }            
 
         // 6. answer
@@ -71,16 +70,14 @@ namespace alg
         if (vec[x1] == target) return std::make_optional(x1);
         return std::nullopt;
     }
-}
-
-namespace alg
-{
+    
+    // ******************************************* //
     // Find peak only
     // * if vec is increasing, return std::nullopt
     // * if vec is decreasing, return std::nullopt
     // * if vec is valley,     return std::nullopt
     // * 2 equal num in a row, return std::nullopt 
-    // 
+    // ******************************************* //
     std::optional<std::uint32_t> peak_bisection(const std::vector<std::int32_t>& vec) 
     {
         // 1. check edge case 
@@ -93,8 +90,8 @@ namespace alg
         // 3. check stop condition
         std::uint32_t x0 = 1;            
         std::uint32_t x1 = vec.size()-2;
-        while(x1 - x0 > 1)
-     // while(x0!= x1) // BUG : infinite loop when x0+1=x1
+
+        while(x1 - x0 > 1) // BUG : Cannot replace by while(x0!=x1), otherwise lead to inf loop when x0+1=x1
         {
             // 4. mid point
             std::uint32_t xm = (x0 + x1) >> 1;
@@ -109,13 +106,40 @@ namespace alg
         if (vec[x1] > vec[x1-1] && vec[x1] > vec[x1+1]) return x1;
         return std::nullopt;
     }
-}
-
-namespace alg
-{
+  
     std::optional<std::uint32_t> rotated_bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
     {
+        // 1. check edge case 
+        if (vec.size() == 0) return std::nullopt; 
+
+        // 2. check solution existence
+
+        // 3. check stop condition
+        std::uint32_t x0 = 0;
+        std::uint32_t x1 = vec.size()-1;
+
+        while(x1 - x0 > 1) // BUG : Cannot replace by while(x0!=x1), otherwise lead to inf loop when x0+1=x1
+        {
+            // 4. mid point
+            std::uint32_t xm = (x0 + x1) >> 1;
+            
+            // 5. bisection
+            if (vec[x0] <= vec[xm])
+            {
+                if (vec[x0] <= target && target <= vec[xm]) x1 = xm;
+                else                                        x0 = xm;
+            }
+            else 
+            {
+                if (vec[xm] <= target && target <= vec[x1]) x0 = xm;
+                else                                        x1 = xm;
+            }
+        }            
+
+        // 6. answer
+        if (vec[x0] == target) return std::make_optional(x0);
+        if (vec[x1] == target) return std::make_optional(x1);
         return std::nullopt;
-    }
+    } 
 }
 
