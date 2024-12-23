@@ -239,6 +239,43 @@ void test_bisection()
     }
 
     std::cout << "\n\nRotated bisection";
+    // size = 2
+    {
+        std::vector<std::int32_t> vec{0,10};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
+    }
+    {
+        std::vector<std::int32_t> vec{10,0};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{20,0};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
+    // size = 3
+    {
+        std::vector<std::int32_t> vec{0,10,20};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{1}));
+    }
+    {
+        std::vector<std::int32_t> vec{10,20,0};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{0}));
+    }
+    {
+        std::vector<std::int32_t> vec{20,0,10};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{2}));
+    }
+    {
+        std::vector<std::int32_t> vec{20,0,11};
+        auto ans = alg::rotated_bisection(vec, 10);
+        assert(compare_and_print(ans, std::optional<std::uint32_t>{}));
+    }
     // no rotation
     {
         std::vector<std::int32_t> vec{10,11,12,13,14,15,16,17,18,19,20}; 
