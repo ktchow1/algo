@@ -2,6 +2,7 @@
 #include<interview.h>
 
 void test_bisection();
+void test_stack();
 void test_sorting();
 
 void test_two_point_sum();
@@ -51,6 +52,7 @@ void test_promise_future();
 int main()
 {
     test_bisection();
+    test_stack();
 //  test_sorting();
   
 //  test_two_point_sum();
