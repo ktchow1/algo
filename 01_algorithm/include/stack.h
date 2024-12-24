@@ -65,11 +65,6 @@ namespace alg
             return true;
         }
 
-        auto size() const noexcept
-        {
-            return m_container0.size();
-        }
-
     private:
         C0 m_container0;
         C1 m_container1;
@@ -166,7 +161,7 @@ namespace alg
             }
             else 
             {
-                m_queue1.front();
+                m_queue1.pop();
                 m_active_queue0 = true;
             }
         }
