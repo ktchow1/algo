@@ -1,7 +1,62 @@
 #pragma once
+#include<cstdint>
 #include<stack>
 #include<queue>
 
+
+namespace alg
+{
+    template<typename C0, typename C1>
+    class container_tester
+    {
+    public:
+        void apply(void (C0::* fp0)(), 
+                   void (C1::* fp1)())
+        {
+            (m_container0.*fp0)();
+            (m_container1.*fp1)();
+        } 
+
+        template<typename T>
+        void apply(void (C0::* fp0)(const T&), 
+                   void (C1::* fp1)(const T&),
+                   const T& x)
+        {
+            (m_container0.*fp0)(x); // BUG : Dont forget the bracket (mem.*fp)(x)
+            (m_container1.*fp1)(x);
+        }
+
+        // ************************************************** //
+        // *** Just the template-way to do the same thing *** //
+        // ************************************************** //
+        template<typename FP0, typename FP1>
+        void apply2(FP0 fp0, FP1 fp1)
+        {
+            (m_container0.*fp0)();
+            (m_container1.*fp1)();
+        } 
+        
+        template<typename FP0, typename FP1, typename T>
+        void apply2(FP0 fp0, FP1 fp1, const T& x)
+        {
+            (m_container0.*fp0)(x);
+            (m_container1.*fp1)(x);
+        } 
+
+        bool compare() const noexcept
+        {
+            if (m_container0.size() != m_container1.size()) return false;
+        //  m_container0.clear();
+        //  m_container1.clear();
+            
+            return true;
+        }
+
+    private:
+        C0 m_container0;
+        C1 m_container1;
+    };
+}
 
 namespace alg
 {

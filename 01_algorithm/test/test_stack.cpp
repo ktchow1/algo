@@ -1,10 +1,18 @@
 #include<iostream>
-#include<utility.h>
 #include<stack.h>
 
 
 void test_queue_from_stack()
 {
+    alg::container_tester<std::queue<std::uint32_t>, alg::queue_from_stack<std::uint32_t>> tester;
+
+    tester.apply(&std::queue<std::uint32_t>::push, &alg::queue_from_stack<std::uint32_t>::push, (std::uint32_t)123);
+    tester.apply(&std::queue<std::uint32_t>::pop,  &alg::queue_from_stack<std::uint32_t>::pop);
+
+    tester.apply2(&std::queue<std::uint32_t>::push, &alg::queue_from_stack<std::uint32_t>::push, (std::uint32_t)123);
+    tester.apply2(&std::queue<std::uint32_t>::pop,  &alg::queue_from_stack<std::uint32_t>::pop);
+    tester.compare();
+
 }
 
 void test_stack_from_queue()
