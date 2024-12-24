@@ -7,10 +7,10 @@
 void test_queue_from_stack()
 {
     using tester_type = alg::container_tester<std::queue<std::uint32_t>, alg::queue<std::uint32_t>>;
-    void (std::queue<std::uint32_t>::* std_push)(const std::uint32_t&) = &std::queue<std::uint32_t>::push;
-    void (alg::queue<std::uint32_t>::* alg_push)(const std::uint32_t&) = &alg::queue<std::uint32_t>::push;
-    void (std::queue<std::uint32_t>::* std_pop)() = &std::queue<std::uint32_t>::pop;
-    void (alg::queue<std::uint32_t>::* alg_pop)() = &alg::queue<std::uint32_t>::pop;
+    void (std::queue<std::uint32_t>::* std_push)(const std::uint32_t&)    = &std::queue<std::uint32_t>::push;
+    void (alg::queue<std::uint32_t>::* alg_push)(const std::uint32_t&)    = &alg::queue<std::uint32_t>::push;
+    void (std::queue<std::uint32_t>::* std_pop)()                         = &std::queue<std::uint32_t>::pop;
+    void (alg::queue<std::uint32_t>::* alg_pop)()                         = &alg::queue<std::uint32_t>::pop;
     const std::uint32_t& (std::queue<std::uint32_t>::* std_front)() const = &std::queue<std::uint32_t>::front;
     const std::uint32_t& (alg::queue<std::uint32_t>::* alg_front)() const = &alg::queue<std::uint32_t>::front;
 
@@ -60,10 +60,10 @@ void test_queue_from_stack()
 void test_stack_from_queue()
 {
     using tester_type = alg::container_tester<std::stack<std::uint32_t>, alg::stack<std::uint32_t>>;
-    void (std::stack<std::uint32_t>::* std_push)(const std::uint32_t&) = &std::stack<std::uint32_t>::push;
-    void (alg::stack<std::uint32_t>::* alg_push)(const std::uint32_t&) = &alg::stack<std::uint32_t>::push;
-    void (std::stack<std::uint32_t>::* std_pop)() = &std::stack<std::uint32_t>::pop;
-    void (alg::stack<std::uint32_t>::* alg_pop)() = &alg::stack<std::uint32_t>::pop;
+    void (std::stack<std::uint32_t>::* std_push)(const std::uint32_t&)  = &std::stack<std::uint32_t>::push;
+    void (alg::stack<std::uint32_t>::* alg_push)(const std::uint32_t&)  = &alg::stack<std::uint32_t>::push;
+    void (std::stack<std::uint32_t>::* std_pop)()                       = &std::stack<std::uint32_t>::pop;
+    void (alg::stack<std::uint32_t>::* alg_pop)()                       = &alg::stack<std::uint32_t>::pop;
     const std::uint32_t& (std::stack<std::uint32_t>::* std_top)() const = &std::stack<std::uint32_t>::top;
     const std::uint32_t& (alg::stack<std::uint32_t>::* alg_top)() const = &alg::stack<std::uint32_t>::top;
 
