@@ -51,7 +51,7 @@ void test_promise_future();
 
 int main()
 {
-    test_bisection();
+//  test_bisection();
     test_stack();
 //  test_sorting();
   

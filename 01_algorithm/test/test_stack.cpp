@@ -1,17 +1,64 @@
 #include<iostream>
+#include<iomanip>
+#include<cassert>
 #include<stack.h>
 
 
 void test_queue_from_stack()
 {
-    alg::container_tester<std::queue<std::uint32_t>, alg::queue_from_stack<std::uint32_t>> tester;
+    using tester_type = alg::container_tester<std::queue<std::uint32_t>, alg::queue<std::uint32_t>>;
+    void (std::queue<std::uint32_t>::* std_push)(const std::uint32_t&) = &std::queue<std::uint32_t>::push;
+    void (alg::queue<std::uint32_t>::* alg_push)(const std::uint32_t&) = &alg::queue<std::uint32_t>::push;
+    void (std::queue<std::uint32_t>::* std_pop)() = &std::queue<std::uint32_t>::pop;
+    void (alg::queue<std::uint32_t>::* alg_pop)() = &alg::queue<std::uint32_t>::pop;
+    const std::uint32_t& (std::queue<std::uint32_t>::* std_front)() const = &std::queue<std::uint32_t>::front;
+    const std::uint32_t& (alg::queue<std::uint32_t>::* alg_front)() const = &alg::queue<std::uint32_t>::front;
 
-    tester.apply(&std::queue<std::uint32_t>::push, &alg::queue_from_stack<std::uint32_t>::push, (std::uint32_t)123);
-    tester.apply(&std::queue<std::uint32_t>::pop,  &alg::queue_from_stack<std::uint32_t>::pop);
+    // empty case
+    {
+        tester_type tester;
+        tester.apply0(&std::queue<std::uint32_t>::push, &alg::queue<std::uint32_t>::push, (std::uint32_t)100);
+        tester.apply0(&std::queue<std::uint32_t>::pop,  &alg::queue<std::uint32_t>::pop);
+        assert(tester.compare(std_front, alg_front));
+        std::cout << "\n[OK] empty queue, apply0() with function pointer directly passed";
 
-    tester.apply2(&std::queue<std::uint32_t>::push, &alg::queue_from_stack<std::uint32_t>::push, (std::uint32_t)123);
-    tester.apply2(&std::queue<std::uint32_t>::pop,  &alg::queue_from_stack<std::uint32_t>::pop);
-    tester.compare();
+        tester.apply0(std_push, alg_push, (std::uint32_t)100);
+        tester.apply0(std_pop,  alg_pop);
+        assert(tester.compare(std_front, alg_front));
+        std::cout << "\n[OK] empty queue, apply0() with function pointer passed as variable";
+
+    //  tester.apply1(&std::queue<std::uint32_t>::push, &alg::queue<std::uint32_t>::push, (std::uint32_t)100);  // BUG : cannot resolve FP0, can only resolve FP1
+    //  tester.apply1(&std::queue<std::uint32_t>::pop,  &alg::queue<std::uint32_t>::pop);                       //       can    resolve FP0 and FP1
+    //  assert(tester.compare(std_front, alg_front));                                                           //       since there are overloads for push
+    //  std::cout << "\n[CANNOT COMPILED] apply1() with function pointer directly passed";                      //       we need to tell compiler which one to use
+
+        tester.apply1(std_push, alg_push, (std::uint32_t)100);
+        tester.apply1(std_pop,  alg_pop);
+        assert(tester.compare(std_front, alg_front));
+        std::cout << "\n[OK] empty queue, apply1() with function pointer passed as variable";
+    }
+
+    // normal case
+    for(std::uint32_t t=0; t!=100; ++t)
+    {
+        tester_type tester;
+        for(std::uint32_t n=0; n!=100; ++n)
+        {
+            tester.apply0(&std::queue<std::uint32_t>::push, &alg::queue<std::uint32_t>::push, (std::uint32_t)(100+n));
+            if (rand()%3==0)
+            {
+                tester.apply0(&std::queue<std::uint32_t>::pop, &alg::queue<std::uint32_t>::pop);
+            }
+        }
+        auto size = tester.size();
+        assert(tester.compare(std_front, alg_front));
+        std::cout << "\n[OK] normal queue trial=" << t << ", size=" << size << ", apply1() with function pointer directly passed";
+    }
+
+
+
+
+
 
 }
 

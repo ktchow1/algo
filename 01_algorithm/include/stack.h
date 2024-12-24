@@ -10,46 +10,64 @@ namespace alg
     class container_tester
     {
     public:
-        void apply(void (C0::* fp0)(), 
-                   void (C1::* fp1)())
+        // ******************************************** //
+        // *** Pass member pointer as concrete type *** //
+        // ******************************************** //
+        void apply0(void (C0::* fp0)(), 
+                    void (C1::* fp1)())
         {
             (m_container0.*fp0)();
             (m_container1.*fp1)();
         } 
 
         template<typename T>
-        void apply(void (C0::* fp0)(const T&), 
-                   void (C1::* fp1)(const T&),
-                   const T& x)
+        void apply0(void (C0::* fp0)(const T&), 
+                    void (C1::* fp1)(const T&),
+                    const T& x)
         {
             (m_container0.*fp0)(x); // BUG : Dont forget the bracket (mem.*fp)(x)
             (m_container1.*fp1)(x);
         }
 
-        // ************************************************** //
-        // *** Just the template-way to do the same thing *** //
-        // ************************************************** //
+        // ******************************************** //
+        // *** Pass member pointer as template type *** //
+        // ******************************************** //
         template<typename FP0, typename FP1>
-        void apply2(FP0 fp0, FP1 fp1)
+        void apply1(FP0 fp0, FP1 fp1)
         {
             (m_container0.*fp0)();
             (m_container1.*fp1)();
         } 
         
         template<typename FP0, typename FP1, typename T>
-        void apply2(FP0 fp0, FP1 fp1, const T& x)
+        void apply1(FP0 fp0, FP1 fp1, const T& x)
         {
             (m_container0.*fp0)(x);
             (m_container1.*fp1)(x);
         } 
 
-        bool compare() const noexcept
+        template<typename FP0, typename FP1>
+        bool compare(FP0 fp0, FP1 fp1)
         {
             if (m_container0.size() != m_container1.size()) return false;
-        //  m_container0.clear();
-        //  m_container1.clear();
-            
+            while (!m_container0.empty())
+            {
+                if (m_container1.empty()) return false;
+                if((m_container0.*fp0)() !=
+                   (m_container1.*fp1)())
+                {
+                    return false;
+                }
+                m_container0.pop();
+                m_container1.pop();
+            }
+            if (!m_container1.empty()) return false;
             return true;
+        }
+
+        auto size() const noexcept
+        {
+            return m_container0.size();
         }
 
     private:
@@ -61,9 +79,11 @@ namespace alg
 namespace alg
 {
     template<typename T>
-    class queue_from_stack
+    class queue
     {
     public:
+        using value_type = T;
+
         void push(const T& x)
         {
             m_stack0.push(x);
@@ -75,10 +95,10 @@ namespace alg
             m_stack1.pop();
         }
 
-        const T& front()
+        const T& front() const noexcept
         {
             migrate();
-            m_stack1.top();
+            return m_stack1.top();
         }
 
         void clear()
@@ -98,7 +118,7 @@ namespace alg
         }
 
     private:
-        void migrate()
+        void migrate() const noexcept
         {
             if (m_stack1.empty())
             {
@@ -111,17 +131,19 @@ namespace alg
         }
 
     private:
-        std::stack<T> m_stack0;  // always for pushing
-        std::stack<T> m_stack1;  // always for popping
+        mutable std::stack<T> m_stack0;  // always for pushing
+        mutable std::stack<T> m_stack1;  // always for popping
     };
 }
 
 namespace alg
 {
     template<typename T>
-    class stack_from_queue
+    class stack
     {
     public:
+        using value_type = T;
+
         void push(const T& x)
         {
             if (m_active_queue0)
@@ -149,7 +171,7 @@ namespace alg
             }
         }
 
-        const T& top()
+        const T& top() const noexcept
         {
             migrate();
             if (m_active_queue0)
@@ -180,7 +202,7 @@ namespace alg
         }
 
     private:
-        void migrate()
+        void migrate() const noexcept
         {
             if (m_active_queue0)
             {
@@ -201,9 +223,9 @@ namespace alg
         }
 
     private:
-        bool m_active_queue0 = true;
-        std::queue<T> m_queue0; // should contains >= 1 item after migrating to queue 1
-        std::queue<T> m_queue1; // should contains >= 1 item after migrating to queue 0
+        mutable bool m_active_queue0 = true;
+        mutable std::queue<T> m_queue0; // should contains >= 1 item after migrating to queue 1
+        mutable std::queue<T> m_queue1; // should contains >= 1 item after migrating to queue 0
     };
 }
 
