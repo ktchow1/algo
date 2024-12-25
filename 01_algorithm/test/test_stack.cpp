@@ -6,7 +6,7 @@
 
 void test_queue_from_stack()
 {
-    using tester_type = alg::container_tester<std::queue<std::uint32_t>, alg::queue<std::uint32_t>>;
+    using comparator_type = alg::container_comparator<std::queue<std::uint32_t>, alg::queue<std::uint32_t>>;
     void (std::queue<std::uint32_t>::* std_push)(const std::uint32_t&)    = &std::queue<std::uint32_t>::push;
     void (alg::queue<std::uint32_t>::* alg_push)(const std::uint32_t&)    = &alg::queue<std::uint32_t>::push;
     void (std::queue<std::uint32_t>::* std_pop)()                         = &std::queue<std::uint32_t>::pop;
@@ -15,7 +15,7 @@ void test_queue_from_stack()
     const std::uint32_t& (alg::queue<std::uint32_t>::* alg_front)() const = &alg::queue<std::uint32_t>::front;
 
     // empty case
-    tester_type tester;
+    comparator_type tester;
     tester.apply0(&std::queue<std::uint32_t>::push, &alg::queue<std::uint32_t>::push, (std::uint32_t)100);
     tester.apply0(&std::queue<std::uint32_t>::pop,  &alg::queue<std::uint32_t>::pop);
     assert(tester.compare(std_front, alg_front));
@@ -41,11 +41,8 @@ void test_queue_from_stack()
     {
         for(std::uint32_t n=0; n!=100; ++n)
         {
-            tester.apply1(std_push, alg_push, 100+n);
-            if (rand()%3==0)
-            {
-                tester.apply1(std_pop, alg_pop);
-            }
+                             tester.apply1(std_push, alg_push, 100+n);
+            if (rand()%3==0) tester.apply1(std_pop,  alg_pop);
         }
         assert(tester.compare(std_front, alg_front));
     }
@@ -59,7 +56,7 @@ void test_queue_from_stack()
 // ******************************************************** //
 void test_stack_from_queue()
 {
-    using tester_type = alg::container_tester<std::stack<std::uint32_t>, alg::stack<std::uint32_t>>;
+    using comparator_type = alg::container_comparator<std::stack<std::uint32_t>, alg::stack<std::uint32_t>>;
     void (std::stack<std::uint32_t>::* std_push)(const std::uint32_t&)  = &std::stack<std::uint32_t>::push;
     void (alg::stack<std::uint32_t>::* alg_push)(const std::uint32_t&)  = &alg::stack<std::uint32_t>::push;
     void (std::stack<std::uint32_t>::* std_pop)()                       = &std::stack<std::uint32_t>::pop;
@@ -68,7 +65,7 @@ void test_stack_from_queue()
     const std::uint32_t& (alg::stack<std::uint32_t>::* alg_top)() const = &alg::stack<std::uint32_t>::top;
 
     // empty case
-    tester_type tester;
+    comparator_type tester;
     tester.apply0(std_push, alg_push, (std::uint32_t)100); // remark 1
     tester.apply0(std_pop,  alg_pop);
     assert(tester.compare(std_top, alg_top));
@@ -84,30 +81,29 @@ void test_stack_from_queue()
     {
         for(std::uint32_t n=0; n!=100; ++n)
         {
-            tester.apply1(std_push, alg_push, 100+n);
-            if (rand()%3==0)
-            {
-                tester.apply1(std_pop, alg_pop);
-            }
+                             tester.apply1(std_push, alg_push, 100+n);
+            if (rand()%3==0) tester.apply1(std_pop,  alg_pop);
         }
         assert(tester.compare(std_top, alg_top));
     }
     std::cout << "\n[OK] normal stack, apply1() with fct_ptr directly passed";
 }
 
-void test_stack_from_vector()
+void test_stack_with_vec()
 {
 }
 
-void test_stack_with_medium()
+void test_stack_with_min()
 {
+
+    // clear stack and push new values again
 }
 
 void test_stack()
 {
     test_queue_from_stack();
     test_stack_from_queue();
-    test_stack_from_vector();
-    test_stack_with_medium();
+    test_stack_with_vec();
+    test_stack_with_min();
 }
 

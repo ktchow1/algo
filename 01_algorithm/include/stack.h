@@ -1,5 +1,6 @@
 #pragma once
 #include<cstdint>
+#include<limits>
 #include<stack>
 #include<queue>
 
@@ -7,7 +8,8 @@
 namespace alg
 {
     template<typename C0, typename C1>
-    class container_tester
+    requires std::is_same_v<typename C0::value_type, typename C1::value_type>
+    class container_comparator
     {
     public:
         // ******************************************** //
@@ -68,6 +70,19 @@ namespace alg
     private:
         C0 m_container0;
         C1 m_container1;
+    };
+
+    template<typename C> 
+    requires std::is_same_v<typename C::value_type, std::int32_t>
+    class stack_with_min_comparator
+    {
+    public:
+
+
+    private:
+        std::stack<std::int32_t> m_stack0_value;
+        std::stack<std::int32_t> m_stack0_min;
+        C                        m_stack1;
     };
 }
 
@@ -230,10 +245,74 @@ namespace alg
 
 namespace alg
 {
-    template<typename T>
-    class stack_with_medium
+    class stack_with_min // for signed int only
     {
     public:
+        void push(std::int32_t x)
+        {
+            if (m_impl.empty())
+            {
+                m_impl.push(x);
+                m_min = x;
+            }
+            else if (x < m_min)
+            {
+                m_impl.push(x - (m_min-x));
+                m_min = x;
+            }
+            else
+            {
+                m_impl.push(x);
+            }
+        }
+
+        void pop()
+        {
+            if (m_impl.top() < m_min)
+            {
+                m_min = m_min + (m_min-m_impl.top());
+                m_impl.pop();
+            }
+            else
+            {
+                m_impl.pop();
+            }
+        }
+
+        std::int32_t top() const noexcept
+        {
+            if (m_impl.top() < m_min)
+            {
+                return m_min;
+            }
+            else
+            {
+                return m_impl.top();
+            }
+        }
+        
+        std::int32_t min() const noexcept
+        {
+            return m_min;
+        }
+
+        void clear()
+        {
+            while(!empty()) pop();
+        }
+
+        std::uint32_t size() const noexcept
+        {
+            return m_impl.size();
+        }
+
+        bool empty() const noexcept
+        {
+            return m_impl.empty();
+        }
+
     private:
+        std::stack<std::int32_t> m_impl;
+        std::int32_t m_min;
     };
 }

@@ -99,14 +99,3 @@ private:
     node<T>* head;
 };
 
-/*
-object_pool<T,1000> pool;
-stack<T> s0(pool);
-stack<T> s1(pool);
-stack<T> s2(pool);
-for(std::uint32_t n=0; n!=100; ++n) s0.push(randX(), randY(), randZ());
-for(std::uint32_t n=0; n!=200; ++n) s1.push(randX(), randY(), randZ());
-for(std::uint32_t n=0; n!=300; ++n) s2.push(randX(), randY(), randZ());
-*/
-
-
