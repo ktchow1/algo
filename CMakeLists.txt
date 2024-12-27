@@ -28,6 +28,7 @@ include_directories(
     03_dynprog/include 
     04_fundalmental/include 
     05_template/include 
+    06_threading/include 
     10_interview/include 
     all_tests/include 
     /mnt/d/dev/cpp_dependency/boost_1_84_0 
@@ -38,11 +39,19 @@ include_directories(
 ##################
 file(GLOB SOURCES
      "01_algorithm/src/*.cpp" 
+     "01_algorithm/test/*.cpp" 
      "02_dynprog_vec/src/*.cpp" 
-     "03_dynprog//src/*.cpp" 
+     "02_dynprog_vec/test/*.cpp" 
+     "03_dynprog/src/*.cpp" 
+     "03_dynprog/test/*.cpp" 
      "04_fundalmental/src/*.cpp"
+     "04_fundalmental/test/*.cpp"
      "05_template/src/*.cpp"
+     "05_template/test/*.cpp"
+     "06_threading/src/*.cpp"
+     "06_threading/test/*.cpp"
      "10_interview/src/*.cpp"
+     "10_interview/test/*.cpp"
      "all_tests/src/*.cpp"
 )
 add_executable(Test ${SOURCES})       # for building executable

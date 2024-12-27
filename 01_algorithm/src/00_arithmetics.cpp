@@ -1,5 +1,6 @@
-#include <iostream>
-#include <stack>
+#include<iostream>
+#include<cstdint>
+#include<stack>
 
 
 struct bignum
