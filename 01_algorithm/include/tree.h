@@ -136,7 +136,7 @@ namespace alg { namespace avl
         }
 
     private:
-        node<T>* insert(node<T>** this_node_ptr, const T& x) // BUG : need to use node<T>** for this_node_ptr
+        node<T>* insert(node<T>** this_node_ptr, const T& x) // BUG2 : need to use node<T>** for this_node_ptr
         {
             if      (*this_node_ptr == nullptr)          { *this_node_ptr = new node<T>(x); return *this_node_ptr; }
             else if (x < (*this_node_ptr)->m_value)      { return insert(&(*this_node_ptr)->m_lhs, x); }
@@ -203,37 +203,42 @@ namespace alg { namespace avl
 
             while(!s.empty())
             {
-                this_node = s.top(); // reuse this_node
+                this_node = s.top();
+                s.pop(); // BUG3 : pop immediately after top
                 if (this_node) 
                 {
                     fct(this_node->m_value);
-                    s.push(this_node->m_lhs);
-                    s.push(this_node->m_rhs);
+                    s.push(this_node->m_rhs); // BUG4 : push rhs first
+                    s.push(this_node->m_lhs); // BUG4 : push lhs later, we process lhs first
                 }
-                s.pop();
             }
         }
-
+ 
+        // ******************************************************************************//
+        // rule 1 : overtake this_node by lhs, cache this_node as it is next-to-process
+        // rule 2 : pop previous overtaken node, process it, visit rhs child, goto rule 1
+        // ******************************************************************************//
         template<typename F> requires std::invocable<F,T>
         void dfs_in_order_iterative(const node<T>* this_node, F& fct) const noexcept
         {
-            std::stack<const node<T>*> s; // there are no nullptr in s, while this_node can be nullptr
+            std::stack<const node<T>*> s; // there are no nullptr in s
 
             while(this_node || !s.empty())
             {
-                // rule 1 : overtake this_node by lhs child, cache overtaken node as it is the next-to-process
+                // rule 1
                 if (this_node != nullptr) 
                 {
                     s.push(this_node);
                     this_node = this_node->m_lhs;
                 }
-                // rule 2 : pop overtaken node, process it, visit rhs child, immediately goto rule 1
+                // rule 2 
                 else
                 {
-                    this_node = s.top();
+                    this_node = s.top(); 
+                    s.pop();
+
                     fct(this_node->m_value);
                     this_node = this_node->m_rhs;
-                    s.pop();
                 }
             }
         }
@@ -246,7 +251,7 @@ namespace alg { namespace avl
 
             while(!q.empty())
             {
-                this_node = q.front(); // reuse this_node
+                this_node = q.front();
                 if (this_node) 
                 {
                     fct(this_node->m_value);
@@ -258,7 +263,7 @@ namespace alg { namespace avl
         }
 
     private:
-        node<T>* m_root = nullptr; // BUG : forget to init m_root
+        node<T>* m_root = nullptr; // BUG1 : forget to init m_root
     };
 }}
 
