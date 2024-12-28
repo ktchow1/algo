@@ -154,12 +154,12 @@ void print_one_case(const std::string& test_name,
 
 inline void print_summary(const std::string& test_name, const std::string& status)
 {
-    std::cout << "\n" << std::setw(50) << std::left << test_name << " " << status;
+    std::cout << "\n" << std::setw(60) << std::left << test_name << " " << status;
 }
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial)
 {
-    std::cout << "\n" << std::setw(50) << std::left << test_name << " error rate = " << error << "/" << trial;
+    std::cout << "\n" << std::setw(60) << std::left << test_name << " error rate = " << error << "/" << trial;
 }
 
 

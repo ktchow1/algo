@@ -1,6 +1,7 @@
 #pragma once
 #include<cstdint>
 #include<functional>
+#include<vector>
 #include<queue>
 #include<stack>
 // *************************************************************************** //
@@ -23,6 +24,42 @@
 //         this_node->m_rhs    <--- more check, less recursion, faster runtime
 // *************************************************************************** //
   
+namespace alg
+{
+    template<typename T>
+    struct traversal_cache
+    {
+        void operator()(const T& x)
+        {
+            m_values.push_back(x);
+        }
+
+        std::vector<T> m_values;
+    };
+
+    template<typename T>
+    bool is_equal(const std::vector<T>& v0, 
+                  const std::vector<T>& v1)
+    {
+        if (v0.size() != v1.size()) return false;
+        for(std::uint32_t n=0; n!=v0.size(); ++n)
+        {
+            if (v0[n]!=v1[n]) return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+    bool is_sorted(const std::vector<T>& v) 
+    {
+        if (v.size() <= 1) return true;
+        for(std::uint32_t n=0; n!=v.size()-1; ++n)
+        {
+            if (v[n]>v[n+1]) return false;
+        }
+        return true;
+    }
+}
 
 namespace alg { namespace avl
 {
@@ -56,20 +93,20 @@ namespace alg { namespace avl
     class tree
     {
     public:
-        node<T>* insert(const T& x)                       { return insert(m_root, x);      } // No emplace version, as we need constructed-T for tree traversal
-        node<T>* search(const T& x)                       { return search(m_root, x);      }
-        std::uint32_t depth()          const noexcept     { return depth(m_root);          }
-        std:: int32_t balance_factor() const noexcept     { return balance_factor(m_root); }
+              node<T>* insert(const T& x)                { return insert(&m_root, x);      } 
+        const node<T>* search(const T& x) const noexcept { return search(m_root, x);       }
+        std::uint32_t  depth()            const noexcept { return depth(m_root);           }
+        std:: int32_t  balance_factor()   const noexcept { return balance_factor(m_root);  }
 
         template<typename F> requires std::invocable<F,T>
-        void traverse(const F& fct, const mode& m) 
+        void traverse(F& fct, const mode& m) const noexcept 
         {
-            if      (m == mode::dfs_in_order_recursive)   dfs_in_order_recursive(m_root, fct); 
-            else if (m == mode::dfs_pre_order_recursive)  dfs_pre_order_recursive(m_root, fct);
-            else if (m == mode::dfs_post_order_recursive) dfs_post_order_recursive(m_root, fct);
-            else if (m == mode::dfs_pre_order_iterative)  dfs_pre_order_iterative(m_root, fct);
-            else if (m == mode::dfs_in_order_iterative)   dfs_in_order_iterative(m_root, fct);
-            else                                          bfs_iteraive(m_root, fct);
+            if      (m == mode::dfs_in_order_recursive)    dfs_in_order_recursive(m_root, fct); 
+            else if (m == mode::dfs_pre_order_recursive)   dfs_pre_order_recursive(m_root, fct);
+            else if (m == mode::dfs_post_order_recursive)  dfs_post_order_recursive(m_root, fct);
+            else if (m == mode::dfs_pre_order_iterative)   dfs_pre_order_iterative(m_root, fct);
+            else if (m == mode::dfs_in_order_iterative)    dfs_in_order_iterative(m_root, fct);
+            else                                           bfs_iterative(m_root, fct);
         }
 
         //      Y                    X
@@ -99,20 +136,20 @@ namespace alg { namespace avl
         }
 
     private:
-        node<T>* insert(const node<T>* this_node, const T& x) // return new node
+        node<T>* insert(node<T>** this_node_ptr, const T& x) // BUG : need to use node<T>** for this_node_ptr
         {
-            if      (this_node == nullptr) { this_node = new node<T>(x); return this_node; }
-            else if (x < this_node->m_value) return insert(this_node->m_lhs, x);
-            else if (x > this_node->m_value) return insert(this_node->m_rhs, x);
-            else                             return this_node;
+            if      (*this_node_ptr == nullptr)          { *this_node_ptr = new node<T>(x); return *this_node_ptr; }
+            else if (x < (*this_node_ptr)->m_value)      { return insert(&(*this_node_ptr)->m_lhs, x); }
+            else if (x > (*this_node_ptr)->m_value)      { return insert(&(*this_node_ptr)->m_rhs, x); }
+            else return *this_node_ptr;
         }
 
-        node<T>* search(node<T>* this_node, const T& x)
+        const node<T>* search(const node<T>* this_node, const T& x) const noexcept
         {
-            if      (this_node == nullptr)   return nullptr;
-            else if (x < this_node->m_value) return search(this_node->m_lhs, x);
-            else if (x > this_node->m_value) return search(this_node->m_rhs, x);
-            else                             return this_node;
+            if      (this_node == nullptr)                 return nullptr;
+            else if (x < this_node->m_value)               return search(this_node->m_lhs, x);
+            else if (x > this_node->m_value)               return search(this_node->m_rhs, x);
+            else                                           return this_node;
         }
 
         std::uint32_t depth(const node<T>* this_node) const noexcept
@@ -129,7 +166,7 @@ namespace alg { namespace avl
 
     private:
         template<typename F> requires std::invocable<F,T>
-        void dfs_in_order_recursive(node<T>* this_node, const F& fct) 
+        void dfs_in_order_recursive(const node<T>* this_node, F& fct) const noexcept
         {
             if (this_node == nullptr) return;
             
@@ -139,17 +176,17 @@ namespace alg { namespace avl
         }
 
         template<typename F> requires std::invocable<F,T>
-        void dfs_pre_order_recursive(node<T>* this_node, const F& fct) 
+        void dfs_pre_order_recursive(const node<T>* this_node, F& fct) const noexcept
         {
             if (this_node == nullptr) return;
-            
+           
             fct(this_node->m_value); 
             dfs_pre_order_recursive(this_node->m_lhs, fct);
             dfs_pre_order_recursive(this_node->m_rhs, fct);
         }
 
         template<typename F> requires std::invocable<F,T>
-        void dfs_post_order_recursive(node<T>* this_node, const F& fct) 
+        void dfs_post_order_recursive(const node<T>* this_node, F& fct) const noexcept
         {
             if (this_node == nullptr) return;
             
@@ -159,9 +196,9 @@ namespace alg { namespace avl
         }
 
         template<typename F> requires std::invocable<F,T>
-        void dfs_pre_order_iterative(node<T>* this_node, const F& fct) 
+        void dfs_pre_order_iterative(const node<T>* this_node, F& fct) const noexcept
         {
-            std::stack<node<T>*> s; // there exists nullptr in s
+            std::stack<const node<T>*> s; // there exists nullptr in s
             s.push(this_node);
 
             while(!s.empty())
@@ -178,9 +215,9 @@ namespace alg { namespace avl
         }
 
         template<typename F> requires std::invocable<F,T>
-        void dfs_in_order_iterative(node<T>* this_node, const F& fct) 
+        void dfs_in_order_iterative(const node<T>* this_node, F& fct) const noexcept
         {
-            std::stack<node<T>*> s; // there are no nullptr in s, while this_node can be nullptr
+            std::stack<const node<T>*> s; // there are no nullptr in s, while this_node can be nullptr
 
             while(this_node || !s.empty())
             {
@@ -202,9 +239,9 @@ namespace alg { namespace avl
         }
 
         template<typename F> requires std::invocable<F,T>
-        void bfs_iterative(node<T>* this_node, const F& fct) 
+        void bfs_iterative(const node<T>* this_node, F& fct) const noexcept
         {
-            std::queue<node<T>*> q; // there exists nullptr in q
+            std::queue<const node<T>*> q; // there exists nullptr in q
             q.push(this_node);
 
             while(!q.empty())
@@ -221,7 +258,7 @@ namespace alg { namespace avl
         }
 
     private:
-        node<T>* m_root;        
+        node<T>* m_root = nullptr; // BUG : forget to init m_root
     };
 }}
 
