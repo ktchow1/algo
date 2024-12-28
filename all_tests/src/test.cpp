@@ -1,11 +1,14 @@
 #include<iostream>
 #include<interview.h>
 
+// *** 01_algorithm *** //
 void test_bisection();
 void test_stack();
 void test_list();
+void test_tree();
 void test_sorting();
 
+// *** 02_dynprog_vec *** //
 void test_two_point_sum();
 void test_two_point_diff();
 void test_subseq_sum();
@@ -13,10 +16,10 @@ void test_string_problem();
 void test_stack_problem();
 void test_sorting_problem();
 
+// *** 03_dynprog *** //
 void test_singly_link_subproblem();
 void test_multi_link_subproblem();
 void test_time_state_diagram();
-
 
 // *** 04_fundalmental *** //
 void test_rvalue();
@@ -65,6 +68,7 @@ int main()
     test_bisection();
     test_stack();
     test_list();
+    test_tree();
     test_sorting();
   
     banner("02_dynprog_vec");
@@ -75,6 +79,7 @@ int main()
     test_stack_problem();
     test_sorting_problem();
   
+    banner("03_dynprog");
 //  test_singly_link_subproblem();
 //  test_multi_link_subproblem();
 //  test_time_state_diagram();
@@ -83,7 +88,7 @@ int main()
 //  test_rvalue();
 //  test_timer();
   
-    // *** 05_template *** //
+    banner("05_template");
 //  test_array();
 //  test_function();
 //  test_idx_seq();
