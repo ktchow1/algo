@@ -70,8 +70,24 @@ namespace alg
 
                 if (m1 < size())
                 {
-                    // Todo here
-
+                    if (m_impl[m0] < m_impl[m1])
+                    {
+                        if (m_impl[n] < m_impl[m0])
+                        {
+                            std::swap(m_impl[n], m_impl[m0]);
+                            n = m0;
+                        }
+                        else return;
+                    }
+                    else
+                    {
+                        if (m_impl[n] < m_impl[m1])
+                        {
+                            std::swap(m_impl[n], m_impl[m1]);
+                            n = m1;
+                        }
+                        else return;
+                    }
                 }
                 else if (m0 < size())
                 {
