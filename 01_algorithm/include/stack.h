@@ -130,13 +130,6 @@ namespace alg
             m_stack1.pop();
         }
 
-        void clear()
-        {
-            while(!m_stack0_value.empty()) m_stack0_value.pop();
-            while(!m_stack0_min  .empty()) m_stack0_min  .pop();
-            m_stack1.clear();
-        }
-
         bool compare() const noexcept
         {
             bool flag = true;
@@ -157,6 +150,13 @@ namespace alg
             return m_stack0_value.empty() ||
                    m_stack0_min.empty() ||
                    m_stack1.empty();
+        }
+
+        void clear()
+        {
+            while(!m_stack0_value.empty()) m_stack0_value.pop();
+            while(!m_stack0_min  .empty()) m_stack0_min  .pop();
+            m_stack1.clear();
         }
 
     private:
@@ -211,12 +211,6 @@ namespace alg
             return m_stack1.top();
         }
 
-        void clear()
-        {
-            m_stack0.clear();
-            m_stack1.clear();
-        }
-
         std::uint32_t size() const noexcept
         {
             return m_stack0.size() + m_stack1.size();
@@ -225,6 +219,12 @@ namespace alg
         bool empty() const noexcept
         {
             return m_stack0.empty() && m_stack1.empty();
+        }
+
+        void clear()
+        {
+            m_stack0.clear();
+            m_stack1.clear();
         }
 
     private:
@@ -294,13 +294,6 @@ namespace alg
             }
         }
 
-        void clear()
-        {
-            m_active_queue0 = true;
-            m_queue0.clear();
-            m_queue1.clear();
-        }
-
         std::uint32_t size() const noexcept
         {
             return m_queue0.size() + m_queue1.size();
@@ -309,6 +302,13 @@ namespace alg
         bool empty() const noexcept
         {
             return m_queue0.empty() && m_queue1.empty();
+        }
+
+        void clear()
+        {
+            m_active_queue0 = true;
+            m_queue0.clear();
+            m_queue1.clear();
         }
 
     private:
@@ -433,11 +433,6 @@ namespace alg { namespace obj_pool
             return m_head->m_value;
         }
 
-        void clear()
-        {
-            while(!empty()) pop();
-        }
-
         std::uint32_t size() const noexcept
         {
             return m_size;
@@ -446,6 +441,11 @@ namespace alg { namespace obj_pool
         bool empty() const noexcept
         {
             return (m_head == nullptr);
+        }
+
+        void clear()
+        {
+            while(!empty()) pop();
         }
 
     private:
@@ -510,11 +510,6 @@ namespace alg
             return m_min;
         }
 
-        void clear()
-        {
-            while(!empty()) pop();
-        }
-
         std::uint32_t size() const noexcept
         {
             return m_impl.size();
@@ -523,6 +518,11 @@ namespace alg
         bool empty() const noexcept
         {
             return m_impl.empty();
+        }
+
+        void clear()
+        {
+            while(!empty()) pop();
         }
 
     private:
