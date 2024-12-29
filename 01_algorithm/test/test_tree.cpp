@@ -36,7 +36,7 @@ private:
 
 void test_avl_tree()
 {
-    std::uint32_t trial = 100;
+    std::uint32_t trial = 10000;
     std::uint32_t error0 = 0;
     std::uint32_t error1 = 0;
     std::uint32_t error2 = 0;
@@ -110,7 +110,7 @@ void test_avl_tree()
 
 void test_avl_algo()
 {
-    std::uint32_t trial = 100;
+    std::uint32_t trial = 10000;
     std::uint32_t error0 = 0;
     std::uint32_t error1 = 0;
     std::uint32_t error2 = 0;
@@ -123,7 +123,7 @@ void test_avl_algo()
     {
         alg::avl::tree<std::uint32_t> tree;
 
-        std::uint32_t N = 50 + rand()%500;
+        std::uint32_t N = 50 + rand()%500; 
         for(std::uint32_t n=0; n!=N; ++n)
         {
             std::uint32_t x = rand()%500;
@@ -162,7 +162,8 @@ void test_avl_algo()
         // ************** //
         alg::avl::node<std::uint32_t>* list_head;
         alg::avl::node<std::uint32_t>* list_tail;
-        std::tie(list_head, list_tail) = alg::avl::create_doubly_list_from_avl_tree(tree.root());
+        std::tie(list_head, list_tail) = alg::avl::create_doubly_list_from_avl_tree(tree.root()); 
+        tree.no_memfree_on_destruction(); // Todo : solve memleak
 
         alg::traversal_cache<std::uint32_t> f2;
         alg::avl::traverse_rhs_only(list_head, f2);

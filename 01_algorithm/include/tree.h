@@ -105,17 +105,17 @@ namespace alg { namespace avl
     class tree
     {
     public:
-        tree() : m_root(nullptr) // BUG1 : forget to init m_root
+        tree() : m_root(nullptr), m_memfree(true) // BUG1 : forget to init m_root
         {
         }
 
-        explicit tree(node<T>* root_created_by_user) : m_root(root_created_by_user)
+        explicit tree(node<T>* root_created_by_user) : m_root(root_created_by_user), m_memfree(true)
         {
         }
 
         ~tree() 
         { 
-            destruct(m_root); // BUG5 : dont forget destructor (test with Valgrind)
+            if (m_memfree) destruct(m_root); // BUG5 : dont forget destructor (test with Valgrind)
         }
 
     public:
@@ -125,6 +125,7 @@ namespace alg { namespace avl
         std:: int32_t  balance_factor()   const noexcept { return balance_factor(m_root);  }
         const node<T>* root()             const noexcept { return m_root;                  }
               node<T>* root()                            { return m_root;                  }
+        void  no_memfree_on_destruction()                { m_memfree = false;              } // caller will modify topology, responsible for memory free
 
         template<typename F> requires std::invocable<F,T>
         void traverse(F& fct, const mode& m) const noexcept 
@@ -306,6 +307,7 @@ namespace alg { namespace avl
 
     private:
         node<T>* m_root;
+        bool m_memfree;
     };
 }}
 
@@ -385,17 +387,37 @@ namespace alg { namespace avl
     template<typename T>
     std::pair<node<T>*, node<T>*> create_doubly_list_from_avl_tree(node<T>* root) 
     {
-        node<T>* lhs_head = nullptr;
-        node<T>* lhs_tail = nullptr;
-        node<T>* rhs_head = nullptr;
-        node<T>* rhs_tail = nullptr;
+        node<T>* head;    
+        node<T>* tail;
 
-        if (root->m_lhs != nullptr) std::tie(lhs_head, lhs_tail) = create_doubly_list_from_avl_tree(root->m_lhs);
-        if (root->m_rhs != nullptr) std::tie(rhs_head, rhs_tail) = create_doubly_list_from_avl_tree(root->m_rhs);
+        // Process LHS
+        if (root->m_lhs != nullptr) 
+        {
+            auto temp = create_doubly_list_from_avl_tree(root->m_lhs);
+            root->m_lhs = temp.second;
+            temp.second->m_rhs = root;
+            head = temp.first;
+        }
+        else
+        {
+            root->m_lhs = nullptr;
+            head = root;
+        }
 
-        root->m_lhs = lhs_tail;
-        root->m_rhs = rhs_head;
-        return std::make_pair(lhs_head, rhs_tail);
+        // Process RHS
+        if (root->m_rhs != nullptr) 
+        {
+            auto temp = create_doubly_list_from_avl_tree(root->m_rhs);
+            root->m_rhs = temp.first;
+            temp.first->m_lhs = root;
+            tail = temp.second;
+        }
+        else
+        {
+            root->m_rhs = nullptr;
+            tail = root;
+        }
+        return std::make_pair(head, tail);
     }
 
 }}
