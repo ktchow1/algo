@@ -80,7 +80,7 @@ void test_singly_list()
     auto n23 = list.insert_before_head((std::uint32_t)23);
     auto n24 = list.insert_before_head((std::uint32_t)24);
     assert(alg::list::compare(list, {24,23,22}));
-    print_summary("test_singly_list", "all succeeded");
+    print_summary("test_singly_list", "all succeeded [Todo : avoid memleak]");
 }
 
 void test_doubly_list()
@@ -167,7 +167,7 @@ void test_doubly_list()
     auto n26 = list.insert_before_head((std::uint32_t)26);
     auto n27 = list.insert_before_head((std::uint32_t)27);
     assert(alg::list::compare(list, {27,26,25})); 
-    print_summary("test_doubly_list", "all succeeded");
+    print_summary("test_doubly_list", "all succeeded [Todo : avoid memleak]");
 }
 
 void test_nth_node_from_tail()
