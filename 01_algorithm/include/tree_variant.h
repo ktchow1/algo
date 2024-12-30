@@ -1,11 +1,10 @@
 #pragma once
-#include<cstdint>
-#include<vector>
+#include<tree.h>
 
 
 namespace alg
 {
-    template<typename T>
+    template<typename T, typename CMP = std::less<T>>
     class heap
     {
     public:
@@ -15,7 +14,7 @@ namespace alg
         void push(ARGS&&...args)
         {
             m_impl.emplace_back(std::forward<ARGS>(args)...);
-            asccend(size()-1);
+            ascend(size()-1);
         }
 
         void pop()
@@ -51,7 +50,7 @@ namespace alg
             while(n>0)
             {
                 std::uint32_t m = (n-1)/2;
-                if (m_impl[n] < m_impl[m])
+                if (CMP{}(m_impl[n], m_impl[m]))
                 {
                     std::swap(m_impl[n], m_impl[m]);
                     n = m;
@@ -70,9 +69,9 @@ namespace alg
 
                 if (m1 < size())
                 {
-                    if (m_impl[m0] < m_impl[m1])
+                    if (CMP{}(m_impl[m0], m_impl[m1]))
                     {
-                        if (m_impl[n] < m_impl[m0])
+                        if (CMP{}(m_impl[m0], m_impl[n]))
                         {
                             std::swap(m_impl[n], m_impl[m0]);
                             n = m0;
@@ -81,7 +80,7 @@ namespace alg
                     }
                     else
                     {
-                        if (m_impl[n] < m_impl[m1])
+                        if (CMP{}(m_impl[m1], m_impl[n]))
                         {
                             std::swap(m_impl[n], m_impl[m1]);
                             n = m1;
@@ -91,11 +90,12 @@ namespace alg
                 }
                 else if (m0 < size())
                 {
-                    if (m_impl[n] > m_impl[m0])
+                    if (CMP{}(m_impl[m0], m_impl[n]))
                     {
                         std::swap(m_impl[n], m_impl[m0]);
                         n = m0;
                     }
+                    else return;
                 }
                 else return;
             }
@@ -111,6 +111,16 @@ namespace alg
 {
     template<typename T>
     class disjoint_set
+    {
+    public:
+    private:
+    };
+}
+
+
+namespace alg
+{
+    class prefix_tree
     {
     public:
     private:

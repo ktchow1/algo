@@ -1,7 +1,5 @@
 #include<iostream>
-#include<functional>
-#include<vector>
-#include<algorithm>
+#include<tree_variant.h>
 
 
 namespace alg
@@ -71,6 +69,7 @@ namespace alg
         if (begin==end) return; // BUG : without this checking, result in infinite recursion for size 0 input
         ITER i = begin;
         ITER j = end;
+        // *************************** //
         --j;
 
         if (begin==j)   return; // BUG : without this checking, result in infinite recursion for size 1 input
