@@ -105,3 +105,17 @@ namespace alg
         std::vector<T> m_impl;
     };
 }
+
+
+namespace alg
+{
+    template<typename T>
+    class disjoint_set
+    {
+    public:
+    private:
+    };
+}
+
+
+
