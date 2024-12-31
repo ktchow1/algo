@@ -144,13 +144,15 @@ namespace alg
         std::copy(vec.begin(), vec.end(), begin);
     }
 
-
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    //
+    // Todo : replace all alg::less_comparator above by std::less, like the following : 
+    //
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void heap_sort(ITER begin, ITER end) // random access iterator
     {
         using T = typename std::iterator_traits<ITER>::value_type;
         using C = typename alg::comparator_traits<CMP>::opposite_type;
 
-        alg::heap<T,C> heap_inplace(begin, end);
+        alg::heap_inplace<T,C> temp(begin, end);
     }
 }
