@@ -317,9 +317,9 @@ namespace alg
             return *this_node;
         }
 
-        const std::optional<V>& find(const std::string& key) const noexcept
+        std::optional<V> find(const std::string& key) const noexcept
         {
-            node* this_node = &m_root;
+            const node* this_node = &m_root;
             for(std::uint32_t n=0; n!=key.size(); ++n)
             {
                 auto iter = this_node->m_children.find(key[n]);

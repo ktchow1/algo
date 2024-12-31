@@ -151,15 +151,55 @@ void test_prefix_tree()
     };
 
     ptree.insert("abc", 123);
-    ptree.traverse(fct);
+    ptree.insert("abcdef", 123456);
+    ptree.insert("abcdeg", 123457);
+    ptree.insert("abcdeh", 123458);
+    ptree.insert("abd", 124);
+    ptree.insert("abe", 125);
+    ptree.insert("abf", 126);
+    ptree.insert("abghij", 127890);
+    ptree.insert("ac", 13);
+    ptree.insert("ad", 14);
+    ptree.insert("ae", 15);
+    ptree.insert("aefgh", 15678);
 
+    assert(*ptree.find("abc") == 123);
+    assert( ptree.find("aa") == std::nullopt);
+    assert( ptree.find("ab") == std::nullopt);
+    assert(*ptree.find("abcdef") == 123456);
+    assert(*ptree.find("abcdeg") == 123457);
+    assert(*ptree.find("abcdeh") == 123458);
+    assert( ptree.find("abcd") == std::nullopt);
+    assert( ptree.find("abcde") == std::nullopt);
+    assert(*ptree.find("abd") == 124);
+    assert(*ptree.find("abe") == 125);
+    assert(*ptree.find("abf") == 126);
+    assert( ptree.find("abg") == std::nullopt);
+    assert( ptree.find("abh") == std::nullopt);
+    assert(*ptree.find("abghij") == 127890);
+    assert( ptree.find("abgh") == std::nullopt);
+    assert( ptree.find("abghi") == std::nullopt);
+    assert(*ptree.find("ac") == 13);
+    assert(*ptree.find("ad") == 14);
+    assert(*ptree.find("ae") == 15);
+    assert( ptree.find("af") == std::nullopt);
+    assert( ptree.find("ag") == std::nullopt);
+    assert(*ptree.find("aefgh") == 15678);
+    assert( ptree.find("aefg") == std::nullopt);
+    assert( ptree.find("aef") == std::nullopt);
 
+//  ptree.traverse(fct);
+    ptree.insert("", 10001);
+    assert(*ptree.find("") == 10001);
+    assert( ptree.find("a") == std::nullopt);
+    assert( ptree.find("b") == std::nullopt);
+    assert( ptree.find("c") == std::nullopt);
 }
 
 void test_tree_variant()
 {
-//  test_heap();
-//  test_disjoint_set();
+    test_heap();
+    test_disjoint_set();
     test_prefix_tree();
 }
 
