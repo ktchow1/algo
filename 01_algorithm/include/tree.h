@@ -13,12 +13,17 @@
 // -  what is a binary complete tree
 // -  what is a binary complete sorted tree
 // 2. Tree functions 
-// -  search 
 // -  insert 
-// -  traverse : BFS, DFS_pre_order, DFS_in_order, DFS_post_order
+// -  find 
 // -  depth
 // -  balance factor
 // -  balance & rotate
+// -  traversal         |     applications 
+//    ------------------+-----------------------------------------------------
+//    BFS               | 
+//    DFS_pre_order     |     traversal in prefix tree
+//    DFS_in_order      |     traversal in avl tree for sorting
+//    DFS_post_order    |     destruction / calculate depth & balance factor
 // *************************************************************************** //
 // Null check 
 // * check this_node           <--- less check, more recursion, simpler code
@@ -120,7 +125,7 @@ namespace alg { namespace avl
 
     public:
               node<T>* insert(const T& x)                { return insert(&m_root, x);      } 
-        const node<T>* search(const T& x) const noexcept { return search(m_root, x);       }
+        const node<T>* find  (const T& x) const noexcept { return find(m_root, x);         }
         std::uint32_t  depth()            const noexcept { return depth(m_root);           }
         std:: int32_t  balance_factor()   const noexcept { return balance_factor(m_root);  }
         const node<T>* root()             const noexcept { return m_root;                  }
@@ -187,11 +192,11 @@ namespace alg { namespace avl
             else return *this_node_ptr;
         }
 
-        const node<T>* search(const node<T>* this_node, const T& x) const noexcept
+        const node<T>* find(const node<T>* this_node, const T& x) const noexcept
         {
             if      (this_node == nullptr)                 return nullptr;
-            else if (x < this_node->m_value)               return search(this_node->m_lhs, x);
-            else if (x > this_node->m_value)               return search(this_node->m_rhs, x);
+            else if (x < this_node->m_value)               return find(this_node->m_lhs, x);
+            else if (x > this_node->m_value)               return find(this_node->m_rhs, x);
             else                                           return this_node;
         }
 

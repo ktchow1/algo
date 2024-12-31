@@ -293,10 +293,3 @@ void test_power_with_multiplication()
     }
 }
 
-void test_arithmetics()
-{
-//  test_bignum();
-//  test_reverse_with_bit_shift();
-//  test_divide_with_subtraction();
-    test_power_with_multiplication();
-}

@@ -1,4 +1,5 @@
 #pragma once
+#include<optional>
 #include<tree.h>
 
 
@@ -94,12 +95,12 @@ namespace alg
 }
 
 
+// **********************************************************//
+// Implementation of ascent() and descend() is same as above.
+// With extra step to convert index into iterator.
+// **********************************************************//
 namespace alg
 {
-    // **********************************************************//
-    // Implementation of ascent() and descend() is same as above.
-    // With extra step to convert index into iterator.
-    // **********************************************************//
     template<typename T, typename CMP = std::less<T>>
     class heap_inplace
     {
@@ -184,6 +185,13 @@ namespace alg
 }
 
 
+// ************************************* //
+// 1. For disjoint_set is a tree :
+// -      represented by parent link
+// -  NOT represented by children link
+//
+// 2. Root of a set is a class-label.
+// ************************************* //
 namespace alg
 {
     enum class find_mode : std::uint8_t
@@ -193,13 +201,6 @@ namespace alg
         recursive_with_path_compression
     };
 
-    // ************************************* //
-    // 1. For disjoint_set is a tree :
-    // -      represented by parent link
-    // -  NOT represented by children link
-    //
-    // 2. Root of a set is a class-label.
-    // ************************************* //
     template<typename T>
     class disjoint_set
     {
@@ -269,15 +270,92 @@ namespace alg
 }
 
 
+// ********************************************************************************
+// AVL tree vs Prefix tree 
+// * key  in avl    tree is stored in node, key == value for std::set
+//   key  in prefix tree is concaternation of char of all ancesters, exclude itself
+// * node in avl    tree always contains value
+//   node in prefix tree may not contain value 
+// * node in avl    tree has 0-2  children
+//   node in prefix tree has 0-26 children
+//
+// Nullity
+// * m_root     is not a node pointer, as it must exist
+// * m_children is not a node pointer, as it must exist 
+// * hence unlike avl tree, no destructor is needed
+// ********************************************************************************
 namespace alg
 {
     template<typename V> // K = std::string
     class prefix_tree
     {
     public:
+        struct node
+        {
+            std::optional<V> m_value;
+            std::unordered_map<char, node> m_children; 
+        };
+
+    public:
+        const node& insert(const std::string& key, const V& value)
+        {
+            node* this_node = &m_root;
+            for(std::uint32_t n=0; n!=key.size(); ++n)
+            {
+                auto iter = this_node->m_children.find(key[n]);
+                if (iter != this_node->m_children.end())
+                {
+                    this_node = &iter->second;
+                }
+                else
+                {
+                    auto [iter0, flag0] = this_node->m_children.insert({ key[n], node{} });
+                    this_node = &iter0->second;
+                }
+            }
+            this_node->m_value = value;
+            return *this_node;
+        }
+
+        const std::optional<V>& find(const std::string& key) const noexcept
+        {
+            node* this_node = &m_root;
+            for(std::uint32_t n=0; n!=key.size(); ++n)
+            {
+                auto iter = this_node->m_children.find(key[n]);
+                if (iter != this_node->m_children.end())
+                {
+                    this_node = &iter->second;
+                }
+                else 
+                {
+                    return std::nullopt;
+                }
+            }
+            return this_node->m_value;
+        }
+    
+    public:
+        using fct_type = std::function<void(const std::string&, const std::optional<V>&)>;
+
+        void traverse(fct_type& fct) const noexcept
+        {   
+            dfs_pre_order_recursive(std::string{}, &m_root, fct);
+        }
+
     private:
+        void dfs_pre_order_recursive(const std::string& key, const node* this_node, fct_type& fct) const noexcept
+        {
+            fct(key, this_node->m_value);
+            for(const auto& x:this_node->m_children)
+            {
+                dfs_pre_order_recursive(key+x.first, &x.second, fct);
+            }
+        }
+    
+    private:
+        node m_root; 
     };
 }
-
 
 
