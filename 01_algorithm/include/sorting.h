@@ -6,15 +6,18 @@
 namespace alg
 {
     template<typename T>
-    struct less_comparator : std::function<bool(const T&, const T&)>
+    struct less : std::function<bool(const T&, const T&)>
     {
         bool operator()(const T& lhs, const T& rhs)
         {
             return lhs < rhs;
         }
     };
+}
 
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+namespace alg
+{
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void select_sort(ITER begin, ITER end) // forward iterator
     {
         for(ITER i=begin; i!=end; ++i)
@@ -32,7 +35,7 @@ namespace alg
         }
     }
 
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void bubble_sort(ITER begin, ITER end) // bidirectional iterator
     {
         for(ITER i=begin; i!=end; ++i)
@@ -48,7 +51,7 @@ namespace alg
         }
     }
 
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void insert_sort(ITER begin, ITER end) // bidirectional iterator
     {
         for(ITER i=begin; i!=end; ++i)
@@ -64,7 +67,7 @@ namespace alg
         }
     }
 
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void quick_sort(ITER begin, ITER end) // bidirectional iterator
     {
         if (begin==end) return; // BUG : without this checking, result in infinite recursion for size 0 input
@@ -95,7 +98,7 @@ namespace alg
     //  quick_sort(i  ,end); // BUG : with this line, result in infinite recursion for size 2 input 
     }
 
-    template<typename ITER, typename OITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    template<typename ITER, typename OITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void merge(ITER begin0, ITER end0, ITER begin1, ITER end1, OITER oiter) // forward iterator
     {
         while(begin0!=end0 && begin1!=end1)
@@ -127,7 +130,7 @@ namespace alg
         }
     }
 
-    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void merge_sort(ITER begin, ITER end) // random access iterator
     {
         if (begin==end)   return; // BUG : without this checking, result in infinite recursion for size 0 input
@@ -144,9 +147,6 @@ namespace alg
         std::copy(vec.begin(), vec.end(), begin);
     }
 
-    //
-    // Todo : replace all alg::less_comparator above by std::less, like the following : 
-    //
     template<typename ITER, typename CMP = std::less<typename std::iterator_traits<ITER>::value_type>>
     void heap_sort(ITER begin, ITER end) // random access iterator
     {
