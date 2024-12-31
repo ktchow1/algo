@@ -1,4 +1,5 @@
 #include<iostream>
+#include<traits.h>
 #include<tree_variant.h>
 
 
@@ -69,7 +70,6 @@ namespace alg
         if (begin==end) return; // BUG : without this checking, result in infinite recursion for size 0 input
         ITER i = begin;
         ITER j = end;
-        // *************************** //
         --j;
 
         if (begin==j)   return; // BUG : without this checking, result in infinite recursion for size 1 input
@@ -142,5 +142,15 @@ namespace alg
         std::vector<typename std::iterator_traits<ITER>::value_type> vec;
         merge(begin, mid, mid, end, std::back_inserter(vec));
         std::copy(vec.begin(), vec.end(), begin);
+    }
+
+
+    template<typename ITER, typename CMP = less_comparator<typename std::iterator_traits<ITER>::value_type>>
+    void heap_sort(ITER begin, ITER end) // random access iterator
+    {
+        using T = typename std::iterator_traits<ITER>::value_type;
+        using C = typename alg::comparator_traits<CMP>::opposite_type;
+
+        alg::heap<T,C> heap_inplace(begin, end);
     }
 }

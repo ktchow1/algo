@@ -319,4 +319,13 @@ namespace alg
     template<typename T>                 constexpr bool has_value_v        = has_value<T>::value;
     template<typename B,   typename D>   constexpr bool is_base_of_v       = is_base_of<B,D>::value;
     template<typename SRC, typename DST> constexpr bool is_convertible_v   = is_convertible<SRC,DST>::value;
+
+
+    // comparator
+    template<typename CMP> 
+    struct comparator_traits {}; 
+    template<typename T> 
+    struct comparator_traits<std::less<T>> { using opposite_type = std::greater<T>; }; 
+    template<typename T> 
+    struct comparator_traits<std::greater<T>> { using opposite_type = std::less<T>; }; 
 }
