@@ -131,33 +131,3 @@ std::uint32_t edit_distance(const std::string& lhs, const std::string& rhs)
 }
 
 
-// ************ //
-// *** Test *** //
-// ************ //
-void test_longest_common_subseq()
-{
-    for(std::uint32_t n=0; n!=100; ++n)
-    {
-        std::string lhs("ABCDEFGHIJABCDEFGHIJABCDEFGHIJABCDEFGHIJ");
-        std::string rhs(lhs);
-        std::uint32_t num_insert = rand()%15; 
-        std::uint32_t num_delete = rand()%15;
-        std::uint32_t num_modify = rand()%15;
-
-        for(std::uint32_t n=0; n!=num_insert; ++n) rhs.insert(rand()%rhs.size(), "*");
-        for(std::uint32_t n=0; n!=num_delete; ++n) rhs.erase(rhs.begin() + rand()%rhs.size());
-        for(std::uint32_t n=0; n!=num_modify; ++n) rhs[rand()%rhs.size()] = '-';
-
-        std::cout << "\nlhs = " << lhs;
-        std::cout << "\nrhs = " << rhs;
-        std::cout << "\nans = " << longest_common_subseq(lhs,rhs);
-        std::cout << "\nedit distance = " << num_insert + num_delete + num_modify << " " << edit_distance(lhs, rhs);
-    }
-}
-
-void test_singly_link_subproblem()
-{
-    test_longest_common_subseq();
-}
-
-

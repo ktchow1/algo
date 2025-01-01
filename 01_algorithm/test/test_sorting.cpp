@@ -1,7 +1,7 @@
 #include<iostream>
 #include<cassert>
-#include<utility.h>
 #include<sorting.h>
+#include<utility.h>
 
 
 template<typename CONTAINER>

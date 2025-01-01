@@ -575,16 +575,3 @@ void test_box_stacking()
     }
 }
 
-void test_bin_packing()
-{
-}
-
-void test_multi_link_subproblem()
-{
-//  test_nCr();
-//  test_bell_number();
-    test_num_bool_parenthesis();
-//  test_coin_game();
-//  test_box_stacking();
-//  test_bin_packing();
-}

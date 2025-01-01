@@ -2,6 +2,7 @@
 #include<interview.h>
 
 // *** 01_algorithm *** //
+void test_arithmetic();
 void test_bisection();
 void test_stack();
 void test_list();
@@ -66,20 +67,21 @@ inline void banner(const std::string str)
 int main()
 {
     banner("01_algorithm");
-    test_bisection();
-    test_stack();
-    test_list();
-    test_tree();
-    test_tree_variant();
-    test_sorting();
+    test_arithmetic();
+//  test_bisection();
+//  test_stack();
+//  test_list();
+//  test_tree();
+//  test_tree_variant();
+//  test_sorting();
   
     banner("02_dynprog_vec");
-    test_two_point_sum();
-    test_two_point_diff();
-    test_subseq_sum();
-    test_string_problem();
-    test_stack_problem();
-    test_sorting_problem();
+//  test_two_point_sum();
+//  test_two_point_diff();
+//  test_subseq_sum();
+//  test_string_problem();
+//  test_stack_problem();
+//  test_sorting_problem();
   
     banner("03_dynprog");
 //  test_singly_link_subproblem();

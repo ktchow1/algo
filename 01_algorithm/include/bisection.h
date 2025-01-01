@@ -38,6 +38,7 @@ namespace alg
         return std::make_optional((x0 + x1) / 2);
     }
 
+
     // *********************************************************** //
     // Find target in non-monotonic increasing (or decreasing) vec
     // *********************************************************** //
@@ -71,6 +72,7 @@ namespace alg
         return std::nullopt;
     }
     
+
     // ******************************************* //
     // Find peak only
     // * if vec is increasing, return std::nullopt
@@ -107,6 +109,7 @@ namespace alg
         return std::nullopt;
     }
   
+
     std::optional<std::uint32_t> rotated_bisection(const std::vector<std::int32_t>& vec, std::int32_t target)
     {
         // 1. check edge case 
