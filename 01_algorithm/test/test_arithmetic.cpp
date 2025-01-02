@@ -91,42 +91,54 @@ void test_count_num_of_one_bits()
 }
 
 
-void test_multiply_with_addition()
+void test_multiply()
 {
     std::uint32_t trial = 10000;
     std::uint32_t error = 0;   
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
+        std::uint64_t n = rand();
         std::uint64_t x = rand();
-        std::uint64_t y = rand();
-        std::uint64_t z = x * y; 
-        std::uint64_t w = alg::multiply_with_addition(x,y);
-        if (z != w) ++error;
+        std::uint64_t y = n * x; 
+        std::uint64_t z = alg::multiply(n,x);
+        if (y != z) ++error;
     }
-    print_summary("test_multiply_with_addition", error, trial);
+    print_summary("test_multiply", error, trial);
 }
 
 
-void test_power_with_multiplication()
+void test_power()
 {
-    std::uint32_t trial = 1000;
+    std::uint32_t trial = 500;
     std::uint32_t error = 0;   
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
+        std::uint64_t n = rand() % 12;
         std::uint64_t x = rand() % 12;
-        std::uint64_t y = rand() % 12;
-        std::uint64_t z = pow(y,x); 
-        std::uint64_t w = alg::power_with_multiplication(x,y);
-        if (z != w) ++error;
+        std::uint64_t y = pow(n,x); 
+        std::uint64_t z = alg::power(n,x);
+        if (y != z) ++error;
     }
-    print_summary("test_power_with_multiplication", error, trial);
+    print_summary("test_power", error, trial);
 }
 
 
-void test_divide_with_subtraction()
+void test_divide()
 {
+    std::uint32_t trial = 10000;
+    std::uint32_t error = 0;   
+
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        std::uint64_t n = rand();
+        std::uint64_t x = rand();
+        std::uint64_t y = n/x; 
+        std::uint64_t z = alg::divide(n,x);
+        if (y != z) ++error;
+    }
+    print_summary("test_divide", error, trial);
 }
 
 
@@ -135,7 +147,7 @@ void test_arithmetic()
     test_bignum();
     test_reverse_digits();
     test_count_num_of_one_bits();
-    test_multiply_with_addition();
-    test_power_with_multiplication();
-    test_divide_with_subtraction();
+    test_multiply();
+    test_power();
+    test_divide();
 }

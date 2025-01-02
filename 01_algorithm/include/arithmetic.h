@@ -141,53 +141,61 @@ namespace alg
 {
     inline std::uint64_t reverse_digits(std::uint64_t x)
     {
-        std::uint64_t y = 0;
+        std::uint64_t z = 0;
         while(x > 0)
         {
-            y = y*10 + x%10;
+            z = z*10 + x%10;
             x = x/10;
         }
-        return y;
+        return z;
     }
 
     inline std::uint64_t count_num_of_one_bits(std::uint64_t x)
     {
-        std::uint64_t y = 0;
-        while(x > 0)
-        {
-            y += x%2;
-            x  = x/2;
-        }
-        return y;
-    }
-
-    inline std::uint64_t multiply_with_addition(std::uint64_t x, std::uint64_t y)
-    {
         std::uint64_t z = 0;
         while(x > 0)
         {
-            if (x%2 == 1) z = z + y;
+            z = z + x%2;
             x = x/2;
-            y = y*2;
         }
         return z;
     }
 
-    inline std::uint64_t power_with_multiplication(std::uint64_t x, std::uint64_t y) // y^x
+    inline std::uint64_t multiply(std::uint64_t n, std::uint64_t x) // n * x
+    {
+        std::uint64_t z = 0;
+        while(x > 0)
+        {
+            if (x%2 == 1) z = z + n;
+            x = x/2;
+            n = n*2;
+        }
+        return z;
+    }
+
+    inline std::uint64_t power(std::uint64_t n, std::uint64_t x) // n^x
     {
         std::uint64_t z = 1;
         while(x > 0)
         {
-            if (x%2 == 1) z = z * y;
+            if (x%2 == 1) z = z * n;
             x = x/2;
-            y = y*y;
+            n = n*n;
         }
         return z;
     }
-
-    inline std::uint64_t divide_with_subtraction(std::uint64_t x, std::uint64_t y)
+/*
+    inline std::uint64_t max_scaled_value_with_upper_bound(std::uint64_t value, std::uint64_t upper_bound) // max (value * 2^N) s.t. (value * 2^N) <= upper_bound 
+    {
+    }
+*/
+    inline std::uint64_t divide(std::uint64_t n, std::uint64_t x) // n/x
     {
         std::uint64_t z = 0;
+//      xx = max_scaled_value_with_upper_bound(x, n);
+
+
+
         return z;
     }
 
