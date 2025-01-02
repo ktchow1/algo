@@ -1,6 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<cassert>
+#include<cmath>
 #include<bitset>
 #include<arithmetic.h>
 #include<utility.h>
@@ -107,12 +108,24 @@ void test_multiply_with_addition()
 }
 
 
-void test_divide_with_subtraction()
+void test_power_with_multiplication()
 {
+    std::uint32_t trial = 1000;
+    std::uint32_t error = 0;   
+
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        std::uint64_t x = rand() % 12;
+        std::uint64_t y = rand() % 12;
+        std::uint64_t z = pow(y,x); 
+        std::uint64_t w = alg::power_with_multiplication(x,y);
+        if (z != w) ++error;
+    }
+    print_summary("test_power_with_multiplication", error, trial);
 }
 
 
-void test_power_with_multiplication()
+void test_divide_with_subtraction()
 {
 }
 
@@ -123,6 +136,6 @@ void test_arithmetic()
     test_reverse_digits();
     test_count_num_of_one_bits();
     test_multiply_with_addition();
-    test_divide_with_subtraction();
     test_power_with_multiplication();
+    test_divide_with_subtraction();
 }

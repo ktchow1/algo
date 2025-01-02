@@ -173,16 +173,23 @@ namespace alg
         return z;
     }
 
+    inline std::uint64_t power_with_multiplication(std::uint64_t x, std::uint64_t y) // y^x
+    {
+        std::uint64_t z = 1;
+        while(x > 0)
+        {
+            if (x%2 == 1) z = z * y;
+            x = x/2;
+            y = y*y;
+        }
+        return z;
+    }
+
     inline std::uint64_t divide_with_subtraction(std::uint64_t x, std::uint64_t y)
     {
         std::uint64_t z = 0;
         return z;
     }
 
-    inline std::uint64_t power_with_multiplication(std::uint64_t x, std::uint64_t y)
-    {
-        std::uint64_t z = 0;
-        return z;
-    }
 }
 
