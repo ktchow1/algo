@@ -139,9 +139,9 @@ namespace alg
 // ******************************* //
 namespace alg 
 {
-    inline std::uint32_t reverse_digits(std::uint32_t x)
+    inline std::uint64_t reverse_digits(std::uint64_t x)
     {
-        std::uint32_t y = 0;
+        std::uint64_t y = 0;
         while(x > 0)
         {
             y = y*10 + x%10;
@@ -150,9 +150,9 @@ namespace alg
         return y;
     }
 
-    inline std::uint32_t count_num_of_one_bits(std::uint32_t x)
+    inline std::uint64_t count_num_of_one_bits(std::uint64_t x)
     {
-        std::uint32_t y = 0;
+        std::uint64_t y = 0;
         while(x > 0)
         {
             y += x%2;
@@ -161,21 +161,27 @@ namespace alg
         return y;
     }
 
-    inline std::uint32_t multiply_with_addition(std::uint32_t x, std::uint32_t y)
+    inline std::uint64_t multiply_with_addition(std::uint64_t x, std::uint64_t y)
     {
-        std::uint32_t z = 0;
+        std::uint64_t z = 0;
+        while(x > 0)
+        {
+            if (x%2 == 1) z = z + y;
+            x = x/2;
+            y = y*2;
+        }
         return z;
     }
 
-    inline std::uint32_t divide_with_subtraction(std::uint32_t x, std::uint32_t y)
+    inline std::uint64_t divide_with_subtraction(std::uint64_t x, std::uint64_t y)
     {
-        std::uint32_t z = 0;
+        std::uint64_t z = 0;
         return z;
     }
 
-    inline std::uint32_t power_with_multiplication(std::uint32_t x, std::uint32_t y)
+    inline std::uint64_t power_with_multiplication(std::uint64_t x, std::uint64_t y)
     {
-        std::uint32_t z = 0;
+        std::uint64_t z = 0;
         return z;
     }
 }

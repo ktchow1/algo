@@ -59,7 +59,7 @@ void test_reverse_digits()
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        std::uint64_t x = rand() % 1000000000;
+        std::uint64_t x = rand();
         std::string   s = std::to_string(x); std::reverse(s.begin(), s.end());
         std::uint64_t y = std::stol(s); 
         std::uint64_t z = alg::reverse_digits(x);
@@ -76,7 +76,7 @@ void test_count_num_of_one_bits()
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        std::uint64_t x = rand() % 1000000000;
+        std::uint64_t x = rand();
         std::uint64_t y = 0;
 
         std::stringstream ss;
@@ -92,6 +92,18 @@ void test_count_num_of_one_bits()
 
 void test_multiply_with_addition()
 {
+    std::uint32_t trial = 10000;
+    std::uint32_t error = 0;   
+
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        std::uint64_t x = rand();
+        std::uint64_t y = rand();
+        std::uint64_t z = x * y; 
+        std::uint64_t w = alg::multiply_with_addition(x,y);
+        if (z != w) ++error;
+    }
+    print_summary("test_multiply_with_addition", error, trial);
 }
 
 
