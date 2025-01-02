@@ -2,17 +2,6 @@
 #include<cstdint>
 #include<stack>
 
-template<std::uint32_t BASE> 
-std::uint32_t reverse_with_bit_shift(std::uint32_t x)
-{
-    std::uint32_t y = 0;
-    while(x > 0)
-    {
-        y = y*BASE + x%BASE;
-        x = x/BASE;
-    }
-    return y;
-}
 
 std::pair<std::uint32_t, std::uint32_t> divide_with_subtraction(std::uint32_t x, std::uint32_t y)
 {
@@ -92,10 +81,3 @@ std::uint64_t power_with_multiplication_optimized(std::uint32_t x, std::uint32_t
     return z;
 }
 
-std::uint64_t power_with_loop(std::uint32_t x, std::uint32_t y)
-{
-    std::uint64_t z=1;
-
-    for(std::uint32_t n=0; n!=y; ++n) z = z*x;
-    return z;
-}
