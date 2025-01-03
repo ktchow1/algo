@@ -161,7 +161,7 @@ namespace alg
         return z;
     }
 
-    inline std::uint64_t multiply(std::uint64_t n, std::uint64_t x) // n * x
+    inline std::uint64_t multiply(std::uint64_t n, std::uint64_t x) // output = n * x
     {
         std::uint64_t z = 0;
         while(x > 0)
@@ -173,7 +173,7 @@ namespace alg
         return z;
     }
 
-    inline std::uint64_t power(std::uint64_t n, std::uint64_t x) // n^x
+    inline std::uint64_t power(std::uint64_t n, std::uint64_t x) // output = n^x
     {
         std::uint64_t z = 1;
         while(x > 0)
@@ -184,18 +184,43 @@ namespace alg
         }
         return z;
     }
-/*
-    inline std::uint64_t max_scaled_value_with_upper_bound(std::uint64_t value, std::uint64_t upper_bound) // max (value * 2^N) s.t. (value * 2^N) <= upper_bound 
+
+    inline std::uint64_t divide(std::uint64_t n, std::uint64_t x) // output = n / x
     {
-    }
-*/
-    inline std::uint64_t divide(std::uint64_t n, std::uint64_t x) // n/x
-    {
+        // ***************************************** //
+        // *** Max sx = x*2^M, such that sx <= n *** //
+        // ***************************************** //
+        std::uint64_t sx = x;
+        std::uint64_t M  = 0;
+        while(sx <= n)
+        {
+            sx = sx * 2;
+            ++M;
+        }
+        if (M > 0)
+        {
+            sx = sx / 2;
+            --M;
+        }
+
+        // ********************* //
+        // *** Update answer *** //
+        // ********************* //
         std::uint64_t z = 0;
-//      xx = max_scaled_value_with_upper_bound(x, n);
-
-
-
+        for(std::uint32_t m=0; m!=M+1; ++m) // BUG : M+1 instead of M
+        {
+            if (n >= sx)
+            {
+                z = z*2 + 1;
+                n = n - sx;
+                sx = sx / 2;
+            }
+            else
+            {
+                z = z*2;
+                sx = sx / 2;
+            }
+        }
         return z;
     }
 

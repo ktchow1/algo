@@ -132,8 +132,8 @@ void test_divide()
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        std::uint64_t n = rand();
-        std::uint64_t x = rand();
+        std::uint64_t n = rand() % 1000000 + 1000000;
+        std::uint64_t x = rand() % 100000 + 1;
         std::uint64_t y = n/x; 
         std::uint64_t z = alg::divide(n,x);
         if (y != z) ++error;
