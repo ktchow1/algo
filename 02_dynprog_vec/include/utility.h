@@ -3,6 +3,7 @@
 #include<cstdint>
 #include<vector>
 #include<algorithm>
+#include<timer.h>
 
 
 // ************************* //
@@ -115,6 +116,40 @@ inline std::vector<std::uint32_t> gen_random_swapped_order(std::uint32_t size)
 }
 
 
+// ****************** //
+// *** Statistics *** //
+// ****************** //
+// Todo : 
+// * add namespace
+// * add percentile
+// * move to c++ folder
+//
+template<typename T>
+class statistics
+{
+public:
+    explicit statistics(const T& x) : m_sum(x), m_count(0)
+    {
+    }
+
+    void add(const T& x)
+    {
+        m_sum += x;
+        ++m_count;
+    }
+    
+    T mean() const noexcept
+    {
+        if (m_count > 0) 
+             return m_sum / m_count;
+        else return m_sum;             
+    }
+
+private:
+    T m_sum;
+    std::uint32_t m_count;
+};
+
 
 // **************** //
 // *** Printing *** //
@@ -159,9 +194,17 @@ inline void print_summary(const std::string& test_name, const std::string& statu
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial)
 {
-    std::cout << "\n" << std::setw(60) << std::left << test_name << " error rate = " << error << "/" << trial;
+    std::cout << "\n" << std::setw(60) << std::left << test_name 
+                      << " error rate = " << error << "/" << trial;
 }
 
+inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial, std::uint64_t time0, std::uint64_t time1)
+{
+    std::cout << "\n" << std::setw(60) << std::left << test_name 
+                      << " error rate = " << error << "/" << trial 
+                      << ", time0 = " << time0
+                      << ", time1 = " << time1;
+}
 
 
 // *************************** //
@@ -182,15 +225,15 @@ void benchmark_str(const std::string&  test_name,
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        auto str  = gen_function(size, alphabet_set);
+        auto str = gen_function(size, alphabet_set);       
         auto ans0 = alg_function(str);
-        auto ans1 = bmk_function(str); 
+        auto ans1 = bmk_function(str);
         bool flag = (ans0 == ans1);
 
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag, str);
     }
-    if (!print_each_test_case) print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial);
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT>
@@ -217,7 +260,7 @@ void benchmark_vec(const std::string&  test_name,
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
-    if (!print_each_test_case) print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial);
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
@@ -242,7 +285,7 @@ void benchmark_vec_without_input(const std::string&  test_name,
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
-    if (!print_each_test_case) print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial);
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
@@ -270,7 +313,7 @@ void benchmark_vec_with_alg_input(const std::string&  test_name,
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
-    if (!print_each_test_case) print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial);
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
@@ -299,6 +342,6 @@ void benchmark_2_vec_with_alg_input(const std::string&  test_name,
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
     }
-    if (!print_each_test_case) print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial);
 }
 
