@@ -7,10 +7,6 @@
 #include<queue>
 #include<math.h>
 
-// Problems
-// 1. redundant calculation - not every state are valid in each iteration
-// 2. possibility of infinite loop - cannot stop when there is no sum equals to target 
-//
 enum class optimization : std::uint8_t
 {
     min, 
@@ -47,64 +43,8 @@ bool euler_update(std::unordered_map<K,V>& state, const K& key, const V& value)
     return false;
 }
 
-std::uint32_t coin_change(std::unordered_set<std::uint32_t>& coins, std::uint32_t target)
-{
-    std::unordered_map<std::uint32_t, std::uint32_t> states;
-    states[0] = 0;
 
-    while(true)
-    {
-        std::unordered_map<std::uint32_t, std::uint32_t> new_states = states;
-        for(const auto& state:states)
-        {
-            for(const auto& coin:coins)
-            {
-                auto new_amount = state.first  + coin;
-                auto new_count  = state.second + 1;
-                if (new_amount == target) return new_count;
 
-                euler_update<optimization::min>(new_states, new_amount, new_count);
-            }
-        }
-        states = std::move(new_states);
-    }
-    return std::numeric_limits<std::uint32_t>::max();
-}
-
-// Optimized version (much faster than the previous approach)
-// 1. Value function for each state does not move, we keep update on it.
-// 2. Maintain a queue of latest updated states, no need to consider irrelevant states.
-//
-std::uint32_t coin_change_optimized(std::unordered_set<std::uint32_t>& coins, std::uint32_t target)
-{
-    std::unordered_map<std::uint32_t, std::uint32_t> states; // amount and count
-    states[0] = 0;
-
-    std::queue<std::uint32_t> q;
-    q.push(0);
-
-    while(!q.empty())
-    {
-        std::uint32_t amount = q.front();
-        std::uint32_t count  = states[amount];
-        q.pop();
-        
-        for(const auto& coin:coins)
-        {
-            auto new_amount = amount + coin;
-            auto new_count  = count  + 1;
-            if (new_amount == target) return new_count;
-
-            if (euler_update<optimization::min>(states, new_amount, new_count) && new_amount < target)
-            {
-                q.push(new_amount);
-            }
-        }
-    }
-    return std::numeric_limits<std::uint32_t>::max();
-}
-  
-// See remark for the changed lines as compared to coin-change problem
 std::uint32_t knapsack_optimized(std::unordered_map<std::uint32_t, std::uint32_t>& items, std::uint32_t limit)
 {
     std::unordered_map<std::uint32_t, std::uint32_t> states; // weight and value
