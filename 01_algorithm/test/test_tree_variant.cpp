@@ -53,8 +53,8 @@ void test_heap()
         if (!alg::is_equal(ans, vec0)) ++error0;
         if (!alg::is_equal(ans, vec1)) ++error1;
     }
-    print_summary("test_heap - normal", error0, trial);
-    print_summary("test_heap - inplace", error1, trial);
+    print_summary("heap - normal", error0, trial);
+    print_summary("heap - inplace", error1, trial);
 }
 
 void test_disjoint_set()
@@ -137,7 +137,7 @@ void test_disjoint_set()
             assert(set.is_same_set("b3", "c3") == true);
         }
     }
-    print_summary("test_disjoint_set", "all succeeded");
+    print_summary("disjoint_set", "all succeeded");
 }
 
 void test_prefix_tree()
@@ -194,6 +194,7 @@ void test_prefix_tree()
     assert( ptree.find("a") == std::nullopt);
     assert( ptree.find("b") == std::nullopt);
     assert( ptree.find("c") == std::nullopt);
+    print_summary("prefix_tree", "all succeeded");
 }
 
 void test_tree_variant()

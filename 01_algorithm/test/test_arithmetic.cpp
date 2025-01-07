@@ -48,8 +48,8 @@ void test_bignum()
         alg::bignum z = x * y; 
         if (std::to_string(c) != z.to_string()) ++error1;
     }
-    print_summary("test_bignum addition", error0, trial);
-    print_summary("test_bignum multiply", error1, trial);
+    print_summary("bignum addition", error0, trial);
+    print_summary("bignum multiply", error1, trial);
 }
 
 
@@ -66,7 +66,7 @@ void test_reverse_digits()
         std::uint64_t z = alg::reverse_digits(x);
         if (y != z) ++error;
     }
-    print_summary("test_reverse_digits", error, trial);
+    print_summary("reverse_digits", error, trial);
 }
 
 
@@ -87,7 +87,7 @@ void test_count_num_of_one_bits()
         std::uint64_t z = alg::count_num_of_one_bits(x);
         if (y != z) ++error;
     }
-    print_summary("test_count_num_of_one_bits", error, trial);
+    print_summary("count_num_of_one_bits", error, trial);
 }
 
 
@@ -104,7 +104,7 @@ void test_multiply()
         std::uint64_t z = alg::multiply(n,x);
         if (y != z) ++error;
     }
-    print_summary("test_multiply", error, trial);
+    print_summary("multiply", error, trial);
 }
 
 
@@ -121,7 +121,7 @@ void test_power()
         std::uint64_t z = alg::power(n,x);
         if (y != z) ++error;
     }
-    print_summary("test_power", error, trial);
+    print_summary("power", error, trial);
 }
 
 
@@ -138,7 +138,7 @@ void test_divide()
         std::uint64_t z = alg::divide(n,x);
         if (y != z) ++error;
     }
-    print_summary("test_divide", error, trial);
+    print_summary("divide", error, trial);
 }
 
 

@@ -46,17 +46,16 @@ namespace alg
 }
 
 
-// **************************************************************** //
+// *********************** //
+// *** Min coin change *** //
+// *********************** //
 // Notations
 // key   = sum(k[n],w[n]) <--- constraint, coin value in total 
 // value = sum(v[n],w[n]) <--- objective,  coin count in total
 // param = w[n]           <--- decision,   coin count for each type
-// **************************************************************** //
+//
 namespace alg
 {  
-    // *********************** //
-    // *** Min coin change *** //
-    // *********************** //
     std::uint32_t min_coin_change_iterative_in_time(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> states;  // image in region grow
@@ -121,7 +120,7 @@ namespace alg
         return find_target(states, target);
     }
 
-    std::uint32_t min_coin_change_resursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         bool any_coin_less_than_target = false;
         for(const auto& x:coins)
@@ -138,18 +137,88 @@ namespace alg
             {
                 if (x < target) // BUG : missing this check will result in infinity loop
                 {
-                    ans = std::min(ans, 1 + min_coin_change_resursive(coins, target-x)); 
+                    ans = std::min(ans, 1 + min_coin_change_recursive(coins, target-x)); 
                 }
             }
             return ans;
         }
         else return ans;
     }
-
-
-    // ************************* //
-    // *** Count coin change *** //
-    // ************************* //
 }
 
 
+// **************** //
+// *** Knapsack *** //
+// **************** //
+// objects[weight] = value
+//
+namespace alg
+{ /* 
+    std::uint32_t knapsack_iterative_in_time(const std::unordered_map<std::uint32_t, std::uint32_t>& objects, std::uint32_t weight_limit)
+    {
+        std::unordered_map<std::uint32_t, std::uint32_t> states;  
+        states[0] = 0;  
+
+        std::queue<std::uint32_t> q; 
+        q.push(0);     
+
+        while(!q.empty())
+        {
+            std::uint32_t k_prev = q.front();
+            std::uint32_t v_prev = states[q.front()];
+            q.pop();
+
+            // *** region grow to neighbour *** //
+            for(const auto& x:coins)
+            {
+                std::uint32_t k = k_prev + x;
+                std::uint32_t v = v_prev + 1;
+                
+                // *** region grow stop criteria *** //
+                if (euler_update<std::less<std::uint32_t>>(states, k, v) && v <= target)
+                {
+                    q.push(k);
+                }
+            }
+        }
+        return find_target(states, target);
+    } */
+/*
+    std::uint32_t knapsack_iterative_in_subprob(const std::unordered_map<std::uint32_t, std::uint32_t>& objects, std::uint32_t weight_limit)
+    {
+        std::unordered_map<std::uint32_t, std::uint32_t> states;  
+        states[0] = 0;        
+
+        for(const auto& x:coins)
+        {
+            std::unordered_map<std::uint32_t, std::uint32_t> next_states(states);  
+            for(const auto& [k_prev, v_prev] : states)
+            {
+                std::uint32_t n = 1;
+                while(true)
+                {
+                    std::uint32_t k = k_prev + n * x;
+                    std::uint32_t v = v_prev + n;
+                    
+                    // *** stop criteria *** //
+                    if (v <= target)
+                    {
+                        euler_update<std::less<std::uint32_t>>(next_states, k, v);
+                    }
+                    else break;
+                    ++n;
+                }
+            }
+            states = std::move(next_states);
+        }
+        return find_target(states, target);
+    } */
+}
+
+
+// ******************** //
+// *** Job schedule *** //
+// ******************** //
+namespace alg
+{  
+}

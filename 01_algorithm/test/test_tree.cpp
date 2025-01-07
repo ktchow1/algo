@@ -98,13 +98,13 @@ void test_avl_tree()
             if (root0 != root2)        ++error6;
         }
     }
-    print_summary("test_avl_tree verify  in_order",     error0, trial);
-    print_summary("test_avl_tree compare in_order",     error1, trial);
-    print_summary("test_avl_tree compare pre_order",    error2, trial);
-    print_summary("test_avl_tree compare in/pre_order", error3, trial);
-    print_summary("test_avl_tree verify  post_order",   error4, trial);
-    print_summary("test_avl_tree rotate  lhs",          error5, trial);
-    print_summary("test_avl_tree rotate  rhs",          error6, trial);
+    print_summary("avl_tree verify  in_order",     error0, trial);
+    print_summary("avl_tree compare in_order",     error1, trial);
+    print_summary("avl_tree compare pre_order",    error2, trial);
+    print_summary("avl_tree compare in/pre_order", error3, trial);
+    print_summary("avl_tree verify  post_order",   error4, trial);
+    print_summary("avl_tree rotate  lhs",          error5, trial);
+    print_summary("avl_tree rotate  rhs",          error6, trial);
 }
 
 
@@ -169,13 +169,13 @@ void test_avl_algo()
         alg::avl::traverse_rhs_only(list_head, f2);
         if (!alg::is_equal(f0.m_values, f2.m_values))                        ++error6;
     }
-    print_summary("test_avl_tree verified to be sorted",             error0, trial);
-    print_summary("test_avl_tree verified to be unsorted",           error1, trial);
-    print_summary("test_avl_tree verified to be resorted",           error2, trial);
-    print_summary("test_avl_tree balanced by resort, compare vec",   error3, trial);
-    print_summary("test_avl_tree balanced by resort, compare depth", error4, trial);
-    print_summary("test_avl_tree balanced by resort, compare BF",    error5, trial);
-    print_summary("test_avl_tree create doubly list",                error6, trial);
+    print_summary("avl_tree verified to be sorted",             error0, trial);
+    print_summary("avl_tree verified to be unsorted",           error1, trial);
+    print_summary("avl_tree verified to be resorted",           error2, trial);
+    print_summary("avl_tree balanced by resort, compare vec",   error3, trial);
+    print_summary("avl_tree balanced by resort, compare depth", error4, trial);
+    print_summary("avl_tree balanced by resort, compare BF",    error5, trial);
+    print_summary("avl_tree create doubly list",                error6, trial);
 }
 
 

@@ -4,35 +4,6 @@
 #include<utility.h>
 
 
-template<typename CONTAINER>
-bool compare(const CONTAINER& c0, const CONTAINER& c1)
-{
-    if (c0.size() != c1.size()) return false;
-
-    auto i0 = c0.begin();
-    auto i1 = c1.begin();
-    for(; i0!=c0.end(); ++i0, ++i1)
-    {
-        if (*i0 != *i1) return false;
-    }
-    return true;
-}
-
-template<typename CONTAINER>
-void print(const std::string& header, const CONTAINER& c)
-{
-    std::uint32_t n=0;
-    std::uint32_t N=c.size();
-
-    std::cout << header << "["; 
-    for(const auto& x:c)
-    {
-        if (n!=N) std::cout << x << ",";
-        else      std::cout << x << "]";
-        ++n;
-    }
-}
-
 
 void test_sorting()
 {

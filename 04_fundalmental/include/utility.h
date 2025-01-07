@@ -132,44 +132,42 @@ inline std::vector<std::uint32_t> gen_random_coins(std::uint32_t size, std::uint
 }
 
 
-// ****************** //
-// *** Statistics *** //
-// ****************** //
-// Todo : 
-// * add namespace
-// * add percentile
-// * move to c++ folder
-//
-template<typename T>
-class statistics
+// *************** //
+// *** Compare *** //
+// *************** //
+template<typename CONTAINER>
+bool compare(const CONTAINER& c0, const CONTAINER& c1)
 {
-public:
-    explicit statistics(const T& x) : m_sum(x), m_count(0)
-    {
-    }
+    if (c0.size() != c1.size()) return false;
 
-    void add(const T& x)
+    auto i0 = c0.begin();
+    auto i1 = c1.begin();
+    for(; i0!=c0.end(); ++i0, ++i1)
     {
-        m_sum += x;
-        ++m_count;
+        if (*i0 != *i1) return false;
     }
-    
-    T mean() const noexcept
-    {
-        if (m_count > 0) 
-             return m_sum / m_count;
-        else return m_sum;             
-    }
-
-private:
-    T m_sum;
-    std::uint32_t m_count;
-};
+    return true;
+}
 
 
 // **************** //
 // *** Printing *** //
 // **************** //
+template<typename CONTAINER>
+void print(const std::string& header, const CONTAINER& c)
+{
+    std::uint32_t n=0;
+    std::uint32_t N=c.size();
+
+    std::cout << header << "["; 
+    for(const auto& x:c)
+    {
+        if (n!=N) std::cout << x << ",";
+        else      std::cout << x << "]";
+        ++n;
+    }
+}
+
 template<typename OUTPUT>
 void print_one_case(const std::string& test_name, 
                     OUTPUT ans0, 
@@ -215,6 +213,41 @@ inline void print_summary(const std::string& test_name, std::uint32_t error, std
                       << ", time = " << time0 << "/" << time1 
                       << std::flush;
 }
+
+
+// ****************** //
+// *** Statistics *** //
+// ****************** //
+// Todo : 
+// * add namespace
+// * add percentile
+// * move to c++ folder
+//
+template<typename T>
+class statistics
+{
+public:
+    explicit statistics(const T& x) : m_sum(x), m_count(0)
+    {
+    }
+
+    void add(const T& x)
+    {
+        m_sum += x;
+        ++m_count;
+    }
+    
+    T mean() const noexcept
+    {
+        if (m_count > 0) 
+             return m_sum / m_count;
+        else return m_sum;             
+    }
+
+private:
+    T m_sum;
+    std::uint32_t m_count;
+};
 
 
 // *************************** //

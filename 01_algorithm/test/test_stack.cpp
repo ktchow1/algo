@@ -55,7 +55,7 @@ void test_queue_from_stack()
         }
         if (!tester.compare(std_front, alg_front)) ++error;
     }
-    print_summary("test_queue_from_stack", error, trial);
+    print_summary("queue_from_stack", error, trial);
 }
 
 
@@ -99,7 +99,7 @@ void test_stack_from_queue()
         }
         if (!tester.compare(std_top, alg_top)) ++error;
     }
-    print_summary("test_stack_from_queue", error, trial);
+    print_summary("stack_from_queue", error, trial);
 }
 
 
@@ -150,9 +150,9 @@ void test_stack_with_vec()
         if (!tester1.compare(std_top, obj_top)) ++error1;
         if (!tester2.compare(std_top, obj_top)) ++error2;
     }
-    print_summary("test_stack_with_vec0", error0, trial);
-    print_summary("test_stack_with_vec1", error1, trial);
-    print_summary("test_stack_with_vec2", error2, trial);
+    print_summary("stack_with_vec0", error0, trial);
+    print_summary("stack_with_vec1", error1, trial);
+    print_summary("stack_with_vec2", error2, trial);
 }
 
 
@@ -174,7 +174,7 @@ void test_stack_with_min()
         assert(tester.compare());
         tester.clear();
     }
-    print_summary("test_stack_with_min", error, trial);
+    print_summary("stack_with_min", error, trial);
 }
 
 
