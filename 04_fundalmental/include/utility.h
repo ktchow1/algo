@@ -3,7 +3,10 @@
 #include<cstdint>
 #include<vector>
 #include<algorithm>
+#include<functional>
 #include<timer.h>
+
+using namespace std::placeholders;
 
 
 // ************************* //
@@ -174,7 +177,7 @@ void print_one_case(const std::string& test_name,
                     std::uint32_t error,
                     std::uint32_t trial, 
                     bool flag, 
-                    const std::string& str)
+                    const std::string& str = "")
 {
     std::cout << "\n" << test_name
               << " : ans0 = " << ans0 
@@ -183,7 +186,7 @@ void print_one_case(const std::string& test_name,
               <<  "/" << trial
               <<  " " << (flag? "OK":"ERROR") << str << std::flush;
 }
-
+/*
 template<typename OUTPUT>
 void print_one_case(const std::string& test_name, 
                     OUTPUT ans0, 
@@ -198,25 +201,27 @@ void print_one_case(const std::string& test_name,
               <<  ", error rate = " << error
               <<  "/" << trial
               <<  " " << (flag? "OK":"ERROR") << std::flush;
-}
+} */
 
 inline void print_summary(const std::string& test_name, const std::string& status)
 {
-    std::cout << "\n" << std::setw(60) << std::left << test_name << " " << status << std::flush;
+    std::cout << "\n" << std::setw(60) << std::left << test_name 
+                      << " " << status
+                      << std::flush;
 }
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial)
 {
     std::cout << "\n" << std::setw(60) << std::left << test_name 
-                      << " error rate = " << error << "/" << trial << std::flush;
+                      << " error rate = " << error << "/" << trial
+                      << std::flush;
 }
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial, std::uint64_t time0, std::uint64_t time1)
 {
     std::cout << "\n" << std::setw(60) << std::left << test_name 
                       << " error rate = " << error << "/" << trial 
-                      << ", time0 = " << time0
-                      << ", time1 = " << time1
+                      << ", time = " << time0 << "/" << time1 
                       << std::flush;
 }
 
@@ -370,3 +375,45 @@ void benchmark_2_vec_with_alg_input(const std::string&  test_name,
     print_summary(test_name, error, trial);
 }
 
+template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
+void benchmark_vec(const std::string&  test_name,
+                   const GEN_FUNCTION& gen_function, // nullary
+                   const ALG_FUNCTION& alg_function, // unary, take GEN_FUNCTION output as input
+                   const BMK_FUNCTION& bmk_function, // unary, take GEN_FUNCTION output as input
+                   std::uint32_t       trial, 
+                   bool                print_each_test_case)
+{
+    alg::timer timer0;
+    alg::timer timer1;
+    statistics<std::uint64_t> stat0(0);
+    statistics<std::uint64_t> stat1(0);
+    std::uint32_t error = 0;
+
+    if (print_each_test_case) std::cout << "\n";
+    for(std::uint32_t t=0; t!=trial; ++t)
+    {
+        auto data = gen_function();
+
+        timer0.click();
+        auto ans0 = alg_function(data);
+        timer0.click();
+
+        timer1.click();
+        auto ans1 = bmk_function(data); 
+        timer1.click();
+
+        stat0.add(timer0.time_elapsed_in_nsec());
+        stat1.add(timer1.time_elapsed_in_nsec());
+        if (ans0 != ans1) ++error;
+
+        if (print_each_test_case) 
+        {
+            print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+        }
+        else
+        {
+
+        }
+    }
+    print_summary(test_name, error, trial, stat0.mean(), stat1.mean());
+}
