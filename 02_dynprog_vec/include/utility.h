@@ -315,19 +315,30 @@ void benchmark_vec_with_alg_input(const std::string&  test_name,
                                   bool                print_each_test_case)
 {
     std::uint32_t error = 0;
+    alg::timer timer0;
+    alg::timer timer1;
+    statistics<std::uint64_t> stat0(0);
+    statistics<std::uint64_t> stat1(0);
     if (print_each_test_case) std::cout << "\n";
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
         auto vec  = gen_function(size, min_value, max_value);
-        auto ans0 = alg_function(vec, arg);
-        auto ans1 = bmk_function(vec, arg); 
-        bool flag = (ans0 == ans1);
 
+        timer0.click();
+        auto ans0 = alg_function(vec, arg);
+        timer0.click();
+        timer1.click();
+        auto ans1 = bmk_function(vec, arg); 
+        timer1.click();
+
+        bool flag = (ans0 == ans1);
         if (!flag) ++error;
         if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
+        stat0.add(timer0.time_elapsed_in_nsec());
+        stat1.add(timer1.time_elapsed_in_nsec());
     }
-    print_summary(test_name, error, trial);
+    print_summary(test_name, error, trial, stat0.mean(), stat1.mean());
 }
 
 template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>

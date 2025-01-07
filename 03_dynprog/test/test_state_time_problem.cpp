@@ -14,7 +14,7 @@ void test_state_time_problem()
                                  gen_random_coins, 
                                  alg::min_coin_change_iterative_in_time,           
                                  alg::min_coin_change_iterative_in_subprob,  
-                                 num_trial, 5, 1, 20, 100, print_each_test_case);  
+                                 num_trial, 7, 1, 20, 120, print_each_test_case);  
 
     benchmark_vec_with_alg_input("min_coin_change test 2",           
                                  gen_random_coins, 
