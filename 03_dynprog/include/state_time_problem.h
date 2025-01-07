@@ -136,7 +136,10 @@ namespace alg
         {
             for(const auto& x:coins)
             {
-                ans = std::min(ans, 1 + min_coin_change_resursive(coins, target-x)); // duplicated subproblem, slow !!!
+                if (x < target) // BUG : missing this check will result in infinity loop
+                {
+                    ans = std::min(ans, 1 + min_coin_change_resursive(coins, target-x)); 
+                }
             }
             return ans;
         }

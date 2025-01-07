@@ -5,23 +5,22 @@
 #include<utility.h>
 
 
-void test_min_coin_change()
-{
-}
-
-
-void test_num_coin_change()
-{
-}
-
-
-void test_knapsack()
-{
-}
-
 void test_state_time_problem()
 {
-    test_min_coin_change();
-    test_num_coin_change();
-    test_knapsack();
+    std::uint32_t num_trial = 1000;
+    bool print_each_test_case = false;
+  
+    benchmark_vec_with_alg_input("min_coin_change test 1",           
+                                 gen_random_coins, 
+                                 alg::min_coin_change_iterative_in_time,           
+                                 alg::min_coin_change_iterative_in_subprob,  
+                                 num_trial, 5, 1, 20, 100, print_each_test_case);  
+
+    benchmark_vec_with_alg_input("min_coin_change test 2",           
+                                 gen_random_coins, 
+                                 alg::min_coin_change_iterative_in_time,           
+                                 alg::min_coin_change_resursive,  
+                                 10, 3, 1, 8, 25, print_each_test_case); 
 }
+
+

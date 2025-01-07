@@ -54,7 +54,7 @@ inline std::string gen_random_palindrome(std::uint32_t size, std::uint32_t alpha
 }
 
 template<typename T>
-inline std::vector<T> gen_random_vec(std::uint32_t size, T min, T max)
+std::vector<T> gen_random_vec(std::uint32_t size, T min, T max)
 {
     std::vector<T> ans;
     for(std::uint32_t n=0; n!=size; ++n)
@@ -66,7 +66,7 @@ inline std::vector<T> gen_random_vec(std::uint32_t size, T min, T max)
 }
 
 template<typename T>
-inline std::vector<T> gen_random_sorted_vec(std::uint32_t size, T min, T max)
+std::vector<T> gen_random_sorted_vec(std::uint32_t size, T min, T max)
 {
     auto ans = gen_random_vec(size, min, max);
     std::sort(ans.begin(), ans.end());
@@ -74,7 +74,7 @@ inline std::vector<T> gen_random_sorted_vec(std::uint32_t size, T min, T max)
 }
 
 template<typename T>
-inline std::vector<T> gen_random_partial_sorted_vec(std::uint32_t size, T min, T max)
+std::vector<T> gen_random_partial_sorted_vec(std::uint32_t size, T min, T max)
 {
     auto ans = gen_random_sorted_vec(size, min, max);
 
@@ -111,6 +111,19 @@ inline std::vector<std::uint32_t> gen_random_swapped_order(std::uint32_t size)
             std::swap(ans[n], ans[n-1]);
             std::swap(ans[n-1], ans[n-2]);
         }
+    }
+    return ans;
+}
+
+inline std::vector<std::uint32_t> gen_random_coins(std::uint32_t size, std::uint32_t min, std::uint32_t max)
+{
+    std::vector<std::uint32_t> ans;
+    ans.push_back(1);
+
+    for(std::uint32_t n=1; n!=size; ++n)
+    {
+        std::uint32_t x = min + std::rand() % (max-min);
+        ans.push_back(x);
     }
     return ans;
 }
@@ -168,7 +181,7 @@ void print_one_case(const std::string& test_name,
               <<  ", ans1 = " << ans1 
               <<  ", error rate = " << error
               <<  "/" << trial
-              <<  " " << (flag? "OK":"ERROR") << str;
+              <<  " " << (flag? "OK":"ERROR") << str << std::flush;
 }
 
 template<typename OUTPUT>
@@ -184,18 +197,18 @@ void print_one_case(const std::string& test_name,
               <<  ", ans1 = " << ans1 
               <<  ", error rate = " << error
               <<  "/" << trial
-              <<  " " << (flag? "OK":"ERROR");
+              <<  " " << (flag? "OK":"ERROR") << std::flush;
 }
 
 inline void print_summary(const std::string& test_name, const std::string& status)
 {
-    std::cout << "\n" << std::setw(60) << std::left << test_name << " " << status;
+    std::cout << "\n" << std::setw(60) << std::left << test_name << " " << status << std::flush;
 }
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial)
 {
     std::cout << "\n" << std::setw(60) << std::left << test_name 
-                      << " error rate = " << error << "/" << trial;
+                      << " error rate = " << error << "/" << trial << std::flush;
 }
 
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial, std::uint64_t time0, std::uint64_t time1)
@@ -203,7 +216,8 @@ inline void print_summary(const std::string& test_name, std::uint32_t error, std
     std::cout << "\n" << std::setw(60) << std::left << test_name 
                       << " error rate = " << error << "/" << trial 
                       << ", time0 = " << time0
-                      << ", time1 = " << time1;
+                      << ", time1 = " << time1
+                      << std::flush;
 }
 
 
