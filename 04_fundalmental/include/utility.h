@@ -186,22 +186,13 @@ void print_one_case(const std::string& test_name,
               <<  "/" << trial
               <<  " " << (flag? "OK":"ERROR") << str << std::flush;
 }
-/*
-template<typename OUTPUT>
-void print_one_case(const std::string& test_name, 
-                    OUTPUT ans0, 
-                    OUTPUT ans1, 
-                    std::uint32_t error,
-                    std::uint32_t trial, 
-                    bool flag) 
+
+inline void print_progress(const std::string& test_name, 
+                           std::uint32_t t,
+                           std::uint32_t trial)
 {
-    std::cout << "\n" << test_name
-              << " : ans0 = " << ans0 
-              <<  ", ans1 = " << ans1 
-              <<  ", error rate = " << error
-              <<  "/" << trial
-              <<  " " << (flag? "OK":"ERROR") << std::flush;
-} */
+
+}
 
 inline void print_summary(const std::string& test_name, const std::string& status)
 {
@@ -229,159 +220,13 @@ inline void print_summary(const std::string& test_name, std::uint32_t error, std
 // *************************** //
 // *** Test loop functions *** //
 // *************************** //
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
-void benchmark_str(const std::string&  test_name,
-                   const GEN_FUNCTION& gen_function, 
-                   const ALG_FUNCTION& alg_function, 
-                   const BMK_FUNCTION& bmk_function, 
-                   std::uint32_t       trial, 
-                   std::uint32_t       size,
-                   std::uint32_t       alphabet_set,
-                   bool                print_each_test_case)
-{
-    std::uint32_t error = 0;
-    if (print_each_test_case) std::cout << "\n";
-
-    for(std::uint32_t t=0; t!=trial; ++t)
-    {
-        auto str = gen_function(size, alphabet_set);       
-        auto ans0 = alg_function(str);
-        auto ans1 = bmk_function(str);
-        bool flag = (ans0 == ans1);
-
-        if (!flag) ++error;
-        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag, str);
-    }
-    print_summary(test_name, error, trial);
-}
-
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT>
-void benchmark_vec(const std::string&  test_name,
-                   const GEN_FUNCTION& gen_function, 
-                   const ALG_FUNCTION& alg_function, 
-                   const BMK_FUNCTION& bmk_function, 
-                   std::uint32_t       trial, 
-                   std::uint32_t       size,
-                   GEN_INPUT           min_value,
-                   GEN_INPUT           max_value, 
-                   bool                print_each_test_case)
-{
-    std::uint32_t error = 0;
-    if (print_each_test_case) std::cout << "\n";
-
-    for(std::uint32_t t=0; t!=trial; ++t)
-    {
-        auto vec  = gen_function(size, min_value, max_value);
-        auto ans0 = alg_function(vec);
-        auto ans1 = bmk_function(vec); 
-        bool flag = (ans0 == ans1);
-
-        if (!flag) ++error;
-        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
-    }
-    print_summary(test_name, error, trial);
-}
-
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
-void benchmark_vec_without_input(const std::string&  test_name,
-                                 const GEN_FUNCTION& gen_function, 
-                                 const ALG_FUNCTION& alg_function, 
-                                 const BMK_FUNCTION& bmk_function, 
-                                 std::uint32_t       trial, 
-                                 std::uint32_t       size,
-                                 bool                print_each_test_case)
-{
-    std::uint32_t error = 0;
-    if (print_each_test_case) std::cout << "\n";
-
-    for(std::uint32_t t=0; t!=trial; ++t)
-    {
-        auto vec  = gen_function(size);
-        auto ans0 = alg_function(vec);
-        auto ans1 = bmk_function(vec); 
-        bool flag = (ans0 == ans1);
-
-        if (!flag) ++error;
-        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
-    }
-    print_summary(test_name, error, trial);
-}
-
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
-void benchmark_vec_with_alg_input(const std::string&  test_name,
-                                  const GEN_FUNCTION& gen_function, 
-                                  const ALG_FUNCTION& alg_function, 
-                                  const BMK_FUNCTION& bmk_function, 
-                                  std::uint32_t       trial, 
-                                  std::uint32_t       size,
-                                  GEN_INPUT           min_value,
-                                  GEN_INPUT           max_value,
-                                  ALG_INPUT           arg,
-                                  bool                print_each_test_case)
-{
-    std::uint32_t error = 0;
-    alg::timer timer0;
-    alg::timer timer1;
-    statistics<std::uint64_t> stat0(0);
-    statistics<std::uint64_t> stat1(0);
-    if (print_each_test_case) std::cout << "\n";
-
-    for(std::uint32_t t=0; t!=trial; ++t)
-    {
-        auto vec  = gen_function(size, min_value, max_value);
-
-        timer0.click();
-        auto ans0 = alg_function(vec, arg);
-        timer0.click();
-        timer1.click();
-        auto ans1 = bmk_function(vec, arg); 
-        timer1.click();
-
-        bool flag = (ans0 == ans1);
-        if (!flag) ++error;
-        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
-        stat0.add(timer0.time_elapsed_in_nsec());
-        stat1.add(timer1.time_elapsed_in_nsec());
-    }
-    print_summary(test_name, error, trial, stat0.mean(), stat1.mean());
-}
-
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION, typename GEN_INPUT, typename ALG_INPUT>
-void benchmark_2_vec_with_alg_input(const std::string&  test_name,
-                                    const GEN_FUNCTION& gen_function, 
-                                    const ALG_FUNCTION& alg_function, 
-                                    const BMK_FUNCTION& bmk_function, 
-                                    std::uint32_t       trial, 
-                                    std::uint32_t       size,
-                                    GEN_INPUT           min_value,
-                                    GEN_INPUT           max_value,
-                                    ALG_INPUT           arg,
-                                    bool                print_each_test_case)
-{
-    std::uint32_t error = 0;
-    if (print_each_test_case) std::cout << "\n";
-
-    for(std::uint32_t t=0; t!=trial; ++t)
-    {
-        auto vec0 = gen_function(size, min_value, max_value);
-        auto vec1 = gen_function(size, min_value, max_value);
-        auto ans0 = alg_function(vec0, vec1, arg);
-        auto ans1 = bmk_function(vec0, vec1, arg); 
-        bool flag = (ans0 == ans1);
-
-        if (!flag) ++error;
-        if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, flag);
-    }
-    print_summary(test_name, error, trial);
-}
-
-template<typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
-void benchmark_vec(const std::string&  test_name,
-                   const GEN_FUNCTION& gen_function, // nullary
-                   const ALG_FUNCTION& alg_function, // unary, take GEN_FUNCTION output as input
-                   const BMK_FUNCTION& bmk_function, // unary, take GEN_FUNCTION output as input
-                   std::uint32_t       trial, 
-                   bool                print_each_test_case)
+template<std::uint32_t GEN_NUM, typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
+void benchmark(const std::string&  test_name,
+               const GEN_FUNCTION& gen_function, // nullary
+               const ALG_FUNCTION& alg_function, // nary = GEN_NUM
+               const BMK_FUNCTION& bmk_function, // nary = GEN_NUM
+               std::uint32_t       trial, 
+               bool                print_each_test_case)
 {
     alg::timer timer0;
     alg::timer timer1;
@@ -392,28 +237,40 @@ void benchmark_vec(const std::string&  test_name,
     if (print_each_test_case) std::cout << "\n";
     for(std::uint32_t t=0; t!=trial; ++t)
     {
-        auto data = gen_function();
-
-        timer0.click();
-        auto ans0 = alg_function(data);
-        timer0.click();
-
-        timer1.click();
-        auto ans1 = bmk_function(data); 
-        timer1.click();
-
-        stat0.add(timer0.time_elapsed_in_nsec());
-        stat1.add(timer1.time_elapsed_in_nsec());
-        if (ans0 != ans1) ++error;
-
-        if (print_each_test_case) 
+        if constexpr (GEN_NUM == 1)
         {
-            print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            auto data = gen_function();
+
+            timer0.click();
+            auto ans0 = alg_function(data);
+            timer0.click();
+
+            timer1.click();
+            auto ans1 = bmk_function(data); 
+            timer1.click();
+
+            if (ans0 != ans1) ++error;
+            if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
         }
         else
         {
+            auto data0 = gen_function();
+            auto data1 = gen_function();
 
+            timer0.click();
+            auto ans0 = alg_function(data0, data1);
+            timer0.click();
+
+            timer1.click();
+            auto ans1 = bmk_function(data0, data1); 
+            timer1.click();
+
+            if (ans0 != ans1) ++error;
+            if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
         }
+
+        stat0.add(timer0.time_elapsed_in_nsec());
+        stat1.add(timer1.time_elapsed_in_nsec());
     }
     print_summary(test_name, error, trial, stat0.mean(), stat1.mean());
 }

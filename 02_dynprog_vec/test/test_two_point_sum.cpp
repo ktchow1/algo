@@ -8,48 +8,45 @@ void test_two_point_sum()
     std::uint32_t num_trial = 1000;
     bool print_each_test_case = false;
 
-    benchmark_vec("max_2_point_sum_distance",           
-                  gen_random_vec<std::int32_t>, 
-                  alg::max_2_point_sum_distance,           
-                  alg::max_2_point_sum_distance_bmk,
-                  num_trial, 100, -100, +100, print_each_test_case);
+    benchmark<1>("test max_2_point_sum_distance",           
+                 std::bind(gen_random_vec<std::int32_t>, 100, -100, +100),
+                 std::bind(alg::max_2_point_sum_distance,     _1),     
+                 std::bind(alg::max_2_point_sum_distance_bmk, _1),
+                 num_trial, print_each_test_case);
 
-    benchmark_vec("max_2_point_sum_with_equal_digit_sum",           
-                  gen_random_vec<std::uint32_t>, 
-                  alg::max_2_point_sum_with_equal_digit_sum,           
-                  alg::max_2_point_sum_with_equal_digit_sum_bmk,
-                  num_trial, 50, 0, +1000, print_each_test_case); 
+    benchmark<1>("test max_2_point_sum_with_equal_digit_sum",           
+                 std::bind(gen_random_vec<std::uint32_t>, 50, 0, +1000), 
+                 std::bind(alg::max_2_point_sum_with_equal_digit_sum,     _1),     
+                 std::bind(alg::max_2_point_sum_with_equal_digit_sum_bmk, _1),
+                 num_trial, print_each_test_case); 
 
-    // Todo
-    // max_2_point_sum_with_non_attacking_rooks
-    
-    benchmark_vec_with_alg_input("check_target_2_point_sum_in_1_sorted_vec", 
-                                 gen_random_sorted_vec<std::int32_t>, 
-                                 alg::check_target_2_point_sum_in_1_sorted_vec,           
-                                 alg::check_target_2_point_sum_in_1_sorted_vec_bmk,           
-                                 num_trial, 100, -6000, 6000, 40, print_each_test_case); 
-
-    benchmark_2_vec_with_alg_input("check_target_2_point_sum_in_2_sorted_vec", 
-                                   gen_random_sorted_vec<std::int32_t>, 
-                                   alg::check_target_2_point_sum_in_2_sorted_vec,           
-                                   alg::check_target_2_point_sum_in_2_sorted_vec_bmk,           
-                                   num_trial, 100, -6000, 6000, 40, print_each_test_case);    
+    benchmark<1>("test check_target_2_point_sum_in_1_sorted_vec", 
+                 std::bind(gen_random_sorted_vec<std::int32_t>, 100, -6000, +6000),  
+                 std::bind(alg::check_target_2_point_sum_in_1_sorted_vec,     _1, 40),      
+                 std::bind(alg::check_target_2_point_sum_in_1_sorted_vec_bmk, _1, 40),          
+                 num_trial, print_each_test_case); 
   
-    benchmark_vec_with_alg_input("count_target_2_point_sum", 
-                                 gen_random_vec<std::int32_t>, 
-                                 alg::count_target_2_point_sum,           
-                                 alg::count_target_2_point_sum_bmk,           
-                                 num_trial, 50, -40, 40, 50, print_each_test_case); 
+    benchmark<2>("test check_target_2_point_sum_in_2_sorted_vec", 
+                 std::bind(gen_random_sorted_vec<std::int32_t>, 100, -6000, +6000),
+                 std::bind(alg::check_target_2_point_sum_in_2_sorted_vec,     _1, _2, 40),      
+                 std::bind(alg::check_target_2_point_sum_in_2_sorted_vec_bmk, _1, _2, 40),          
+                 num_trial, print_each_test_case);    
     
-    benchmark_vec_with_alg_input("count_target_3_point_sum", 
-                                 gen_random_vec<std::int32_t>, 
-                                 alg::count_target_3_point_sum,           
-                                 alg::count_target_3_point_sum_bmk,           
-                                 num_trial, 50, -40, 40, 75, print_each_test_case); 
+    benchmark<1>("test count_target_2_point_sum", 
+                 std::bind(gen_random_vec<std::int32_t>, 50, -40, +40), 
+                 std::bind(alg::count_target_2_point_sum,     _1, 50),     
+                 std::bind(alg::count_target_2_point_sum_bmk, _1, 50),         
+                 num_trial, print_each_test_case); 
+    
+    benchmark<1>("test count_target_3_point_sum", 
+                 std::bind(gen_random_vec<std::int32_t>, 50, -40, +40),  
+                 std::bind(alg::count_target_3_point_sum,     _1, 75),     
+                 std::bind(alg::count_target_3_point_sum_bmk, _1, 75),         
+                 num_trial, print_each_test_case); 
 
-    benchmark_vec_with_alg_input("count_target_4_point_sum", 
-                                 gen_random_vec<std::int32_t>, 
-                                 alg::count_target_4_point_sum,           
-                                 alg::count_target_4_point_sum_bmk,           
-                                 num_trial, 50, -40, 40, 100, print_each_test_case);  
+    benchmark<1>("test count_target_4_point_sum", 
+                 std::bind(gen_random_vec<std::int32_t>, 50, -40, +40),  
+                 std::bind(alg::count_target_4_point_sum,     _1, 100),      
+                 std::bind(alg::count_target_4_point_sum_bmk, _1, 100),          
+                 num_trial, print_each_test_case);  
 }
