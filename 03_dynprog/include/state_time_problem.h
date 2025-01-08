@@ -69,6 +69,14 @@ namespace alg
 //
 namespace alg
 {  
+    // ****************************************************************************** //
+    // Consider region growing in graph :
+    // 1. vertex = {key}          with target                as destination vertex
+    // 2. vertex = {key x time}   with target (for all time) as destination vertices
+    //
+    // Both graphs has edge connecting vertices, with cost = 1, find shortest path.
+    // Both graphs work, with same implementation.
+    // ****************************************************************************** //
     std::uint32_t min_coin_change_iterative_in_time(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> states;  // image in region grow
@@ -83,14 +91,13 @@ namespace alg
             std::uint32_t v_prev = states[q.front()];
             q.pop();
 
-            // *** region grow to neighbour *** //
+            // *** for each neighbour *** //
             for(const auto& x:coins)
             {
                 std::uint32_t k = k_prev + x;
                 std::uint32_t v = v_prev + 1;
                 
-                // *** region grow stop criteria *** //
-                if (euler_update<std::less<std::uint32_t>>(states, k, v) && k <= target)
+                if (euler_update<std::less<std::uint32_t>>(states, k, v) && k <= target) 
                 {
                     q.push(k);
                 }
@@ -99,12 +106,14 @@ namespace alg
         return find_target(states, target);
     }
 
+    // *********************************** //
+    // 1. no region grow
+    // 2. use 2 maps to induce :
+    //    from subproblem with 1 coin 
+    //      to subproblem with 2 coins ...
+    // *********************************** //
     std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        // 1. no region grow
-        // 2. use 2 maps to induce :
-        //    from subproblem of size n 
-        //      to subproblem of size n+1
         std::unordered_map<std::uint32_t, std::uint32_t> states;  
         states[0] = 0;        
 
@@ -119,8 +128,7 @@ namespace alg
                     std::uint32_t k = k_prev + n * x;
                     std::uint32_t v = v_prev + n;
                     
-                    // *** stop criteria *** //
-                    if (k <= target)
+                    if (k <= target) 
                     {
                         euler_update<std::less<std::uint32_t>>(next_states, k, v);
                     }
@@ -163,10 +171,9 @@ namespace alg
 // ************************* //
 // *** Count coin change *** //
 // ************************* //
-// For counting the number of combo for coin change
-// there is no count_coin_change_iterative_in_time
-// there is no count_coin_change_recursive
-// This question is path dependent. Do not double count {1,1,2} & {1,2,1} 
+// Counting instead of minimization 
+// - no longer finding shortest path in the graph
+// - it become finding number of path in the graph
 //
 namespace alg
 {     
@@ -195,6 +202,9 @@ namespace alg
                 }
             }
             states = std::move(next_states);
+
+            std::cout << "\nconsider " << x << " : ";
+            for(const auto[y,z] : states) std::cout << y << "_" << z << ", " << std::flush;
         }
         return find_target(states, target);
     } 
@@ -210,62 +220,10 @@ namespace alg
 { /* 
     std::uint32_t knapsack_iterative_in_time(const std::unordered_map<std::uint32_t, std::uint32_t>& objects, std::uint32_t weight_limit)
     {
-        std::unordered_map<std::uint32_t, std::uint32_t> states;  
-        states[0] = 0;  
-
-        std::queue<std::uint32_t> q; 
-        q.push(0);     
-
-        while(!q.empty())
-        {
-            std::uint32_t k_prev = q.front();
-            std::uint32_t v_prev = states[q.front()];
-            q.pop();
-
-            // *** region grow to neighbour *** //
-            for(const auto& x:coins)
-            {
-                std::uint32_t k = k_prev + x;
-                std::uint32_t v = v_prev + 1;
-                
-                // *** region grow stop criteria *** //
-                if (euler_update<std::less<std::uint32_t>>(states, k, v) && v <= target)
-                {
-                    q.push(k);
-                }
-            }
-        }
-        return find_target(states, target);
-    } */
-/*
+    } 
+  
     std::uint32_t knapsack_iterative_in_subprob(const std::unordered_map<std::uint32_t, std::uint32_t>& objects, std::uint32_t weight_limit)
     {
-        std::unordered_map<std::uint32_t, std::uint32_t> states;  
-        states[0] = 0;        
-
-        for(const auto& x:coins)
-        {
-            std::unordered_map<std::uint32_t, std::uint32_t> next_states(states);  
-            for(const auto& [k_prev, v_prev] : states)
-            {
-                std::uint32_t n = 1;
-                while(true)
-                {
-                    std::uint32_t k = k_prev + n * x;
-                    std::uint32_t v = v_prev + n;
-                    
-                    // *** stop criteria *** //
-                    if (v <= target)
-                    {
-                        euler_update<std::less<std::uint32_t>>(next_states, k, v);
-                    }
-                    else break;
-                    ++n;
-                }
-            }
-            states = std::move(next_states);
-        }
-        return find_target(states, target);
     } */
 }
 
