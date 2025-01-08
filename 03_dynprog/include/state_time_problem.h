@@ -77,7 +77,7 @@ namespace alg
                 std::uint32_t v = v_prev + 1;
                 
                 // *** region grow stop criteria *** //
-                if (euler_update<std::less<std::uint32_t>>(states, k, v) && v <= target)
+                if (euler_update<std::less<std::uint32_t>>(states, k, v) && k <= target)
                 {
                     q.push(k);
                 }
@@ -107,7 +107,7 @@ namespace alg
                     std::uint32_t v = v_prev + n;
                     
                     // *** stop criteria *** //
-                    if (v <= target)
+                    if (k <= target)
                     {
                         euler_update<std::less<std::uint32_t>>(next_states, k, v);
                     }
@@ -144,6 +144,46 @@ namespace alg
         }
         else return ans;
     }
+}
+
+
+// ************************* //
+// *** Count coin change *** //
+// ************************* //
+// For counting the number of combo for coin change
+// there is no count_coin_change_iterative_in_time
+// there is no count_coin_change_recursive
+//
+namespace alg
+{ /*  
+    std::uint32_t count_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    {
+        std::unordered_map<std::uint32_t, std::uint32_t> states;  
+        states[0] = 0;        
+
+        for(const auto& x:coins)
+        {
+            std::unordered_map<std::uint32_t, std::uint32_t> next_states(states);  
+            for(const auto& [k_prev, v_prev] : states)
+            {
+                std::uint32_t n = 1;
+                while(true)
+                {
+                    std::uint32_t k = k_prev + n * x;
+                    
+                    // *** stop criteria *** //
+                    if (k <= target)
+                    {
+                        euler_update_increment(next_states, k);
+                    }
+                    else break;
+                    ++n;
+                }
+            }
+            states = std::move(next_states);
+        }
+        return find_target(states, target);
+    } */
 }
 
 

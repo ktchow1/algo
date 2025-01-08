@@ -66,7 +66,7 @@ inline void banner(const std::string str)
 
 int main()
 {
-    banner("01_algorithm");
+/*  banner("01_algorithm");
     test_arithmetic();
     test_bisection();
     test_stack();
@@ -82,7 +82,7 @@ int main()
     test_string_problem();
     test_stack_problem();
     test_sorting_problem();
-    
+*/    
     banner("03_dynprog");
 //  test_singly_link_subproblem();
 //  test_multi_link_subproblem();
