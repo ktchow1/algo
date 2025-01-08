@@ -34,6 +34,19 @@ namespace alg
         }
     }
 
+    template<typename K, typename V> // V must be integer type
+    void euler_update_increment(std::unordered_map<K,V>& states, const K& key)
+    {
+        if (auto iter = states.find(key); iter != states.end())
+        {
+            ++iter->second;
+        }
+        else
+        {
+            states[key] = 1;
+        }
+    }
+
     template<typename K, typename V>
     V find_target(const std::unordered_map<K,V>& states, const K& key)
     {
@@ -153,9 +166,10 @@ namespace alg
 // For counting the number of combo for coin change
 // there is no count_coin_change_iterative_in_time
 // there is no count_coin_change_recursive
+// This question is path dependent. Do not double count {1,1,2} & {1,2,1} 
 //
 namespace alg
-{ /*  
+{     
     std::uint32_t count_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> states;  
@@ -183,7 +197,7 @@ namespace alg
             states = std::move(next_states);
         }
         return find_target(states, target);
-    } */
+    } 
 }
 
 
