@@ -141,30 +141,23 @@ namespace alg
         return find_target(states, target);
     }
 
-    std::uint32_t min_coin_change_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_slow_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        bool any_coin_less_than_target = false;
+        std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
         for(const auto& x:coins)
         {
             if (x == target) return 1;
-            if (x <  target) any_coin_less_than_target = true; 
-        }
-
-        // *** recursion *** //
-        std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
-        if (any_coin_less_than_target) 
-        {
-            for(const auto& x:coins)
+            if (x <  target)
             {
-                if (x < target) // BUG : missing this check will result in infinity loop
-                {
-                    ans = std::min(ans, 1 + min_coin_change_recursive(coins, target-x)); 
-                }
+                ans = std::min(ans, 1 + min_coin_change_slow_recursive(coins, target-x)); 
             }
-            return ans;
         }
-        else return ans;
+        return ans;
     }
+/*
+    std::uint32_t min_coin_change_fast_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    {
+    } */
 }
 
 
