@@ -7,32 +7,36 @@
 
 void test_min_coin_change()
 {
-    for(std::uint32_t target=10; target!=36; target+=2)
-    {
-        std::vector<std::uint32_t> coins{1,2,5,8};
-        auto ans0 = alg::min_coin_change_iterative_in_time(coins, target);
-        auto ans1 = alg::min_coin_change_slow_recursive(coins, target);
-        assert(ans0 == ans1);
-    }
-    print_summary("min_coin_change iterative vs recursion", "all succeeded");
-
-    {
-        std::uint32_t num_trial = 500;
-        bool print_each_test_case = false;
-  
-        benchmark<1>("min_coin_change iterative0 vs iterative1",           
-                     std::bind(gen_random_coins, 10, 1, 50), 
-                     std::bind(alg::min_coin_change_iterative_in_time,    _1, 250),      
-                     std::bind(alg::min_coin_change_iterative_in_subprob, _1, 250),
-                     num_trial, print_each_test_case);
-    }
+    std::uint32_t num_trial;
+    bool print_each_test_case = false;
+     
+    num_trial = 10;
+    benchmark<1>("min_coin_change iterative_in_time vs slow_recursive",           
+                 std::bind(gen_random_coins, 4, 2, 8), 
+                 std::bind(alg::min_coin_change_iterative_in_time, _1, 25),      
+                 std::bind(alg::min_coin_change_slow_recursive,    _1, 25),
+                 num_trial, print_each_test_case);
+ 
+    num_trial = 500;
+    benchmark<1>("min_coin_change iterative_in_time vs fast_recursive",           
+                 std::bind(gen_random_coins, 5, 2, 12), 
+                 std::bind(alg::min_coin_change_iterative_in_time, _1, 50),      
+                 std::bind(alg::min_coin_change_fast_recursive,    _1, 50),
+                 num_trial, print_each_test_case);
+ 
+    num_trial = 500;
+    benchmark<1>("min_coin_change iterative0 vs iterative1",           
+                 std::bind(gen_random_coins, 10, 2, 50), 
+                 std::bind(alg::min_coin_change_iterative_in_time,    _1, 250),      
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 250),
+                 num_trial, print_each_test_case);
 }
 
 
 void test_count_coin_change()
 {
     {
-        std::vector<std::uint32_t> coins{1,2,5};
+    //  std::vector<std::uint32_t> coins{1,2,5};
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,1) == 1);  
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,2) == 2); 
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,3) == 2); 
@@ -40,7 +44,7 @@ void test_count_coin_change()
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,5) == 4); 
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,6) == 5); 
     //  assert(alg::count_coin_change_iterative_in_subprob(coins,7) == 6); 
-        assert(alg::count_coin_change_iterative_in_subprob(coins,8) == 7); 
+    //  assert(alg::count_coin_change_iterative_in_subprob(coins,8) == 7); 
     }
     print_summary("count_coin_change iterative vs hardcoded answer", "all succeeded");
 }

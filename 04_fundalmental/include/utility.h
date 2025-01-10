@@ -118,16 +118,24 @@ inline std::vector<std::uint32_t> gen_random_swapped_order(std::uint32_t size)
     return ans;
 }
 
+// Assume size-1 <= max-min+1
 inline std::vector<std::uint32_t> gen_random_coins(std::uint32_t size, std::uint32_t min, std::uint32_t max)
 {
     std::vector<std::uint32_t> ans;
     ans.push_back(1);
 
+    for(std::uint32_t n=min; n!=max; ++n)
+    {
+        ans.push_back(n);
+    }
     for(std::uint32_t n=1; n!=size; ++n)
     {
-        std::uint32_t x = min + std::rand() % (max-min);
-        ans.push_back(x);
+        std::uint32_t m = 1+rand()%(ans.size()-1);
+        std::swap(ans[n], ans[m]);
     }
+
+    ans.resize(size);
+    std::sort(ans.begin(), ans.end());
     return ans;
 }
 
@@ -183,13 +191,6 @@ void print_one_case(const std::string& test_name,
               <<  ", error rate = " << error
               <<  "/" << trial
               <<  " " << (flag? "OK":"ERROR") << str << std::flush;
-}
-
-inline void print_progress(const std::string& test_name, 
-                           std::uint32_t t,
-                           std::uint32_t trial)
-{
-
 }
 
 inline void print_summary(const std::string& test_name, const std::string& status)

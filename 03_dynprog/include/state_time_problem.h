@@ -34,19 +34,6 @@ namespace alg
         }
     }
 
-    template<typename K, typename V> // V must be integer type
-    void euler_update_increment(std::unordered_map<K,V>& states, const K& key)
-    {
-        if (auto iter = states.find(key); iter != states.end())
-        {
-            ++iter->second;
-        }
-        else
-        {
-            states[key] = 1;
-        }
-    }
-
     template<typename K, typename V>
     V find_target(const std::unordered_map<K,V>& states, const K& key)
     {
@@ -59,16 +46,63 @@ namespace alg
 }
 
 
-// *********************** //
-// *** Min coin change *** //
-// *********************** //
+// *** Idea *** //
+//
 // Notations
 // key   = sum(k[n],w[n]) <--- constraint, coin value in total 
 // value = sum(v[n],w[n]) <--- objective,  coin count in total
 // param = w[n]           <--- decision,   coin count for each type
 //
+//
+// *********************** //
+// *** Min coin change *** //
+// *********************** //
 namespace alg
 {  
+    std::uint32_t min_coin_change_slow_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    {
+        std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
+        for(const auto& x:coins)
+        {
+            if (x == target) return 1;
+            if (x <  target)
+            {
+                ans = std::min(ans, 1 + min_coin_change_slow_recursive(coins, target-x)); 
+            }
+        }
+        return ans;
+    }
+  
+    std::uint32_t min_coin_change_fast_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    {
+        if (coins.size() == 1)
+        {
+            if (target % coins[0] == 0) 
+            {
+                return target / coins[0];
+            }
+            else 
+            {
+                return std::numeric_limits<std::uint32_t>::max();
+            }
+        }
+        else 
+        {
+            std::vector<std::uint32_t> coins_sub(coins);
+            coins_sub.pop_back();
+
+            if (coins.back() > target)
+            {
+                return min_coin_change_fast_recursive(coins_sub, target);
+            }
+            else
+            {
+                return std::min(min_coin_change_fast_recursive(coins,     target-coins.back()) + 1,
+                                min_coin_change_fast_recursive(coins_sub, target));
+            }
+        }
+    } 
+
     // ****************************************************************************** //
     // Consider region growing in graph :
     // 1. vertex = {key}          with target                as destination vertex
@@ -141,23 +175,6 @@ namespace alg
         return find_target(states, target);
     }
 
-    std::uint32_t min_coin_change_slow_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
-    {
-        std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
-        for(const auto& x:coins)
-        {
-            if (x == target) return 1;
-            if (x <  target)
-            {
-                ans = std::min(ans, 1 + min_coin_change_slow_recursive(coins, target-x)); 
-            }
-        }
-        return ans;
-    }
-/*
-    std::uint32_t min_coin_change_fast_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
-    {
-    } */
 }
 
 
@@ -165,42 +182,12 @@ namespace alg
 // *** Count coin change *** //
 // ************************* //
 // Counting instead of minimization 
-// - no longer finding shortest path in the graph
-// - it become finding number of path in the graph
 //
 namespace alg
-{     
+{   /* 
     std::uint32_t count_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        std::unordered_map<std::uint32_t, std::uint32_t> states;  
-        states[0] = 0;        
-
-        for(const auto& x:coins)
-        {
-            std::unordered_map<std::uint32_t, std::uint32_t> next_states(states);  
-            for(const auto& [k_prev, v_prev] : states)
-            {
-                std::uint32_t n = 1;
-                while(true)
-                {
-                    std::uint32_t k = k_prev + n * x;
-                    
-                    // *** stop criteria *** //
-                    if (k <= target)
-                    {
-                        euler_update_increment(next_states, k);
-                    }
-                    else break;
-                    ++n;
-                }
-            }
-            states = std::move(next_states);
-
-            std::cout << "\nconsider " << x << " : ";
-            for(const auto[y,z] : states) std::cout << y << "_" << z << ", " << std::flush;
-        }
-        return find_target(states, target);
-    } 
+    } */
 }
 
 
@@ -210,7 +197,7 @@ namespace alg
 // objects[weight] = value
 //
 namespace alg
-{ /* 
+{   /* 
     std::uint32_t knapsack_iterative_in_time(const std::unordered_map<std::uint32_t, std::uint32_t>& objects, std::uint32_t weight_limit)
     {
     } 
