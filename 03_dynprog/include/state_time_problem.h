@@ -3,6 +3,7 @@
 #include<limits>
 #include<queue>
 #include<unordered_map>
+#include<matrix.h>
 
 
 // ***************************************** //
@@ -59,7 +60,7 @@ namespace alg
 // *********************** //
 namespace alg
 {  
-    std::uint32_t min_coin_change_slow_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_recursive_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
         for(const auto& x:coins)
@@ -67,13 +68,13 @@ namespace alg
             if (x == target) return 1;
             if (x <  target)
             {
-                ans = std::min(ans, 1 + min_coin_change_slow_recursive(coins, target-x)); 
+                ans = std::min(ans, 1 + min_coin_change_recursive_in_state(coins, target-x)); 
             }
         }
         return ans;
     }
   
-    std::uint32_t min_coin_change_fast_recursive(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_recursive_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         if (coins.size() == 1)
         {
@@ -88,30 +89,20 @@ namespace alg
         }
         else 
         {
-            std::vector<std::uint32_t> coins_sub(coins);
-            coins_sub.pop_back();
-
+            std::vector<std::uint32_t> coins_sub(coins.begin(), --coins.end());
             if (coins.back() > target)
             {
-                return min_coin_change_fast_recursive(coins_sub, target);
+                return min_coin_change_recursive_in_subprob(coins_sub, target);
             }
             else
             {
-                return std::min(min_coin_change_fast_recursive(coins,     target-coins.back()) + 1,
-                                min_coin_change_fast_recursive(coins_sub, target));
+                return std::min(min_coin_change_recursive_in_subprob(coins,     target-coins.back()) + 1,
+                                min_coin_change_recursive_in_subprob(coins_sub, target));
             }
         }
     } 
 
-    // ****************************************************************************** //
-    // Consider region growing in graph :
-    // 1. vertex = {key}          with target                as destination vertex
-    // 2. vertex = {key x time}   with target (for all time) as destination vertices
-    //
-    // Both graphs has edge connecting vertices, with cost = 1, find shortest path.
-    // Both graphs work, with same implementation.
-    // ****************************************************************************** //
-    std::uint32_t min_coin_change_iterative_in_time(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_iterative_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> states;  // image in region grow
         states[0] = 0;                                            // bug : must initialize 
@@ -140,12 +131,43 @@ namespace alg
         return find_target(states, target);
     }
 
-    // *********************************** //
-    // 1. no region grow
-    // 2. use 2 maps to induce :
-    //    from subproblem with 1 coin 
-    //      to subproblem with 2 coins ...
-    // *********************************** //
+    std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    {
+        // n = matrix.y =   {1,2,3,... coins.size}
+        // m = matrix.x = {0,1,2,3,... target} 
+        matrix<std::uint32_t> mat(coins.size(), target+1, std::numeric_limits<std::uint32_t>::max());
+        
+        // for 1st row
+        for(std::uint32_t m=0; m<=target; ++m) 
+        {
+            if (m % coins[0] == 0) 
+            {
+                mat(0,m) = m / coins[0];
+            }
+        }
+        // for 1st col
+        for(std::uint32_t n=0; n!=coins.size(); ++n) 
+        {
+            mat(n,0) = 0;
+        }
+
+        for(std::uint32_t n=1; n!=coins.size(); ++n)
+        {
+            for(std::uint32_t m=1; m<=target; ++m)
+            {
+                if (coins[n] > m)
+                {
+                    mat(n,m) = mat(n-1,m);
+                }
+                else
+                {
+                    mat(n,m) = std::min(mat(n-1,m), mat(n,m-coins[n]) + 1);
+                }
+            }
+        }
+        return mat(coins.size()-1, target);
+    }
+/*
     std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> states;  
@@ -173,8 +195,7 @@ namespace alg
             states = std::move(next_states);
         }
         return find_target(states, target);
-    }
-
+    } */
 }
 
 

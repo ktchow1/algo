@@ -10,25 +10,25 @@ void test_min_coin_change()
     std::uint32_t num_trial;
     bool print_each_test_case = false;
      
-    num_trial = 10;
-    benchmark<1>("min_coin_change iterative_in_time vs slow_recursive",           
-                 std::bind(gen_random_coins, 4, 2, 8), 
-                 std::bind(alg::min_coin_change_iterative_in_time, _1, 25),      
-                 std::bind(alg::min_coin_change_slow_recursive,    _1, 25),
+    num_trial = 20;
+    benchmark<1>("min_coin_change 1",
+                 std::bind(gen_random_coins, 3, 2, 10), 
+                 std::bind(alg::min_coin_change_recursive_in_state, _1, 25),
+                 std::bind(alg::min_coin_change_iterative_in_state, _1, 25),      
                  num_trial, print_each_test_case);
  
-    num_trial = 500;
-    benchmark<1>("min_coin_change iterative_in_time vs fast_recursive",           
-                 std::bind(gen_random_coins, 5, 2, 12), 
-                 std::bind(alg::min_coin_change_iterative_in_time, _1, 50),      
-                 std::bind(alg::min_coin_change_fast_recursive,    _1, 50),
+    num_trial = 1000;
+    benchmark<1>("min_coin_change 2",           
+                 std::bind(gen_random_coins, 6, 2, 30), 
+                 std::bind(alg::min_coin_change_recursive_in_subprob, _1, 100),
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 100),      
                  num_trial, print_each_test_case);
- 
-    num_trial = 500;
-    benchmark<1>("min_coin_change iterative0 vs iterative1",           
-                 std::bind(gen_random_coins, 10, 2, 50), 
-                 std::bind(alg::min_coin_change_iterative_in_time,    _1, 250),      
-                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 250),
+    
+    num_trial = 1000;
+    benchmark<1>("min_coin_change 3",           
+                 std::bind(gen_random_coins, 20, 2, 100), 
+                 std::bind(alg::min_coin_change_iterative_in_state,   _1, 800),      
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 800),
                  num_trial, print_each_test_case);
 }
 
