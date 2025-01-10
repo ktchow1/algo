@@ -140,6 +140,22 @@ inline std::vector<std::uint32_t> gen_random_coins(std::uint32_t size, std::uint
     return ans;
 }
 
+inline auto gen_random_objects(std::uint32_t size, 
+                               std::uint32_t min_weight, 
+                               std::uint32_t max_weight,
+                               std::uint32_t min_value, 
+                               std::uint32_t max_value)
+{
+    std::vector<std::pair<std::uint32_t,std::uint32_t>> ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        std::uint32_t w = min_weight + rand()% (max_weight - min_weight);
+        std::uint32_t v = min_value  + rand()% (max_value  - min_value);
+        ans.push_back(std::make_pair(w,v));
+    }
+    return ans;
+}
+
 
 // *************** //
 // *** Compare *** //
