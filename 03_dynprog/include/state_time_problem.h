@@ -189,7 +189,7 @@ namespace alg
         // m = matrix.size_x = {0,1,2,3,... target} 
         matrix<std::uint32_t> mat(coins.size(), target+1, inf<std::uint32_t>);
         
-        // for 1st row
+        // init 1st row
         for(std::uint32_t m=0; m<=target; ++m) 
         {
             if (m % coins[0] == 0) 
@@ -198,13 +198,13 @@ namespace alg
             }
         }
 
-        // for 1st col
+        // init 1st col
         for(std::uint32_t n=0; n!=coins.size(); ++n) 
         {
             mat(n,0) = 0;
         }
 
-        // for matrix
+        // iteration
         for(std::uint32_t n=1; n!=coins.size(); ++n)
         {
             for(std::uint32_t m=1; m<=target; ++m)
@@ -265,7 +265,7 @@ namespace alg
     {
         matrix<std::uint32_t> mat(coins.size(), target+1, 0); 
         
-        // for 1st row
+        // init 1st row
         for(std::uint32_t m=0; m<=target; ++m) 
         {
             if (m % coins[0] == 0) 
@@ -274,13 +274,13 @@ namespace alg
             }
         }
 
-        // for 1st col
+        // init 1st col
         for(std::uint32_t n=0; n!=coins.size(); ++n) 
         {
             mat(n,0) = 1; 
         }
 
-        // for matrix
+        // iteration
         for(std::uint32_t n=1; n!=coins.size(); ++n)
         {
             for(std::uint32_t m=1; m<=target; ++m)
@@ -308,20 +308,26 @@ namespace alg
 // second = single object value
 // 
 // for std::unordered_map<...> "graph" 
-// key   = sum of objects weight
-// value = sum of objects value
+// key   = total objects weight
+// value = total objects value
 //
 namespace alg
 {  
-    void init(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, auto& graph, auto& queue) 
+
+    void knapsack_init(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, auto& graph, auto& queue) 
     {
+        // BUG.2 : Need to add more init points, otherwise some states in graph can never be reached
+        //
+        // we can either (both proved to work in test) :
+        // * add all states, i.e. from 0,1,2,...,weight_limit, OR
+        // * add all states below min_object_weight only        
+        //
         std::uint32_t min_object_weight = inf<std::uint32_t>;
         for(const auto& x:objects)
         {
             if (min_object_weight > x.first)
                 min_object_weight = x.first;
         }
-
         for(std::uint32_t m=0; m!=min_object_weight; ++m)
         {
             graph[m] = 0;
@@ -333,7 +339,7 @@ namespace alg
     {
         std::unordered_map<std::uint32_t, std::uint32_t> graph;
         std::queue<std::uint32_t> q;    
-        init(objects, graph, q); // <--- see BUG.2, we need more init points to handle case : state < weight_limit (strictly less) 
+        knapsack_init(objects, graph, q); // <--- BUG.2
 
         while(!q.empty())
         {
@@ -364,20 +370,23 @@ namespace alg
         // m = matrix.size_x = {0,1,2,3,... weight_limit} 
         matrix<std::uint32_t> mat(objects.size(), weight_limit+1, 0);
         
-        // for 1st row
+        // init 1st row
         for(std::uint32_t m=0; m<=weight_limit; ++m) 
         {
-        //  if (m % objects[0].first == 0) <--- see BUG.2, because constraint is : state <= weight_limit, NOT state == weight_limit
+        //  if (m % objects[0].first == 0) <--- BUG.2, as constraint is : state <= weight_limit, 
+        //                                                            NOT state == weight_limit,
+        //                                                            we can still put items in knapsack 
+        //                                                            even if state % object_weight != 0
             mat(0,m) = (m / objects[0].first) * objects[0].second;
         }
 
-        // for 1st col
+        // init 1st col
         for(std::uint32_t n=0; n!=objects.size(); ++n) 
         {
             mat(n,0) = 0;
         }
 
-        // for matrix
+        // iteration
         for(std::uint32_t n=1; n!=objects.size(); ++n)
         {
             for(std::uint32_t m=1; m<=weight_limit; ++m)
