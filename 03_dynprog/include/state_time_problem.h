@@ -47,21 +47,31 @@ namespace alg
     }
 }
 
-// ******************************************************************************************************************************** //
+// ************************************************************************************************* //
 // [Concepts]
+//                   coin change        knapsack           job schedule             
+// ---------------------------------------------------------------------------------
+//            x      coin value         obj weight         task workload   
+//            y      1                  obj value          task profit                                      
+//      param p      coin num           obj num            task done/not (i.e. 1/0)
+//  prob size N     #coin type         #obj type          #task type
+// 
+//      state s      s[N-1] = sum(x[n], p[n], for n=[0,N-1])
+//      value v      v[N-1] = sum(y[n], p[n], for n=[0,N-1])
+// 
+//  coin change      min v under constraint  s[N-1] == target
+//     knapsack      max v under constraint  s[N-1] <= weight_limit
+// job schedule      max v under constraints s[n]   <= deadline[n] for all n=[0,N-1]
 //
-// constraint : state = sum(x[n],p[n])        example : x = coin denomination, state = sum of coins value 
-// objective  : value = sum(y[n],p[n])        example : y = 1 for all n,       value = num of coins used (in total)
-// decision   : param = p[n]                  example :                        param = num of coin  used (for each type)
 //
+// ************************************************************************************************* //
 // Approaches (with speed 4 > 3 > 2 > 1)
 // 1. recursive in state-graph
 // 2. recursive in subproblem-table           
-// 3. iterative in state-graph                iterative version of 1, aka region_growing (cannot be implemented as tabulation)
-// 4. iterative in subproblem-table           iterative version of 2, aka tabulation     (cannot be implemented as region growing)
+// 3. iterative in state-graph         implemented as region_growing
+// 4. iterative in subproblem-table    implemented as tabulation   
 //
 //
-// ******************************************************************************************************************************** //
 // 1. Recursion in state-graph connects a vertex with its neighbours in the same problem size
 //
 //    f(coins, target) = min[ f(coins, target-coins[0]) + 1,
@@ -91,21 +101,19 @@ namespace alg
 // *  col[1] = subproblem with target = 1 
 //    ...
 //
-// ******************************************************************************************************************************** //
-// BUG.1 and BUG.2
+// ************************************************************************************************* //
+// Remark 1. For min coin change : 
+// - all 4 implementations involve "std::numeric_limits<T>::max() + 1" 
+// - overflow will happen (unless $1 is always in coin set)
+// - overflow can be avoided by using inf<T>, one<T> and add(x,y) 
 //
-// 1. all 4 min_coin_change() algo
-// -  involve "std::numeric_limits<T>::max() + 1", which may overflow 
-// -  need to replace them with inf<T>, one<T> and add(x,y) 
-//
-// 2. in knapsack, unlike the constraint in coin change :  
-//    state == target            for coin change
-//    state <= weight_limit      for knapsack 
-//
-// Both BUG.1&2 will not be revealed if :
-// * there is $1 coin or
-// * there is 1kg object in knapsack
-//
+// Remark 2. For knapsack :
+// - there is a change in constraint
+//   state == target            for coin change
+//   state <= weight_limit      for knapsack 
+//  
+// Remark 3. For job schedule : 
+// - there is a change in decision param,   
 //
 //
 // *********************** //
@@ -160,16 +168,16 @@ namespace alg
         std::unordered_map<std::uint32_t, std::uint32_t> graph;   // graph in region grow
         graph[0] = 0;                                             // bug : must initialize 
 
-        std::queue<std::uint32_t> q;                              // queue in region growstates
-        q.push(0);                                                // bug : must initialize 
+        std::queue<std::uint32_t> queue;                          // queue in region growstates
+        queue.push(0);                                            // bug : must initialize 
 
-        while(!q.empty())
+        while(!queue.empty())
         {
-            std::uint32_t s_prev = q.front();
-            std::uint32_t v_prev = graph[q.front()];
-            q.pop();
+            std::uint32_t s_prev = queue.front();
+            std::uint32_t v_prev = graph[queue.front()];
+            queue.pop();
 
-            // *** for each neighbour *** //
+            // for each neighbour
             for(const auto& x:coins)
             {
                 std::uint32_t s = s_prev + x;
@@ -177,7 +185,7 @@ namespace alg
                 
                 if (euler_update<std::less<std::uint32_t>>(graph, s, v) && s <= target) 
                 {
-                    q.push(s);
+                    queue.push(s);
                 }
             }
         }
@@ -188,9 +196,10 @@ namespace alg
 
     std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        // n = matrix.size_y =   {1,2,3,... coins.size}
-        // m = matrix.size_x = {0,1,2,3,... target} 
         matrix<std::uint32_t> mat(coins.size(), target+1, inf<std::uint32_t>);
+        // where mat(n,m) = min num of coins need to reach state m with coins {0,1,2..,n}
+        //              n =   {1,2,3,... coins.size}
+        //              m = {0,1,2,3,... target} 
         
         // init 1st row
         for(std::uint32_t m=0; m<=target; ++m) 
@@ -230,9 +239,7 @@ namespace alg
 // ************************* //
 // *** Count coin change *** //
 // ************************* //
-// Unlike minimization coin change problem,
-// this is a counting coin change problem,
-// in which, approach 1,3 do not apply.
+// In here, approach 1,3 do not work.
 //
 namespace alg
 {   
@@ -316,41 +323,21 @@ namespace alg
 //
 namespace alg
 {  
-
-    void knapsack_init(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, auto& graph, auto& queue) 
-    {
-        // BUG.2 : Need to add more init points, otherwise some states in graph can never be reached
-        //
-        // we can either (both proved to work in test) :
-        // * add all states, i.e. from 0,1,2,...,weight_limit, OR
-        // * add all states below min_object_weight only        
-        //
-        std::uint32_t min_object_weight = inf<std::uint32_t>;
-        for(const auto& x:objects)
-        {
-            if (min_object_weight > x.first)
-                min_object_weight = x.first;
-        }
-        for(std::uint32_t m=0; m!=min_object_weight; ++m)
-        {
-            graph[m] = 0;
-            queue.push(m);
-        }
-    }
-
     std::uint32_t knapsack_iterative_in_state(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> graph;
-        std::queue<std::uint32_t> q;    
-        knapsack_init(objects, graph, q); // <--- BUG.2
+        graph[0] = 0;
+        
+        std::queue<std::uint32_t> queue;    
+        queue.push(0);
 
-        while(!q.empty())
+        while(!queue.empty())
         {
-            std::uint32_t s_prev = q.front();
-            std::uint32_t v_prev = graph[q.front()];
-            q.pop();
+            std::uint32_t s_prev = queue.front();
+            std::uint32_t v_prev = graph[queue.front()];
+            queue.pop();
 
-            // *** for each neighbour *** //
+            // for each neighbour
             for(const auto& x:objects)
             {
                 std::uint32_t s = s_prev + x.first;
@@ -358,29 +345,35 @@ namespace alg
                 
                 if (euler_update<std::greater<std::uint32_t>>(graph, s, v) && s <= weight_limit) 
                 {
-                    q.push(s);
+                    queue.push(s);
                 }
             }
         }
 
-        auto ans = find_target(graph, weight_limit);
-        return (ans? *ans: 0);
+        // Reamrk 2. Optimal case may not use all weight_limit
+        std::uint32_t ans = 0;
+        for(const auto& x:graph)
+        {
+            if (ans < x.second)
+                ans = x.second;
+        }
+        return ans;
     }
 
     std::uint32_t knapsack_iterative_in_subprob(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
-        // n = matrix.size_y =   {1,2,3,... objects.size}
-        // m = matrix.size_x = {0,1,2,3,... weight_limit} 
         matrix<std::uint32_t> mat(objects.size(), weight_limit+1, 0);
+        // where mat(n,m) = total value of objects obtained on reaching state m with objects {0,1,2..,n}
+        //              n =   {1,2,3,... objects.size}
+        //              m = {0,1,2,3,... weight_limit} 
         
         // init 1st row
         for(std::uint32_t m=0; m<=weight_limit; ++m) 
         {
-        //  if (m % objects[0].first == 0) <--- BUG.2, as constraint is : state <= weight_limit, 
-        //                                                            NOT state == weight_limit,
-        //                                                            we can still put items in knapsack 
-        //                                                            even if state % object_weight != 0
-            mat(0,m) = (m / objects[0].first) * objects[0].second;
+            if (m % objects[0].first == 0) 
+            {
+                mat(0,m) = (m / objects[0].first) * objects[0].second;
+            }
         }
 
         // init 1st col
@@ -404,7 +397,15 @@ namespace alg
                 }
             }
         }
-        return mat(objects.size()-1, weight_limit);
+
+        // Reamrk 2. Optimal case may not use all weight_limit
+        std::uint32_t ans = 0;
+        for(std::uint32_t m=0; m!=weight_limit; ++m)
+        {
+            if (ans < mat(objects.size()-1, m))
+                ans = mat(objects.size()-1, m);
+        }
+        return ans;
     }
 }
 
@@ -412,6 +413,22 @@ namespace alg
 // ******************** //
 // *** Job schedule *** //
 // ******************** //
+// for std::vector<std::tuple<...>> "tasks"
+// get<0> = single task workload
+// get<1> = single task profit
+// get<2> = single task deadline <--- tasks are ordered in ascending deadline
+// 
+// for std::unordered_map<...> "graph" 
+// key   = total task workload
+// value = total task profit
+//
 namespace alg
-{  
+{ /* 
+    std::uint32_t job_schedule_iterative_in_state(const std::vector<std::pair<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
+    {
+    } */
+/*
+    std::uint32_t job_schedule_iterative_in_subprob(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
+    {
+    } */
 }

@@ -67,8 +67,14 @@ void test_knapsack()
 }
 
 
+void test_job_schedule()
+{
+}
+
+
 void test_state_time_problem()
 {
     test_coin_change();
     test_knapsack();
+    test_job_schedule();
 }

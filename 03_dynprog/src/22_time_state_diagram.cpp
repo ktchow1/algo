@@ -1,40 +1,5 @@
 /*
 
-
-std::uint32_t knapsack_optimized(std::unordered_map<std::uint32_t, std::uint32_t>& items, std::uint32_t limit)
-{
-    std::unordered_map<std::uint32_t, std::uint32_t> states; 
-    states[0] = 0;
-
-    std::queue<std::uint32_t> q;
-    q.push(0);
-
-    while(!q.empty())
-    {
-        std::uint32_t weight = q.front();
-        std::uint32_t value  = states[weight];
-        q.pop();
-        
-        for(const auto& item:items)
-        {
-            auto new_weight = weight + item.first;
-            auto new_value  = value  + item.second; 
-
-            if (euler_update<optimization::max>(states, new_weight, new_value) && new_weight < limit) // <--- change 3 (min becomes max)
-            {
-                q.push(new_weight);
-            }
-        }
-    }
-
-    std::uint32_t ans = 0;
-    for(const auto& x:states) 
-    {
-        if (ans < x.second) ans = x.second;
-    }
-    return ans;
-}   
-
 auto equal_partition(const std::vector<std::uint32_t>& vec) 
 {
     std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> map; // sum and subset-giving-the-sum
@@ -80,6 +45,5 @@ auto equal_partition(const std::vector<std::uint32_t>& vec)
     }
     return *min_iter; // This is a pair, 1st item is partition sum, 2nd item is vector.
 }
-
 
 */
