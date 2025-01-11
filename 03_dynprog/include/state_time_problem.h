@@ -98,11 +98,11 @@ namespace alg
 // -  need to replace them with inf<T>, one<T> and add(x,y) 
 // -  this bug is revealed when removed $1 from coins
 //
-// 2. in knapsack, unlike the constraint in coin change 
+// 2. in knapsack, unlike the constraint in coin change :  
 //
 //    state == target            for coin change
-//    state <= weight_limit      for knapsack
-//
+//    state <= weight_limit      for knapsack (please search BUG.2 to see how it affect both region grow and tabulation)
+// ******************************************************************************************************************************** //
 
 
 // *********************** //
@@ -183,10 +183,10 @@ namespace alg
         return (ans? *ans: inf<std::uint32_t>);
     }
 
-    // n = matrix.size_y =   {1,2,3,... coins.size}
-    // m = matrix.size_x = {0,1,2,3,... target} 
     std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
+        // n = matrix.size_y =   {1,2,3,... coins.size}
+        // m = matrix.size_x = {0,1,2,3,... target} 
         matrix<std::uint32_t> mat(coins.size(), target+1, inf<std::uint32_t>);
         
         // for 1st row
@@ -313,13 +313,27 @@ namespace alg
 //
 namespace alg
 {  
+    void init(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, auto& graph, auto& queue) 
+    {
+        std::uint32_t min_object_weight = inf<std::uint32_t>;
+        for(const auto& x:objects)
+        {
+            if (min_object_weight > x.first)
+                min_object_weight = x.first;
+        }
+
+        for(std::uint32_t m=0; m!=min_object_weight; ++m)
+        {
+            graph[m] = 0;
+            queue.push(m);
+        }
+    }
+
     std::uint32_t knapsack_iterative_in_state(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> graph;
-        graph[0] = 0;                                         
-
         std::queue<std::uint32_t> q;    
-        q.push(0);                  
+        init(objects, graph, q); // <--- see BUG.2, we need more init points to handle case : state < weight_limit (strictly less) 
 
         while(!q.empty())
         {
@@ -344,19 +358,17 @@ namespace alg
         return (ans? *ans: 0);
     }
 
-    // n = matrix.size_y =   {1,2,3,... objects.size}
-    // m = matrix.size_x = {0,1,2,3,... weight_limit} 
     std::uint32_t knapsack_iterative_in_subprob(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
+        // n = matrix.size_y =   {1,2,3,... objects.size}
+        // m = matrix.size_x = {0,1,2,3,... weight_limit} 
         matrix<std::uint32_t> mat(objects.size(), weight_limit+1, 0);
         
         // for 1st row
         for(std::uint32_t m=0; m<=weight_limit; ++m) 
         {
-            if (m % objects[0].first == 0) 
-            {
-                mat(0,m) = (m / objects[0].first) * objects[0].second;
-            }
+        //  if (m % objects[0].first == 0) <--- see BUG.2, because constraint is : state <= weight_limit, NOT state == weight_limit
+            mat(0,m) = (m / objects[0].first) * objects[0].second;
         }
 
         // for 1st col
@@ -380,14 +392,6 @@ namespace alg
                 }
             }
         }
-        
-        // DEBUG
-        std::cout << "\ninput ";
-        for(const auto& x:objects) std::cout << x.first << ":" << x.second << ", ";
-        std::cout << "\n";
-        mat.debug();
-
-
         return mat(objects.size()-1, weight_limit);
     }
 }

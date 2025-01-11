@@ -56,25 +56,19 @@ void test_coin_change()
 
 void test_knapsack()
 {
-    std::uint32_t num_trial = 10;
-    bool print_each_test_case = true;
+    std::uint32_t num_trial = 1000;
+    bool print_each_test_case = false;
 
-    benchmark<1>("knapack state vs subprob (iterative)",           
-                 std::bind(gen_random_objects, 3, 2, 10, 2, 10), 
-                 std::bind(alg::knapsack_iterative_in_state,   _1, 20),      
-                 std::bind(alg::knapsack_iterative_in_subprob, _1, 20),
-                 num_trial, print_each_test_case);
-    /*
     benchmark<1>("knapack state vs subprob (iterative)",           
                  std::bind(gen_random_objects, 20, 10, 50, 1, 100), 
                  std::bind(alg::knapsack_iterative_in_state,   _1, 400),      
                  std::bind(alg::knapsack_iterative_in_subprob, _1, 400),
-                 num_trial, print_each_test_case); */
+                 num_trial, print_each_test_case); 
 }
 
 
 void test_state_time_problem()
 {
-//  test_coin_change();
+    test_coin_change();
     test_knapsack();
 }
