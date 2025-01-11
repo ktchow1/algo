@@ -90,21 +90,24 @@ namespace alg
 // *  col[0] = subproblem with target = 0 
 // *  col[1] = subproblem with target = 1 
 //    ...
+//
 // ******************************************************************************************************************************** //
-// BUGS
+// BUG.1 and BUG.2
 //
 // 1. all 4 min_coin_change() algo
 // -  involve "std::numeric_limits<T>::max() + 1", which may overflow 
 // -  need to replace them with inf<T>, one<T> and add(x,y) 
-// -  this bug is revealed when removed $1 from coins
 //
 // 2. in knapsack, unlike the constraint in coin change :  
-//
 //    state == target            for coin change
-//    state <= weight_limit      for knapsack (please search BUG.2 to see how it affect both region grow and tabulation)
-// ******************************************************************************************************************************** //
-
-
+//    state <= weight_limit      for knapsack 
+//
+// Both BUG.1&2 will not be revealed if :
+// * there is $1 coin or
+// * there is 1kg object in knapsack
+//
+//
+//
 // *********************** //
 // *** Min coin change *** //
 // *********************** //
