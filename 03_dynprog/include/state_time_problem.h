@@ -3,6 +3,7 @@
 #include<limits>
 #include<queue>
 #include<unordered_map>
+#include<optional>
 #include<matrix.h>
 
 
@@ -36,13 +37,13 @@ namespace alg
     }
 
     template<typename K, typename V>
-    V find_target(const std::unordered_map<K,V>& states, const K& key)
+    std::optional<V> find_target(const std::unordered_map<K,V>& states, const K& key)
     {
         if (auto iter = states.find(key); iter!=states.end())
         {
             return iter->second;
         }
-        else return std::numeric_limits<V>::max();
+        else return std::nullopt;
     }
 }
 
@@ -90,7 +91,18 @@ namespace alg
 // *  col[1] = subproblem with target = 1 
 //    ...
 // ******************************************************************************************************************************** //
-
+// BUGS
+//
+// 1. all 4 min_coin_change() algo
+// -  involve "std::numeric_limits<T>::max() + 1", which may overflow 
+// -  need to replace them with inf<T>, one<T> and add(x,y) 
+// -  this bug is revealed when removed $1 from coins
+//
+// 2. in knapsack, unlike the constraint in coin change 
+//
+//    state == target            for coin change
+//    state <= weight_limit      for knapsack
+//
 
 
 // *********************** //
@@ -100,13 +112,13 @@ namespace alg
 {  
     std::uint32_t min_coin_change_recursive_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        std::uint32_t ans = std::numeric_limits<std::uint32_t>::max();
+        std::uint32_t ans = inf<std::uint32_t>;
         for(const auto& x:coins)
         {
             if (x == target) return 1;
             if (x <  target)
             {
-                ans = std::min(ans, min_coin_change_recursive_in_state(coins, target-x) + 1); 
+                ans = std::min(ans, add(min_coin_change_recursive_in_state(coins, target-x), one<std::uint32_t>)); 
             }
         }
         return ans;
@@ -122,7 +134,7 @@ namespace alg
             }
             else 
             {
-                return std::numeric_limits<std::uint32_t>::max();
+                return inf<std::uint32_t>;
             }
         }
         else 
@@ -134,8 +146,8 @@ namespace alg
             }
             else
             {
-                return std::min(min_coin_change_recursive_in_subprob(coins,     target-coins.back()) + 1,
-                                min_coin_change_recursive_in_subprob(coins_sub, target));
+                return std::min(add(min_coin_change_recursive_in_subprob(coins,     target-coins.back()), one<std::uint32_t>),
+                                    min_coin_change_recursive_in_subprob(coins_sub, target));
             }
         }
     } 
@@ -166,14 +178,16 @@ namespace alg
                 }
             }
         }
-        return find_target(graph, target);
+
+        auto ans = find_target(graph, target);
+        return (ans? *ans: inf<std::uint32_t>);
     }
 
     // n = matrix.size_y =   {1,2,3,... coins.size}
     // m = matrix.size_x = {0,1,2,3,... target} 
     std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        matrix<std::uint32_t> mat(coins.size(), target+1, std::numeric_limits<std::uint32_t>::max());
+        matrix<std::uint32_t> mat(coins.size(), target+1, inf<std::uint32_t>);
         
         // for 1st row
         for(std::uint32_t m=0; m<=target; ++m) 
@@ -201,11 +215,11 @@ namespace alg
                 }
                 else
                 {
-                    mat(n,m) = std::min(mat(n-1,m), mat(n,m-coins[n]) + 1);
+                    mat(n,m) = std::min(mat(n-1,m), add(mat(n,m-coins[n]), one<std::uint32_t>));
                 }
             }
         }
-        return mat(coins.size()-1, target);
+        return mat(coins.size()-1, target); 
     }
 }
 
@@ -225,11 +239,11 @@ namespace alg
         {
             if (target % coins[0] == 0) 
             {
-                return 1; // <--- update here
+                return 1; 
             }
             else 
             {
-                return 0; // <--- update here
+                return 0;
             }
         }
         else 
@@ -237,33 +251,33 @@ namespace alg
             std::vector<std::uint32_t> coins_sub(coins.begin(), --coins.end());
             if (coins.back() > target)
             {
-                return count_coin_change_recursive_in_subprob(coins_sub, target); // <--- update here
+                return count_coin_change_recursive_in_subprob(coins_sub, target); 
             }
             else
             {
                 return count_coin_change_recursive_in_subprob(coins,     target-coins.back()) + 
-                       count_coin_change_recursive_in_subprob(coins_sub, target); // <--- update here
+                       count_coin_change_recursive_in_subprob(coins_sub, target);
             }
         }
     } 
 
     std::uint32_t count_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        matrix<std::uint32_t> mat(coins.size(), target+1, 0); // <--- update here
+        matrix<std::uint32_t> mat(coins.size(), target+1, 0); 
         
         // for 1st row
         for(std::uint32_t m=0; m<=target; ++m) 
         {
             if (m % coins[0] == 0) 
             {
-                mat(0,m) = 1; // <--- update here
+                mat(0,m) = 1;
             }
         }
 
         // for 1st col
         for(std::uint32_t n=0; n!=coins.size(); ++n) 
         {
-            mat(n,0) = 1; // <--- update here
+            mat(n,0) = 1; 
         }
 
         // for matrix
@@ -277,7 +291,7 @@ namespace alg
                 }
                 else
                 {
-                    mat(n,m) = mat(n-1,m) + mat(n,m-coins[n]); // <--- update here
+                    mat(n,m) = mat(n-1,m) + mat(n,m-coins[n]); 
                 }
             }
         }
@@ -325,7 +339,9 @@ namespace alg
                 }
             }
         }
-        return find_target(graph, weight_limit);
+
+        auto ans = find_target(graph, weight_limit);
+        return (ans? *ans: 0);
     }
 
     // n = matrix.size_y =   {1,2,3,... objects.size}
@@ -364,6 +380,14 @@ namespace alg
                 }
             }
         }
+        
+        // DEBUG
+        std::cout << "\ninput ";
+        for(const auto& x:objects) std::cout << x.first << ":" << x.second << ", ";
+        std::cout << "\n";
+        mat.debug();
+
+
         return mat(objects.size()-1, weight_limit);
     }
 }

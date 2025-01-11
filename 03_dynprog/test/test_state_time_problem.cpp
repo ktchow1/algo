@@ -9,7 +9,7 @@ void test_coin_change()
 {
     std::uint32_t num_trial;
     bool print_each_test_case = false;
-     
+           
     num_trial = 20;
     benchmark<1>("min_coin_change recursive vs iterative (state)",
                  std::bind(gen_random_coins, 3, 2, 10), 
@@ -19,18 +19,32 @@ void test_coin_change()
  
     num_trial = 1000;
     benchmark<1>("min_coin_change recursive vs iterative (subprob)", 
-                 std::bind(gen_random_coins, 6, 2, 30), 
+                 std::bind(gen_random_coins, 4, 2, 30), 
                  std::bind(alg::min_coin_change_recursive_in_subprob, _1, 100),
                  std::bind(alg::min_coin_change_iterative_in_subprob, _1, 100),      
                  num_trial, print_each_test_case);
-    
+          
+    num_trial = 1000;
+    benchmark<1>("min_coin_change recursive vs iterative (subprob) with ans=inf", 
+                 std::bind(gen_random_coins, 2, 7, 19), 
+                 std::bind(alg::min_coin_change_recursive_in_subprob, _1, 73),
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 73),      
+                 num_trial, print_each_test_case);
+  
     num_trial = 1000;
     benchmark<1>("min_coin_change state vs subprob (iterative)",           
-                 std::bind(gen_random_coins, 20, 2, 100), 
-                 std::bind(alg::min_coin_change_iterative_in_state,   _1, 800),      
-                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 800),
+                 std::bind(gen_random_coins, 8, 1, 60), 
+                 std::bind(alg::min_coin_change_iterative_in_state,   _1, 600),      
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 600),
                  num_trial, print_each_test_case);
 
+    num_trial = 1000;
+    benchmark<1>("min_coin_change state vs subprob (iterative) with ans=inf",           
+                 std::bind(gen_random_coins, 2, 7, 19), 
+                 std::bind(alg::min_coin_change_iterative_in_state,   _1, 173),      
+                 std::bind(alg::min_coin_change_iterative_in_subprob, _1, 173),
+                 num_trial, print_each_test_case);
+    
     num_trial = 1000;
     benchmark<1>("count_coin_change recursive vs iterative (subprob)", 
                  std::bind(gen_random_coins, 6, 2, 30), 
