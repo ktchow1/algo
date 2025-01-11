@@ -111,9 +111,11 @@ namespace alg
 // - there is a change in constraint
 //   state == target            for coin change
 //   state <= weight_limit      for knapsack 
+// - need to scan graph or tabulation for optimum at the end
 //  
 // Remark 3. For job schedule : 
-// - there is a change in decision param,   
+// - there is a change in decision param, which takes 0/1 only  
+// - there is a order constraint, do tasks[i] before tasks[j] for i < j
 //
 //
 // *********************** //
@@ -165,11 +167,11 @@ namespace alg
 
     std::uint32_t min_coin_change_iterative_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
-        std::unordered_map<std::uint32_t, std::uint32_t> graph;   // graph in region grow
-        graph[0] = 0;                                             // bug : must initialize 
+        std::unordered_map<std::uint32_t, std::uint32_t> graph;   // graph for region growing
+        graph[0] = 0;                                             // BUG : must initialize 
 
-        std::queue<std::uint32_t> queue;                          // queue in region growstates
-        queue.push(0);                                            // bug : must initialize 
+        std::queue<std::uint32_t> queue;                          // queue for region growing
+        queue.push(0);                                            // BUG : must initialize 
 
         while(!queue.empty())
         {
@@ -183,7 +185,8 @@ namespace alg
                 std::uint32_t s = s_prev + x;
                 std::uint32_t v = v_prev + 1;
                 
-                if (euler_update<std::less<std::uint32_t>>(graph, s, v) && s <= target) 
+                // BUG : check constrant before euler update, to ensure all vertices in graph are valid 
+                if (s <= target && euler_update<std::less<std::uint32_t>>(graph, s, v)) 
                 {
                     queue.push(s);
                 }
@@ -343,7 +346,7 @@ namespace alg
                 std::uint32_t s = s_prev + x.first;
                 std::uint32_t v = v_prev + x.second;
                 
-                if (euler_update<std::greater<std::uint32_t>>(graph, s, v) && s <= weight_limit) 
+                if (s <= weight_limit && euler_update<std::greater<std::uint32_t>>(graph, s, v)) 
                 {
                     queue.push(s);
                 }
@@ -400,7 +403,7 @@ namespace alg
 
         // Reamrk 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
-        for(std::uint32_t m=0; m!=weight_limit; ++m)
+        for(std::uint32_t m=0; m<=weight_limit; ++m)
         {
             if (ans < mat(objects.size()-1, m))
                 ans = mat(objects.size()-1, m);
