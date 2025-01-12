@@ -222,31 +222,44 @@ inline void print_summary(const std::string& test_name, const std::string& statu
                       << " " << status
                       << std::flush;
 }
-
+  
 inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial)
 {
     std::cout << "\n" << std::setw(75) << std::left << test_name 
                       << " error rate = " << error << "/" << trial
                       << std::flush;
 }
-
-inline void print_summary(const std::string& test_name, std::uint32_t error, std::uint32_t trial, std::uint64_t time0, std::uint64_t time1)
+  
+inline void print_summary_return_cursor(const std::string& test_name, std::uint32_t error, std::uint32_t trial, std::uint64_t time0, std::uint64_t time1)
 {
-    std::cout << "\n" << std::setw(75) << std::left << test_name 
+    std::cout << "\r" << std::setw(75) << std::left << test_name 
                       << " error rate = " << error << "/" << trial 
                       << ", time = " << time0 << "/" << time1 
                       << std::flush;
+}
+
+inline void print_progress(const std::string& test_name, std::uint32_t t, std::uint32_t trial)
+{
+    if (t == 0)
+    {
+        std::cout << "\r" << std::setw(75) << std::left << test_name 
+                          << " running "
+                          << std::flush;
+    }
+    if (trial >= 20) 
+    {
+        if (t % (trial/20) == 0) std::cout << "." << std::flush; 
+    }   
+    else
+    {
+        std::cout << "." << std::flush; 
+    }
 }
 
 
 // ****************** //
 // *** Statistics *** //
 // ****************** //
-// Todo : 
-// * add namespace
-// * add percentile
-// * move to c++ folder
-//
 template<typename T>
 class statistics
 {
@@ -277,20 +290,13 @@ private:
 // *************************** //
 // *** Test loop functions *** //
 // *************************** //
-enum class print_mode : std::uint8_t
-{
-    nothing,
-    progress,
-    every_case
-};
-
 template<std::uint32_t GEN_NUM, typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
 void benchmark(const std::string&  test_name,
                const GEN_FUNCTION& gen_function, // nullary
                const ALG_FUNCTION& alg_function, // nary = GEN_NUM
                const BMK_FUNCTION& bmk_function, // nary = GEN_NUM
                std::uint32_t       trial, 
-               print_mode          mode = print_mode::nothing) 
+               bool                print_each_case = false) 
 {
     alg::timer timer0;
     alg::timer timer1;
@@ -298,9 +304,7 @@ void benchmark(const std::string&  test_name,
     statistics<std::uint64_t> stat1(0);
     std::uint32_t error = 0;
 
-    if (mode == print_mode::every_case) std::cout << "\n";
-    if (mode == print_mode::progress && trial >= 20) print_summary(test_name, "running ");
-
+    std::cout << "\n";
     for(std::uint32_t t=0; t!=trial; ++t)
     {
         if constexpr (GEN_NUM == 1)
@@ -316,11 +320,8 @@ void benchmark(const std::string&  test_name,
             timer1.click();
 
             if (ans0 != ans1) ++error;
-            if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
-            if (mode == print_mode::progress && trial >= 20) 
-            {
-                if (t % (trial/20) == 0) std::cout << "." << std::flush; 
-            }   
+            if (print_each_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            else                 print_progress(test_name, t, trial);   
         }
         else
         {
@@ -336,15 +337,12 @@ void benchmark(const std::string&  test_name,
             timer1.click();
 
             if (ans0 != ans1) ++error;
-            if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
-            if (mode == print_mode::progress && trial >= 20) 
-            { 
-                if (t % (trial/20) == 0) std::cout << "." << std::flush; 
-            }   
+            if (print_each_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            else                 print_progress(test_name, t, trial);   
         }
 
         stat0.add(timer0.time_elapsed_in_nsec());
         stat1.add(timer1.time_elapsed_in_nsec());
     }
-    print_summary(test_name, error, trial, stat0.mean(), stat1.mean());
+    print_summary_return_cursor(test_name, error, trial, stat0.mean(), stat1.mean());
 }

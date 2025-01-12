@@ -79,7 +79,7 @@ void test_equal_partition()
 {
     std::uint32_t num_trial = 1000;
     benchmark<1>("equal partition - state vs subprob (iterative)",           
-                 std::bind(gen_random_vec<std::uint32_t>, 30, 2, 100), 
+                 std::bind(gen_random_vec<std::uint32_t>, 25, 2, 50), 
                  std::bind(alg::equal_partition_iterative_in_state,   _1),      
                  std::bind(alg::equal_partition_iterative_in_subprob, _1), 
                  num_trial);  
