@@ -456,10 +456,10 @@ namespace alg
             {
                 std::uint32_t s = s_prev.first + std::get<0>(tasks[n]);
                 std::uint32_t v = v_prev       + std::get<1>(tasks[n]);
-                std::uint32_t task_deadline =    std::get<2>(tasks[n]);
+                std::uint32_t d =                std::get<2>(tasks[n]); // task deadline
                 
-                if (s <= task_deadline && 
-                    n >= s_prev.second && 
+                if (s <= d && 
+                    n >= s_prev.second && // Remark 3. Ensure no duplicated task. Ensure task in sequence. 
                     euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
                 {
                     queue.push({s,n+1});
@@ -469,11 +469,11 @@ namespace alg
   
         // Remark 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
-/*      for(const auto& x:graph)
+        for(const auto& x:graph)
         {
             if (ans < x.second)
                 ans = x.second;
-        } */
+        }   
         return ans;
     } 
   
@@ -483,18 +483,22 @@ namespace alg
         matrix<std::uint32_t> mat(tasks.size(), hard_deadline+1, 0);
         
         // init 1st row
-        for(std::uint32_t m=0; m<=hard_deadline; ++m) 
         {
-            if (m % std::get<0>(tasks[0]) == 0) 
+            std::uint32_t s = std::get<0>(tasks[0]);
+            std::uint32_t v = std::get<1>(tasks[0]);
+            std::uint32_t d = std::get<2>(tasks[0]);
+            if (s <= d)
             {
-                mat(0,m) = (m / std::get<0>(tasks[0])) * std::get<1>(tasks[0]);
+                mat(0,0) = 0; // tasks[0] not done
+                mat(0,s) = v; // tasks[0] is done
             }
+            else mat(0,0) = 0;
         }
 
-        // init 1st col
+        // init 1st col (redundant, as it is init in construction)
         for(std::uint32_t n=0; n!=tasks.size(); ++n) 
         {
-            mat(n,0) = 0;
+            mat(n,0) = 0; 
         }
 
         // iteration
@@ -502,13 +506,17 @@ namespace alg
         {
             for(std::uint32_t m=1; m<=hard_deadline; ++m)
             {
-                if (std::get<0>(tasks[n]) > m)
+                std::uint32_t s = std::get<0>(tasks[0]);
+                std::uint32_t v = std::get<1>(tasks[0]);
+                std::uint32_t d = std::get<2>(tasks[0]);
+                if (m > d)
                 {
                     mat(n,m) = mat(n-1,m);
                 }
                 else
                 {
-                    mat(n,m) = std::max(mat(n-1,m), mat(n,m-std::get<0>(tasks[n])) + std::get<1>(tasks[n]));
+                //  mat(n,m) = std::max(mat(n-1,m), mat(n,  m-s) + v); // Remark 3. Ensure no duplicated task.
+                    mat(n,m) = std::max(mat(n-1,m), mat(n-1,m-s) + v);
                 }
             }
         }
