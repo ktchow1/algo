@@ -36,7 +36,7 @@ namespace alg
 
         matrix(std::uint32_t size_y, 
                std::uint32_t size_x,
-               const T& init)
+               T init)
                : m_size_y(size_y), 
                  m_size_x(size_x),
                  m_impl(size_y * size_x, init)

@@ -2,6 +2,7 @@
 #include<cstdint>
 #include<limits>
 #include<queue>
+#include<set>
 #include<map>
 #include<unordered_map>
 #include<optional>
@@ -38,6 +39,20 @@ namespace alg
         }
     }
 
+    template<typename SET> 
+    bool euler_update(SET& states, const typename SET::key_type& key)
+    {   
+        if (auto iter = states.find(key); iter != states.end())
+        {
+            return false;
+        }
+        else
+        {
+            states.insert(key);
+            return true;
+        }
+    }
+
     template<typename MAP>
     std::optional<typename MAP::mapped_type> find_target(const MAP& states, const typename MAP::mapped_type& key)
     {
@@ -51,12 +66,12 @@ namespace alg
 
 // ************************************************************************************************* //
 // [Concepts]
-//                   coin change        knapsack           job schedule             
-// ---------------------------------------------------------------------------------
-//            x      coin value         obj weight         task workload   
-//            y      1                  obj value          task profit                                      
-//      param p      coin num           obj num            task done/not (i.e. 1/0)
-//  prob size N     #coin type         #obj type          #task type
+//                   coin change        knapsack           job schedule       equal partition        
+// --------------------------------------------------------------------------------------------------
+//            x      coin value         obj weight         task workload      num  
+//            y      1                  obj value          task profit        num 
+//      param p      coin num           obj num            task done (0/1)    num picked (0/1)
+//  prob size N     #coin type         #obj type          #task type         #num
 // 
 //      state s      s[N-1] = sum(x[n], p[n], for n=[0,N-1])
 //      value v      v[N-1] = sum(y[n], p[n], for n=[0,N-1])
@@ -64,6 +79,7 @@ namespace alg
 //  coin change      min v under constraint  s[N-1] == target
 //     knapsack      max v under constraint  s[N-1] <= weight_limit
 // job schedule      max v under constraints s[n]   <= deadline[n] for all n=[0,N-1]
+// eq partition      max v under constraint  s = v  <= sum(num)/2
 //
 //
 // ************************************************************************************************* //
@@ -124,6 +140,15 @@ namespace alg
 // - to handle these constraints 
 //   state-graph   implementation needs to add most-recent-completed-job as part of the state
 //   subprob-table implementation needs to modify recursion equation, depends on prev subprob only
+//
+// Remark 4. For equal partition 
+// - there are constraints on param
+//   (a) takes 0/1 only 
+//   (b) numbers[i] cannot be picked after numbers[j], if i < j
+// - simiplified version of job schedule
+//   (a) with value = state 
+//   (b) no constraint on state
+//
 // ************************************************************************************************* //
 
 
@@ -226,6 +251,7 @@ namespace alg
         for(std::uint32_t n=0; n!=coins.size(); ++n) 
         {
             mat(n,0) = 0;
+
         }
 
         // main iteration
@@ -407,13 +433,13 @@ namespace alg
 
         // Remark 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
-        for(std::uint32_t m=0; m<=weight_limit; ++m)
+        for(std::uint32_t m=0; m!=mat.size_x(); ++m)
         {
             if (ans < mat(objects.size()-1, m))
                 ans = mat(objects.size()-1, m);
         }
         return ans;
-    }
+    }// 
 }
 
 
@@ -446,16 +472,14 @@ namespace alg
             auto v_prev = graph[queue.front()];
             queue.pop();
 
-            // for each neighbour
-            for(std::uint32_t n=0; n!=tasks.size(); ++n)
+            // for each neighbour (Remark 3. Ensure no duplicated task. Ensure task in sequence.)
+            for(std::uint32_t n=s_prev.second; n!=tasks.size(); ++n)
             {
                 std::uint32_t s = s_prev.first + std::get<0>(tasks[n]);
                 std::uint32_t v = v_prev       + std::get<1>(tasks[n]);
                 std::uint32_t deadline =         std::get<2>(tasks[n]);
                 
-                if (s <= deadline && 
-                    n >= s_prev.second && // Remark 3. Ensure no duplicated task. Ensure task in sequence. 
-                    euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
+                if (s <= deadline && euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
                 {
                     queue.push({s,n+1});
                 }
@@ -511,10 +535,103 @@ namespace alg
 
         // Remark 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
-        for(std::uint32_t m=0; m<=hard_deadline; ++m)
+        for(std::uint32_t m=0; m!=mat.size_x(); ++m)
         {
             if (ans < mat(tasks.size()-1, m))
                 ans = mat(tasks.size()-1, m);
+        }
+        return ans;
+    } 
+}
+
+
+// *********************** //
+// *** Equal partition *** //
+// *********************** //
+namespace alg
+{ 
+    std::uint32_t find_half_of_sum(const std::vector<std::uint32_t>& numbers)
+    {
+        std::uint32_t ans = 0;
+        for(const auto& x:numbers)
+        {
+            ans += x;
+        }
+        return ans/2;
+    }
+  
+    std::uint32_t equal_partition_iterative_in_state(const std::vector<std::uint32_t>& numbers)
+    {
+        std::uint32_t target = find_half_of_sum(numbers);
+
+        std::set<std::pair<std::uint32_t, std::uint32_t>> graph;
+        graph.insert({0,0});
+
+        std::queue<std::pair<std::uint32_t, std::uint32_t>> queue; 
+        queue.push({0,0});
+
+        while(!queue.empty())
+        {
+            auto s_prev = queue.front();
+            queue.pop();
+
+            // for each neighbour
+            for(std::uint32_t n=s_prev.second; n!=numbers.size(); ++n)
+            {
+                std::uint32_t s = s_prev.first + numbers[n];
+                if (s <= target && euler_update(graph, std::make_pair(s,n+1))) 
+                {
+                    queue.push({s,n+1});
+                }
+            }
+        }
+  
+        std::uint32_t ans = 0;
+        for(const auto& x:graph)
+        {
+            if (ans < x.first)
+                ans = x.first;
+        }   
+        return ans;
+    } 
+    
+    std::uint32_t equal_partition_iterative_in_subprob(const std::vector<std::uint32_t>& numbers)
+    {
+        // Todo : should use alg::matrix<bool>, but don't know why alg::matrix<T> does not support T=bool.
+        std::uint32_t target = find_half_of_sum(numbers);
+        matrix<std::uint32_t> mat(numbers.size(), target+1, 0); 
+
+        // init 1st row
+        mat(0,numbers[0]) = 1; 
+
+        // init 1st col
+        for(std::uint32_t n=0; n!=numbers.size(); ++n)
+        {
+            mat(n,0) = 1;
+        }
+
+        // main iteration
+        for(std::uint32_t n=1; n!=numbers.size(); ++n)
+        {
+            for(std::uint32_t m=1; m<=target; ++m)
+            {
+                if (m >= numbers[n])
+                {
+                    if (mat(n-1,m)            == 1) mat(n,m) = 1;
+                    if (mat(n-1,m-numbers[n]) == 1) mat(n,m) = 1;
+                }
+                else
+                {
+                    mat(n,m) = mat(n-1,m);
+                }
+            }
+        }
+
+        std::uint32_t ans = 0;
+        for(std::uint32_t m=0; m!=mat.size_x(); ++m)
+        {
+            if (ans < m && mat(numbers.size()-1, m) == 1)
+                ans = m;
         }
         return ans;
     } 

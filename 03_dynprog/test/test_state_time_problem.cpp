@@ -71,7 +71,18 @@ void test_job_schedule()
                  std::bind(gen_random_jobs, 30, 2, 20, 2, 30, 10, 250), 
                  std::bind(alg::job_schedule_iterative_in_state,   _1),      
                  std::bind(alg::job_schedule_iterative_in_subprob, _1),
-                 num_trial, print_mode::progress); 
+                 num_trial); 
+}
+
+
+void test_equal_partition()
+{
+    std::uint32_t num_trial = 1000;
+    benchmark<1>("equal partition - state vs subprob (iterative)",           
+                 std::bind(gen_random_vec<std::uint32_t>, 30, 2, 100), 
+                 std::bind(alg::equal_partition_iterative_in_state,   _1),      
+                 std::bind(alg::equal_partition_iterative_in_subprob, _1), 
+                 num_trial);  
 }
 
 
@@ -80,4 +91,5 @@ void test_state_time_problem()
     test_coin_change();
     test_knapsack();
     test_job_schedule();
+    test_equal_partition();
 }

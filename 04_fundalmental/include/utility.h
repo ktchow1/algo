@@ -299,7 +299,7 @@ void benchmark(const std::string&  test_name,
     std::uint32_t error = 0;
 
     if (mode == print_mode::every_case) std::cout << "\n";
-    if (mode == print_mode::progress)   print_summary(test_name, "running ");
+    if (mode == print_mode::progress && trial >= 20) print_summary(test_name, "running ");
 
     for(std::uint32_t t=0; t!=trial; ++t)
     {
@@ -317,7 +317,10 @@ void benchmark(const std::string&  test_name,
 
             if (ans0 != ans1) ++error;
             if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
-            if (mode == print_mode::progress) { if (t % (trial/20) == 0) std::cout << "." << std::flush; }   
+            if (mode == print_mode::progress && trial >= 20) 
+            {
+                if (t % (trial/20) == 0) std::cout << "." << std::flush; 
+            }   
         }
         else
         {
@@ -334,7 +337,10 @@ void benchmark(const std::string&  test_name,
 
             if (ans0 != ans1) ++error;
             if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
-            if (mode == print_mode::progress) { if (t % (trial/20) == 0) std::cout << "." << std::flush; }   
+            if (mode == print_mode::progress && trial >= 20) 
+            { 
+                if (t % (trial/20) == 0) std::cout << "." << std::flush; 
+            }   
         }
 
         stat0.add(timer0.time_elapsed_in_nsec());
