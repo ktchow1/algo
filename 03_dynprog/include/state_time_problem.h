@@ -6,7 +6,10 @@
 #include<map>
 #include<unordered_map>
 #include<optional>
+
+// from alg
 #include<matrix.h>
+#include<utility.h>
 
 
 // ***************************************** //
@@ -81,7 +84,6 @@ namespace alg
 // job schedule      max v under constraints s[n]   <= deadline[n] for all n=[0,N-1]
 // eq partition      max v under constraint  s = v  <= sum(num)/2
 //
-//
 // ************************************************************************************************* //
 // Approaches (with speed 4 > 3 > 2 > 1)
 // 1. recursive in state-graph
@@ -148,6 +150,11 @@ namespace alg
 // - simiplified version of job schedule
 //   (a) with value = state 
 //   (b) no constraint on state
+//
+// Remark 5. For box stacking 
+// - it is like job schedule, as param = {0,1}
+// - state is not a scaler (plus next-allowed-item)
+// - state is a 2D vector  (plus next-allowed-item) 
 //
 // ************************************************************************************************* //
 
@@ -452,7 +459,7 @@ namespace alg
 // get<2> = single task deadline <--- tasks are ordered in ascending deadline
 // 
 // for std::map<...> "graph"  
-// key.first  = total task wotkload
+// key.first  = total task workload
 // key.second = next  task possible
 // value      = total task profit
 //
@@ -633,6 +640,190 @@ namespace alg
             if (ans < m && mat(numbers.size()-1, m) == 1)
                 ans = m;
         }
+        return ans;
+    } 
+}
+
+
+// ******************** //
+// *** Box stacking *** //
+// ******************** //
+// Let pick from bottom up.
+//
+namespace alg
+{ 
+    enum class orientation : std::uint8_t
+    {
+        x_up,
+        y_up,
+        z_up
+    };
+
+    struct stack_state
+    {
+        std::uint32_t m_next_allowed_box; 
+        std::uint32_t m_base_min;
+        std::uint32_t m_base_max;
+
+        bool is_greater_eq(const box& b, orientation b_ori) const noexcept // assuming each box has x <= y <= z
+        {
+            if (b_ori == orientation::x_up)
+            {
+                if (m_base_min < b.m_y) return false;
+                if (m_base_max < b.m_z) return false;
+            }
+            else if (b_ori == orientation::y_up)
+            {
+                if (m_base_min < b.m_x) return false;
+                if (m_base_max < b.m_z) return false;
+            }
+            else
+            {
+                if (m_base_min < b.m_x) return false;
+                if (m_base_max < b.m_y) return false;
+            }
+            return true;
+        }
+
+        void update(std::uint32_t next_allowed_box, const box& b, orientation b_ori) 
+        {
+            m_next_allowed_box = next_allowed_box;
+            if (b_ori == orientation::x_up)
+            {
+                m_base_min = b.m_y;
+                m_base_max = b.m_z;
+            }
+            else if (b_ori == orientation::y_up)
+            {
+                m_base_min = b.m_x;
+                m_base_max = b.m_z;
+            }
+            else
+            {
+                m_base_min = b.m_x;
+                m_base_max = b.m_y;
+            }
+        } 
+    };
+
+    struct stack_state_less
+    {
+        bool operator()(const stack_state& lhs, const stack_state& rhs) const noexcept
+        {
+            if      (lhs.m_next_allowed_box < rhs.m_next_allowed_box) return  true;
+            else if (lhs.m_next_allowed_box > rhs.m_next_allowed_box) return false;
+            else if (lhs.m_base_min < rhs.m_base_min)                 return  true;
+            else if (lhs.m_base_min > rhs.m_base_min)                 return false;
+            else if (lhs.m_base_max < rhs.m_base_max)                 return  true;
+            else if (lhs.m_base_max > rhs.m_base_max)                 return false;
+            else                                                      return false; 
+        }
+    };
+
+    std::uint32_t box_stacking_iterative_in_state(const std::vector<box>& boxes) 
+    {
+        std::map<stack_state, std::uint32_t, stack_state_less> graph; // value = stack height 
+        graph[{0, inf<std::uint32_t>, inf<std::uint32_t>}] = 0;
+
+        std::queue<stack_state> queue; 
+        queue.push({0, inf<std::uint32_t>, inf<std::uint32_t>});
+  
+        while(!queue.empty())
+        {
+            auto s_prev = queue.front();
+            auto v_prev = graph[queue.front()];
+            queue.pop();
+
+            for(std::uint32_t n=s_prev.m_next_allowed_box; n!=boxes.size(); ++n)
+            {
+                // ********* //
+                // *** x *** //
+                // ********* //
+                if (s_prev.is_greater_eq(boxes[n], orientation::x_up))
+                {
+                    auto s = s_prev;
+                    auto v = v_prev + boxes[n].m_x; 
+                    s.update(n+1, boxes[n], orientation::x_up);
+
+                    if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
+                }
+
+                // ********* //
+                // *** y *** //
+                // ********* //
+                if (s_prev.is_greater_eq(boxes[n], orientation::y_up))
+                {
+                    auto s = s_prev;
+                    auto v = v_prev + boxes[n].m_y; 
+                    s.update(n+1, boxes[n], orientation::y_up);
+
+                    if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
+                }
+
+                // ********* //
+                // *** z *** //
+                // ********* //
+                if (s_prev.is_greater_eq(boxes[n], orientation::z_up))
+                {
+                    auto s = s_prev;
+                    auto v = v_prev + boxes[n].m_z; 
+                    s.update(n+1, boxes[n], orientation::z_up);
+
+                    if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
+                }
+            }
+        }
+      
+        std::uint32_t ans = 0;
+        for(const auto& x:graph)
+        {
+            if (ans < x.second)
+                ans = x.second;
+        }   
+        return ans;
+    } 
+   
+    // ************************************************************************************ //
+    // We do not use matrix here, as we cannot calculate matrix.size_x (can be very large).
+    // Therefore we use 2 std::map instead, to represent prev_row and this_row.
+    // ************************************************************************************ //
+    std::uint32_t box_stacking_iterative_in_subprob(const std::vector<box>& boxes)
+    {
+/* 
+        std::map<std::uint32_t> mat(numbers.size(), target+1, 0); 
+
+        // init 1st row
+        mat(0,numbers[0]) = 1; 
+
+        // init 1st col
+        for(std::uint32_t n=0; n!=numbers.size(); ++n)
+        {
+            mat(n,0) = 1;
+        }
+
+        // main iteration
+        for(std::uint32_t n=1; n!=numbers.size(); ++n)
+        {
+            for(std::uint32_t m=1; m<=target; ++m)
+            {
+                if (m >= numbers[n])
+                {
+                    if (mat(n-1,m)            == 1) mat(n,m) = 1;
+                    if (mat(n-1,m-numbers[n]) == 1) mat(n,m) = 1;
+                }
+                else
+                {
+                    mat(n,m) = mat(n-1,m);
+                }
+            }
+        }
+*/
+        std::uint32_t ans = 0;
+//      for(std::uint32_t m=0; m!=mat.size_x(); ++m)
+//      {
+//          if (ans < m && mat(numbers.size()-1, m) == 1)
+//              ans = m;
+//      }
         return ans;
     } 
 }

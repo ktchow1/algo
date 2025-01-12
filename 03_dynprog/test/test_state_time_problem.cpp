@@ -86,10 +86,28 @@ void test_equal_partition()
 }
 
 
+void test_box_stacking()
+{
+    std::uint32_t num_trial = 10;
+    benchmark<1>("box stacking - state vs subprob (iterative)",           
+                 std::bind(gen_random_boxes, 4, 6, 12), 
+                 std::bind(alg::box_stacking_iterative_in_state,   _1),      
+                 std::bind(alg::box_stacking_iterative_in_subprob, _1), 
+                 num_trial, true);  
+}
+
+
+void test_bin_packing()
+{
+}
+
+
 void test_state_time_problem()
 {
-    test_coin_change();
-    test_knapsack();
-    test_job_schedule();
-    test_equal_partition();
+//  test_coin_change();
+//  test_knapsack();
+//  test_job_schedule();
+//  test_equal_partition();
+    test_box_stacking();
+    test_bin_packing();
 }

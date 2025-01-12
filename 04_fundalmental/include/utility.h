@@ -162,6 +162,31 @@ inline auto gen_random_jobs(std::uint32_t size,
     return ans;
 }
 
+struct box // gen function needs to ensure x <= y <= z
+{
+    std::uint32_t m_x; 
+    std::uint32_t m_y;
+    std::uint32_t m_z;
+};
+
+inline auto gen_random_boxes(std::uint32_t size, 
+                             std::uint32_t side_min,
+                             std::uint32_t side_max) 
+{
+    std::vector<box> ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        std::uint32_t x = side_min + rand() % (side_max-side_min);
+        std::uint32_t y = side_min + rand() % (side_max-side_min);
+        std::uint32_t z = side_min + rand() % (side_max-side_min);
+        std::uint32_t min = std::min(std::min(x, y), z);
+        std::uint32_t max = std::max(std::max(x, y), z);
+        std::uint32_t mid = x + y + z - min - max;
+        ans.push_back({min, mid, max});
+    }
+    return ans;
+}
+
 
 // *************** //
 // *** Compare *** //
