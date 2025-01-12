@@ -47,7 +47,7 @@ void test_coin_change()
     
     num_trial = 1000;
     benchmark<1>("count_coin_change - recursive vs iterative (subprob)", 
-                 std::bind(gen_random_coins, 6, 2, 30), 
+                 std::bind(gen_random_coins, 8, 1, 30), 
                  std::bind(alg::count_coin_change_recursive_in_subprob, _1, 100),
                  std::bind(alg::count_coin_change_iterative_in_subprob, _1, 100),      
                  num_trial, print_each_test_case);

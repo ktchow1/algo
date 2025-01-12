@@ -2,6 +2,7 @@
 #include<cstdint>
 #include<limits>
 #include<queue>
+#include<map>
 #include<unordered_map>
 #include<optional>
 #include<matrix.h>
@@ -14,8 +15,9 @@
 // ***************************************** //
 namespace alg
 {  
-    template<typename CMP, typename K, typename V>
-    bool euler_update(std::unordered_map<K,V>& states, const K& key, const V& value)
+    // MAP can be std::map or std::unordered_map
+    template<typename CMP, typename MAP> 
+    bool euler_update(MAP& states, const typename MAP::key_type& key, const typename MAP::mapped_type& value)
     {   
         if (auto iter = states.find(key); iter != states.end())
         {
@@ -36,8 +38,8 @@ namespace alg
         }
     }
 
-    template<typename K, typename V>
-    std::optional<V> find_target(const std::unordered_map<K,V>& states, const K& key)
+    template<typename MAP>
+    std::optional<typename MAP::mapped_type> find_target(const MAP& states, const typename MAP::mapped_type& key)
     {
         if (auto iter = states.find(key); iter!=states.end())
         {
@@ -105,19 +107,26 @@ namespace alg
 // Remark 1. For min coin change : 
 // - all 4 implementations involve "std::numeric_limits<T>::max() + 1" 
 // - overflow will happen (unless $1 is always in coin set)
-// - overflow can be avoided by using inf<T>, one<T> and add(x,y) 
+// - overflow can be avoided by using alg::inf<T>, alg::one<T> and alg::add(x,y) 
 //
 // Remark 2. For knapsack :
 // - there is a change in constraint
-//   state == target            for coin change
-//   state <= weight_limit      for knapsack 
-// - need to scan graph or tabulation for optimum at the end
+//   state == target       for coin change
+//   state <= weight_limit for knapsack 
+// - hence, at the end of algo, we need to :
+//   scan state-graph   for optimum 
+//   scan subprob-table for optimum  
 //  
 // Remark 3. For job schedule : 
-// - there is a change in decision param, which takes 0/1 only  
-// - there is a order constraint, do tasks[i] before tasks[j] for i < j
-//
-//
+// - there are constraints on param
+//   (a) takes 0/1 only 
+//   (b) tasks[i] cannot be done after tasks[j], if i < j
+// - to handle these constraints 
+//   state-graph   implementation needs to add most-recent-completed-job as part of the state
+//   subprob-table implementation needs to modify recursion equation, depends on prev subprob only
+// ************************************************************************************************* //
+
+
 // *********************** //
 // *** Min coin change *** //
 // *********************** //
@@ -353,7 +362,7 @@ namespace alg
             }
         }
 
-        // Reamrk 2. Optimal case may not use all weight_limit
+        // Remark 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
         for(const auto& x:graph)
         {
@@ -401,7 +410,7 @@ namespace alg
             }
         }
 
-        // Reamrk 2. Optimal case may not use all weight_limit
+        // Remark 2. Optimal case may not use all weight_limit
         std::uint32_t ans = 0;
         for(std::uint32_t m=0; m<=weight_limit; ++m)
         {
@@ -421,17 +430,96 @@ namespace alg
 // get<1> = single task profit
 // get<2> = single task deadline <--- tasks are ordered in ascending deadline
 // 
-// for std::unordered_map<...> "graph" 
-// key   = total task workload
-// value = total task profit
+// for std::map<...> "graph"  
+// key.first  = total task wotkload
+// key.second = next  task possible
+// value      = total task profit
 //
 namespace alg
-{ /* 
-    std::uint32_t job_schedule_iterative_in_state(const std::vector<std::pair<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
+{ 
+    std::uint32_t job_schedule_iterative_in_state(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
-    } */
-/*
+        std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> graph; // Todo : use unordered_map (need to define hash)
+        graph[{0,0}] = 0;
+        
+        std::queue<std::pair<std::uint32_t, std::uint32_t>> queue;    
+        queue.push({0,0});
+  
+        while(!queue.empty())
+        {
+            auto s_prev = queue.front();
+            auto v_prev = graph[queue.front()];
+            queue.pop();
+
+            // for each neighbour
+            for(std::uint32_t n=0; n!=tasks.size(); ++n)
+            {
+                std::uint32_t s = s_prev.first + std::get<0>(tasks[n]);
+                std::uint32_t v = v_prev       + std::get<1>(tasks[n]);
+                std::uint32_t task_deadline =    std::get<2>(tasks[n]);
+                
+                if (s <= task_deadline && 
+                    n >= s_prev.second && 
+                    euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
+                {
+                    queue.push({s,n+1});
+                }
+            }
+        }
+  
+        // Remark 2. Optimal case may not use all weight_limit
+        std::uint32_t ans = 0;
+/*      for(const auto& x:graph)
+        {
+            if (ans < x.second)
+                ans = x.second;
+        } */
+        return ans;
+    } 
+  
     std::uint32_t job_schedule_iterative_in_subprob(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
-    } */
+        std::uint32_t hard_deadline = std::get<2>(tasks.back());
+        matrix<std::uint32_t> mat(tasks.size(), hard_deadline+1, 0);
+        
+        // init 1st row
+        for(std::uint32_t m=0; m<=hard_deadline; ++m) 
+        {
+            if (m % std::get<0>(tasks[0]) == 0) 
+            {
+                mat(0,m) = (m / std::get<0>(tasks[0])) * std::get<1>(tasks[0]);
+            }
+        }
+
+        // init 1st col
+        for(std::uint32_t n=0; n!=tasks.size(); ++n) 
+        {
+            mat(n,0) = 0;
+        }
+
+        // iteration
+        for(std::uint32_t n=1; n!=tasks.size(); ++n)
+        {
+            for(std::uint32_t m=1; m<=hard_deadline; ++m)
+            {
+                if (std::get<0>(tasks[n]) > m)
+                {
+                    mat(n,m) = mat(n-1,m);
+                }
+                else
+                {
+                    mat(n,m) = std::max(mat(n-1,m), mat(n,m-std::get<0>(tasks[n])) + std::get<1>(tasks[n]));
+                }
+            }
+        }
+
+        // Remark 2. Optimal case may not use all weight_limit
+        std::uint32_t ans = 0;
+        for(std::uint32_t m=0; m<=hard_deadline; ++m)
+        {
+            if (ans < mat(tasks.size()-1, m))
+                ans = mat(tasks.size()-1, m);
+        }
+        return ans;
+    } 
 }
