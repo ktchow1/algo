@@ -228,18 +228,18 @@ namespace alg
             mat(n,0) = 0;
         }
 
-        // iteration
+        // main iteration
         for(std::uint32_t n=1; n!=coins.size(); ++n)
         {
             for(std::uint32_t m=1; m<=target; ++m)
             {
-                if (coins[n] > m)
+                if (m >= coins[n])
                 {
-                    mat(n,m) = mat(n-1,m);
+                    mat(n,m) = std::min(mat(n-1,m), add(mat(n,m-coins[n]), one<std::uint32_t>));
                 }
                 else
                 {
-                    mat(n,m) = std::min(mat(n-1,m), add(mat(n,m-coins[n]), one<std::uint32_t>));
+                    mat(n,m) = mat(n-1,m);
                 }
             }
         }
@@ -302,18 +302,18 @@ namespace alg
             mat(n,0) = 1; 
         }
 
-        // iteration
+        // main iteration
         for(std::uint32_t n=1; n!=coins.size(); ++n)
         {
             for(std::uint32_t m=1; m<=target; ++m)
             {
-                if (coins[n] > m)
+                if (m >= coins[n])
                 {
-                    mat(n,m) = mat(n-1,m);
+                    mat(n,m) = mat(n-1,m) + mat(n,m-coins[n]); 
                 }
                 else
                 {
-                    mat(n,m) = mat(n-1,m) + mat(n,m-coins[n]); 
+                    mat(n,m) = mat(n-1,m);
                 }
             }
         }
@@ -387,25 +387,20 @@ namespace alg
                 mat(0,m) = (m / objects[0].first) * objects[0].second;
             }
         }
+        // init 1st col (redundant)
 
-        // init 1st col
-        for(std::uint32_t n=0; n!=objects.size(); ++n) 
-        {
-            mat(n,0) = 0;
-        }
-
-        // iteration
+        // main iteration
         for(std::uint32_t n=1; n!=objects.size(); ++n)
         {
             for(std::uint32_t m=1; m<=weight_limit; ++m)
             {
-                if (objects[n].first > m)
+                if (m >= objects[n].first)
                 {
-                    mat(n,m) = mat(n-1,m);
+                    mat(n,m) = std::max(mat(n-1,m), mat(n,m-objects[n].first) + objects[n].second);
                 }
                 else
                 {
-                    mat(n,m) = std::max(mat(n-1,m), mat(n,m-objects[n].first) + objects[n].second);
+                    mat(n,m) = mat(n-1,m);
                 }
             }
         }
@@ -456,9 +451,9 @@ namespace alg
             {
                 std::uint32_t s = s_prev.first + std::get<0>(tasks[n]);
                 std::uint32_t v = v_prev       + std::get<1>(tasks[n]);
-                std::uint32_t d =                std::get<2>(tasks[n]); // task deadline
+                std::uint32_t deadline =         std::get<2>(tasks[n]);
                 
-                if (s <= d && 
+                if (s <= deadline && 
                     n >= s_prev.second && // Remark 3. Ensure no duplicated task. Ensure task in sequence. 
                     euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
                 {
@@ -482,41 +477,34 @@ namespace alg
         std::uint32_t hard_deadline = std::get<2>(tasks.back());
         matrix<std::uint32_t> mat(tasks.size(), hard_deadline+1, 0);
         
-        // init 1st row
+        // init 1st row (coz main iteration does not include 1st row)
         {
-            std::uint32_t s = std::get<0>(tasks[0]);
-            std::uint32_t v = std::get<1>(tasks[0]);
-            std::uint32_t d = std::get<2>(tasks[0]);
-            if (s <= d)
+            std::uint32_t workload = std::get<0>(tasks[0]);
+            std::uint32_t profit   = std::get<1>(tasks[0]);
+            std::uint32_t deadline = std::get<2>(tasks[0]);
+            if (workload <= deadline)
             {
-                mat(0,0) = 0; // tasks[0] not done
-                mat(0,s) = v; // tasks[0] is done
+                mat(0,workload) = profit; 
             }
-            else mat(0,0) = 0;
         }
+        // init 1st col (redundant)
 
-        // init 1st col (redundant, as it is init in construction)
-        for(std::uint32_t n=0; n!=tasks.size(); ++n) 
-        {
-            mat(n,0) = 0; 
-        }
-
-        // iteration
+        // main iteration
         for(std::uint32_t n=1; n!=tasks.size(); ++n)
         {
+            std::uint32_t workload = std::get<0>(tasks[n]);
+            std::uint32_t profit   = std::get<1>(tasks[n]);
+            std::uint32_t deadline = std::get<2>(tasks[n]);
             for(std::uint32_t m=1; m<=hard_deadline; ++m)
             {
-                std::uint32_t s = std::get<0>(tasks[0]);
-                std::uint32_t v = std::get<1>(tasks[0]);
-                std::uint32_t d = std::get<2>(tasks[0]);
-                if (m > d)
+                if (m >= workload && m <= deadline)
                 {
-                    mat(n,m) = mat(n-1,m);
+                //  mat(n,m) = std::max(mat(n-1,m), mat(n,  m-workload) + profit); // Remark 3. Ensure no duplicated task.
+                    mat(n,m) = std::max(mat(n-1,m), mat(n-1,m-workload) + profit);
                 }
                 else
                 {
-                //  mat(n,m) = std::max(mat(n-1,m), mat(n,  m-s) + v); // Remark 3. Ensure no duplicated task.
-                    mat(n,m) = std::max(mat(n-1,m), mat(n-1,m-s) + v);
+                    mat(n,m) = mat(n-1,m);
                 }
             }
         }

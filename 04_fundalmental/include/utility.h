@@ -122,20 +122,7 @@ inline std::vector<std::uint32_t> gen_random_swapped_order(std::uint32_t size)
 // Assume size <= max-min+1
 inline std::vector<std::uint32_t> gen_random_coins(std::uint32_t size, std::uint32_t min, std::uint32_t max)
 {
-    std::vector<std::uint32_t> ans;
-    for(std::uint32_t n=min; n!=max; ++n)
-    {
-        ans.push_back(n);
-    }
-    for(std::uint32_t n=0; n!=size; ++n)
-    {
-        std::uint32_t m = rand() % ans.size();
-        std::swap(ans[n], ans[m]);
-    }
-
-    ans.resize(size);
-    std::sort(ans.begin(), ans.end());
-    return ans;
+    return gen_random_sorted_vec(size, min, max);
 }
 
 inline auto gen_random_objects(std::uint32_t size, 
@@ -150,6 +137,27 @@ inline auto gen_random_objects(std::uint32_t size,
         std::uint32_t w = min_weight + rand()% (max_weight - min_weight);
         std::uint32_t v = min_value  + rand()% (max_value  - min_value);
         ans.push_back(std::make_pair(w,v));
+    }
+    return ans;
+}
+
+inline auto gen_random_jobs(std::uint32_t size, 
+                            std::uint32_t min_workload, 
+                            std::uint32_t max_workload,
+                            std::uint32_t min_profit, 
+                            std::uint32_t max_profit,
+                            std::uint32_t min_deadline, 
+                            std::uint32_t max_deadline)
+{
+    auto deadlines = gen_random_sorted_vec(size, min_deadline, max_deadline);
+
+    std::vector<std::tuple<std::uint32_t,std::uint32_t,std::uint32_t>> ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        std::uint32_t w = min_workload + rand()% (max_workload - min_workload);
+        std::uint32_t p = min_profit   + rand()% (max_profit   - min_profit);
+        std::uint32_t d = deadlines[n];
+        ans.push_back(std::make_tuple(w,p,d));
     }
     return ans;
 }
