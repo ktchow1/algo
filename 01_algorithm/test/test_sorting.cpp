@@ -15,7 +15,7 @@ void test_sorting()
     std::uint32_t error4 = 0;
     std::uint32_t error5 = 0;
 
-    print_summary("[test_sorting]", "running");
+    print_summary("all_sorting", "running ");
     for(std::uint32_t t=0; t!=trial; ++t)
     {
         auto vec = gen_random_vec<std::uint32_t>(200, 0, 200);

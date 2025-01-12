@@ -21,7 +21,7 @@ void test_bignum()
     assert((alg::bignum{"01234"} * alg::bignum{"0"}   ).to_string() == std::string{"0"});
     assert((alg::bignum{"000"}   * alg::bignum{"1234"}).to_string() == std::string{"0"});
     assert((alg::bignum{"000"}   * alg::bignum{"0"}   ).to_string() == std::string{"0"});
-    print_summary("bignum edge case", "all succeeded");
+    print_summary("bignum edge case", "succeeded");
 
     std::uint32_t trial = 10000;
     std::uint32_t error0 = 0;   

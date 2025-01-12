@@ -277,13 +277,20 @@ private:
 // *************************** //
 // *** Test loop functions *** //
 // *************************** //
+enum class print_mode : std::uint8_t
+{
+    nothing,
+    progress,
+    every_case
+};
+
 template<std::uint32_t GEN_NUM, typename GEN_FUNCTION, typename ALG_FUNCTION, typename BMK_FUNCTION>
 void benchmark(const std::string&  test_name,
                const GEN_FUNCTION& gen_function, // nullary
                const ALG_FUNCTION& alg_function, // nary = GEN_NUM
                const BMK_FUNCTION& bmk_function, // nary = GEN_NUM
                std::uint32_t       trial, 
-               bool                print_each_test_case)
+               print_mode          mode = print_mode::nothing) 
 {
     alg::timer timer0;
     alg::timer timer1;
@@ -291,7 +298,9 @@ void benchmark(const std::string&  test_name,
     statistics<std::uint64_t> stat1(0);
     std::uint32_t error = 0;
 
-    if (print_each_test_case) std::cout << "\n";
+    if (mode == print_mode::every_case) std::cout << "\n";
+    if (mode == print_mode::progress)   print_summary(test_name, "running ");
+
     for(std::uint32_t t=0; t!=trial; ++t)
     {
         if constexpr (GEN_NUM == 1)
@@ -307,7 +316,8 @@ void benchmark(const std::string&  test_name,
             timer1.click();
 
             if (ans0 != ans1) ++error;
-            if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            if (mode == print_mode::progress) { if (t % (trial/20) == 0) std::cout << "." << std::flush; }   
         }
         else
         {
@@ -323,7 +333,8 @@ void benchmark(const std::string&  test_name,
             timer1.click();
 
             if (ans0 != ans1) ++error;
-            if (print_each_test_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            if (mode == print_mode::every_case) print_one_case(test_name, ans0, ans1, error, trial, ans0 == ans1);
+            if (mode == print_mode::progress) { if (t % (trial/20) == 0) std::cout << "." << std::flush; }   
         }
 
         stat0.add(timer0.time_elapsed_in_nsec());

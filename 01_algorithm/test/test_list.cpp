@@ -80,7 +80,7 @@ void test_singly_list()
     auto n23 = list.insert_before_head((std::uint32_t)23);
     auto n24 = list.insert_before_head((std::uint32_t)24);
     assert(alg::list::compare(list, {24,23,22}));
-    print_summary("singly_list", "all succeeded [Todo : avoid memleak]");
+    print_summary("singly_list", "succeeded [Todo : avoid memleak]");
 }
 
 void test_doubly_list()
@@ -167,7 +167,7 @@ void test_doubly_list()
     auto n26 = list.insert_before_head((std::uint32_t)26);
     auto n27 = list.insert_before_head((std::uint32_t)27);
     assert(alg::list::compare(list, {27,26,25})); 
-    print_summary("doubly_list", "all succeeded [Todo : avoid memleak]");
+    print_summary("doubly_list", "succeeded [Todo : avoid memleak]");
 }
 
 void test_nth_node_from_tail()
@@ -186,7 +186,7 @@ void test_nth_node_from_tail()
     assert(alg::list::find_nth_node_before_tail(list.begin(), 10) == nullptr);
     assert(alg::list::find_nth_node_before_tail(list.begin(), 11) == nullptr);
     assert(alg::list::find_nth_node_before_tail(list.begin(), 12) == nullptr);
-    print_summary("nth_node_from_tail", "all succeeded");
+    print_summary("nth_node_from_tail", "succeeded");
 }
 
 void test_circular_list()
@@ -221,7 +221,7 @@ void test_circular_list()
 
     nodes[49]->m_next = nullptr;
     assert(detector.is_looped() == false);
-    print_summary("circular_list", "all succeeded");
+    print_summary("circular_list", "succeeded");
 }
 
 void test_list()

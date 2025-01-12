@@ -137,7 +137,7 @@ void test_disjoint_set()
             assert(set.is_same_set("b3", "c3") == true);
         }
     }
-    print_summary("disjoint_set", "all succeeded");
+    print_summary("disjoint_set", "succeeded");
 }
 
 void test_prefix_tree()
@@ -194,7 +194,7 @@ void test_prefix_tree()
     assert( ptree.find("a") == std::nullopt);
     assert( ptree.find("b") == std::nullopt);
     assert( ptree.find("c") == std::nullopt);
-    print_summary("prefix_tree", "all succeeded");
+    print_summary("prefix_tree", "succeeded");
 }
 
 void test_tree_variant()

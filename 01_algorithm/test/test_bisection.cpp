@@ -68,7 +68,7 @@ void test_bisection()
         auto ans = alg::bisection([](double x) { return sin(x)-cos(x); }, 2*pi/3, +pi/2);
         assert(compare_and_print(ans, std::optional<double>{}));
     }
-    print_summary(test_name, "all succeeded");
+    print_summary(test_name, "succeeded");
 
     test_name = "bisection of int vector";
     // size = 1
@@ -150,7 +150,7 @@ void test_bisection()
         auto ans = alg::bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{})); // not exist
     }
-    print_summary(test_name, "all succeeded");
+    print_summary(test_name, "succeeded");
 
     test_name = "peak bisection";
     // size = 2
@@ -216,7 +216,7 @@ void test_bisection()
         auto ans = alg::peak_bisection(vec);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{})); // valley
     }
-    print_summary(test_name, "all succeeded");
+    print_summary(test_name, "succeeded");
 
     test_name = "rotated bisection";
     // size = 2
@@ -314,6 +314,6 @@ void test_bisection()
         auto ans = alg::rotated_bisection(vec, 10);
         assert(compare_and_print(ans, std::optional<std::uint32_t>{12})); // target at last
     }
-    print_summary(test_name, "all succeeded");
+    print_summary(test_name, "succeeded");
 }
 

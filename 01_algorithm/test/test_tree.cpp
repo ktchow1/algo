@@ -149,13 +149,13 @@ void test_avl_algo()
         tree.traverse(f0, alg::avl::mode::dfs_in_order_recursive);  
         auto* root = alg::avl::create_avl_tree_from_sorted_vec(f0.m_values.begin(), f0.m_values.end()); 
         
-                                                                             // Why construct balanced tree from root?
-        alg::avl::tree bal_tree{root};                                       // 1. use tree traversal to verify output
-        bal_tree.traverse(f1, alg::avl::mode::dfs_in_order_recursive);       // 2. use tree destructor to avoid memleak [verified with Valgrind]
+                                                                          // Why construct balanced tree from root?
+        alg::avl::tree bal_tree{root};                                    // 1. use tree traversal to verify output
+        bal_tree.traverse(f1, alg::avl::mode::dfs_in_order_recursive);    // 2. use tree destructor to avoid memleak [verified with Valgrind]
 
-        if (!alg::is_equal(f0.m_values, f1.m_values))                        ++error3;
-        if (    bal_tree.depth()           >     tree.depth())               ++error4; 
-        if (abs(bal_tree.balance_factor()) > abs(tree.balance_factor()))     ++error5; 
+        if (!alg::is_equal(f0.m_values, f1.m_values))                     ++error3;
+        if (    bal_tree.depth()           >     tree.depth())            ++error4; 
+        if (abs(bal_tree.balance_factor()) > abs(tree.balance_factor()))  ++error5; 
         
         // ************** //
         // *** Algo 3 *** //
@@ -167,15 +167,15 @@ void test_avl_algo()
 
         alg::traversal_cache<std::uint32_t> f2;
         alg::avl::traverse_rhs_only(list_head, f2);
-        if (!alg::is_equal(f0.m_values, f2.m_values))                        ++error6;
+        if (!alg::is_equal(f0.m_values, f2.m_values))                      ++error6;
     }
-    print_summary("avl_tree verified to be sorted",             error0, trial);
-    print_summary("avl_tree verified to be unsorted",           error1, trial);
-    print_summary("avl_tree verified to be resorted",           error2, trial);
-    print_summary("avl_tree balanced by resort, compare vec",   error3, trial);
-    print_summary("avl_tree balanced by resort, compare depth", error4, trial);
-    print_summary("avl_tree balanced by resort, compare BF",    error5, trial);
-    print_summary("avl_tree create doubly list",                error6, trial);
+    print_summary("avl_tree verified to be sorted",                        error0, trial);
+    print_summary("avl_tree verified to be unsorted",                      error1, trial);
+    print_summary("avl_tree verified to be resorted",                      error2, trial);
+    print_summary("avl_tree balanced by resort, compare vec",              error3, trial);
+    print_summary("avl_tree balanced by resort, compare depth",            error4, trial);
+    print_summary("avl_tree balanced by resort, compare BF (known error)", error5, trial);
+    print_summary("avl_tree create doubly list",                           error6, trial);
 }
 
 

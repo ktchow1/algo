@@ -6,19 +6,18 @@
 void test_string_problem()
 {
     std::uint32_t num_trial = 10000;
-    bool print_each_test_case = false;
   
     benchmark<1>("longest_non_duplicate_substr",           
                  std::bind(gen_random_str, 20, 26), 
                  std::bind(alg::longest_non_duplicated_substr,     _1),      
                  std::bind(alg::longest_non_duplicated_substr_bmk, _1),
-                 num_trial, print_each_test_case); 
+                 num_trial); 
 
     benchmark<1>("longest_odd_palindrome_substr",           
                  std::bind(gen_random_palindrome, 200, 5), 
                  std::bind(alg::longest_odd_palindrome_substr,     _1),
                  std::bind(alg::longest_odd_palindrome_substr_bmk, _1),
-                 num_trial, print_each_test_case); 
+                 num_trial); 
 
 
     // **************************** //
