@@ -86,13 +86,13 @@ namespace alg
 //
 // ************************************************************************************************* //
 // Approaches (with speed 4 > 3 > 2 > 1)
-// 1. recursive in state-graph
-// 2. recursive in subproblem-table           
-// 3. iterative in state-graph         implemented as region_growing
-// 4. iterative in subproblem-table    implemented as tabulation   
+// 1. recursive in state_graph
+// 2. recursive in state_subproblem_matrix
+// 3. iterative in state_graph                implemented as region_growing
+// 4. iterative in state_subproblem_matrix    implemented as scanning
 //
 //
-// 1. Recursion in state-graph connects a vertex with its neighbours in the same problem size
+// 1. Recursion in state_graph connects a vertex with its neighbours in the same problem size
 //
 //    f(coins, target) = min[ f(coins, target-coins[0]) + 1,
 //                            f(coins, target-coins[1]) + 1,
@@ -100,61 +100,61 @@ namespace alg
 //                            ... ] 
 //
 //
-// 2. Recursion in subproblem-table connects a cell with its neighbours in different problem size
+// 2. Recursion in state_subproblem_matrix connects a cell with its neighbours in different problem size
 //
 //    f(coins, target) = min[ f(coins, target-coins[0]) + 1,
 //                            f(coins.exclude(coins[0]), target) ] 
 //
 //
-// 3. State-graph consisted of : 
+// 3. State_graph consisted of : 
 // *  vertices  = all possible states (i.e. 0, 1, 2, ..., target)
 // *  edges     = between any 2 states, whenever they can be connected by a coin
 // *  objective = minimize distance from state_0 to state_target
-// *  implement = region_growing (Dijkstra) on the state-graph, represented as std::map<state,value>
+// *  implement = region_growing (Dijkstra) on the state_graph, represented as std::map<state,value>
 //
 //
-// 4. Subproblem-table is a 2D matrix of :
+// 4. State_subproblem_matrix is a 2D matrix of "states" vs "subproblem size" :
 // *  row[0] = subproblem with coins[0] only
 // *  row[1] = subproblem with coins[0] and coins[1]
 //    ...
-// *  col[0] = subproblem with target = 0 
-// *  col[1] = subproblem with target = 1 
+// *  col[0] = state 0 as target
+// *  col[1] = state 1 as target
 //    ...
 //
 // ************************************************************************************************* //
 // Remark 1. For min coin change : 
 // - all 4 implementations involve "std::numeric_limits<T>::max() + 1" 
-// - overflow will happen (unless $1 is always in coin set)
-// - overflow can be avoided by using alg::inf<T>, alg::one<T> and alg::add(x,y) 
+// - overflow will happen, which can be avoided by either :
+//   (a) $1 is always in the coin set 
+//   (b) using alg::inf<T>, alg::one<T> and alg::add(x,y)
 //
 // Remark 2. For knapsack :
 // - there is a change in constraint
 //   state == target       for coin change
 //   state <= weight_limit for knapsack 
-// - hence, at the end of algo, we need to :
-//   scan state-graph   for optimum 
-//   scan subprob-table for optimum  
+// - hence at the end of algo, we need to :
+//   scan for optimum in state_graph            
+//   scan for optimum in state_subproblem_matrix
 //  
 // Remark 3. For job schedule : 
 // - there are constraints on param
 //   (a) takes 0/1 only 
 //   (b) tasks[i] cannot be done after tasks[j], if i < j
 // - to handle these constraints 
-//   state-graph   implementation needs to add most-recent-completed-job as part of the state
-//   subprob-table implementation needs to modify recursion equation, depends on prev subprob only
+//   state_graph             needs to add next_allowed_job as part of the state
+//   state_subproblem_matrix needs to modify recursion eq, so that it depends on prev rows only
 //
 // Remark 4. For equal partition 
-// - there are constraints on param
-//   (a) takes 0/1 only 
-//   (b) numbers[i] cannot be picked after numbers[j], if i < j
-// - simiplified version of job schedule
-//   (a) with value = state 
+// - it is a simiplified version of job schedule 
+//   (a) with same constraints on param
 //   (b) no constraint on state
+//   (c) with value = state 
 //
 // Remark 5. For box stacking 
 // - it is like job schedule, as param = {0,1}
-// - state is not a scaler (plus next-allowed-item)
-// - state is a 2D vector  (plus next-allowed-item) 
+// - state is not a scaler (plus next_allowed_item)
+// - state is a 2D vector  (plus next_allowed_item) 
+// - hence cannot use state_subproblem_matrix approach
 //
 // ************************************************************************************************* //
 
@@ -164,7 +164,7 @@ namespace alg
 // *********************** //
 namespace alg
 {  
-    std::uint32_t min_coin_change_recursive_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_recursive_in_graph(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::uint32_t ans = inf<std::uint32_t>;
         for(const auto& x:coins)
@@ -172,13 +172,13 @@ namespace alg
             if (x == target) return 1;
             if (x <  target)
             {
-                ans = std::min(ans, add(min_coin_change_recursive_in_state(coins, target-x), one<std::uint32_t>)); 
+                ans = std::min(ans, add(min_coin_change_recursive_in_graph(coins, target-x), one<std::uint32_t>)); 
             }
         }
         return ans;
     }
   
-    std::uint32_t min_coin_change_recursive_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_recursive_in_matrix(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         if (coins.size() == 1)
         {
@@ -196,17 +196,17 @@ namespace alg
             std::vector<std::uint32_t> coins_sub(coins.begin(), --coins.end());
             if (coins.back() > target)
             {
-                return min_coin_change_recursive_in_subprob(coins_sub, target);
+                return min_coin_change_recursive_in_matrix(coins_sub, target);
             }
             else
             {
-                return std::min(add(min_coin_change_recursive_in_subprob(coins,     target-coins.back()), one<std::uint32_t>),
-                                    min_coin_change_recursive_in_subprob(coins_sub, target));
+                return std::min(add(min_coin_change_recursive_in_matrix(coins,     target-coins.back()), one<std::uint32_t>),
+                                    min_coin_change_recursive_in_matrix(coins_sub, target));
             }
         }
     } 
 
-    std::uint32_t min_coin_change_iterative_in_state(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_iterative_in_graph(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> graph;   // graph for region growing
         graph[0] = 0;                                             // BUG : must initialize 
@@ -238,7 +238,7 @@ namespace alg
         return (ans? *ans: inf<std::uint32_t>);
     }
 
-    std::uint32_t min_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t min_coin_change_iterative_in_matrix(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         matrix<std::uint32_t> mat(coins.size(), target+1, inf<std::uint32_t>);
         // where mat(n,m) = min num of coins need to reach state m with coins {0,1,2..,n}
@@ -288,7 +288,7 @@ namespace alg
 //
 namespace alg
 {   
-    std::uint32_t count_coin_change_recursive_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t count_coin_change_recursive_in_matrix(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         if (coins.size() == 1)
         {
@@ -306,17 +306,17 @@ namespace alg
             std::vector<std::uint32_t> coins_sub(coins.begin(), --coins.end());
             if (coins.back() > target)
             {
-                return count_coin_change_recursive_in_subprob(coins_sub, target); 
+                return count_coin_change_recursive_in_matrix(coins_sub, target); 
             }
             else
             {
-                return count_coin_change_recursive_in_subprob(coins,     target-coins.back()) + 
-                       count_coin_change_recursive_in_subprob(coins_sub, target);
+                return count_coin_change_recursive_in_matrix(coins,     target-coins.back()) + 
+                       count_coin_change_recursive_in_matrix(coins_sub, target);
             }
         }
     } 
 
-    std::uint32_t count_coin_change_iterative_in_subprob(const std::vector<std::uint32_t>& coins, std::uint32_t target)
+    std::uint32_t count_coin_change_iterative_in_matrix(const std::vector<std::uint32_t>& coins, std::uint32_t target)
     {
         matrix<std::uint32_t> mat(coins.size(), target+1, 0); 
         
@@ -368,7 +368,7 @@ namespace alg
 //
 namespace alg
 {  
-    std::uint32_t knapsack_iterative_in_state(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
+    std::uint32_t knapsack_iterative_in_graph(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
         std::unordered_map<std::uint32_t, std::uint32_t> graph;
         graph[0] = 0;
@@ -405,7 +405,7 @@ namespace alg
         return ans;
     }
 
-    std::uint32_t knapsack_iterative_in_subprob(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
+    std::uint32_t knapsack_iterative_in_matrix(const std::vector<std::pair<std::uint32_t, std::uint32_t>>& objects, std::uint32_t weight_limit)
     {
         matrix<std::uint32_t> mat(objects.size(), weight_limit+1, 0);
         // where mat(n,m) = total value of objects obtained on reaching state m with objects {0,1,2..,n}
@@ -465,7 +465,7 @@ namespace alg
 //
 namespace alg
 { 
-    std::uint32_t job_schedule_iterative_in_state(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
+    std::uint32_t job_schedule_iterative_in_graph(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
         std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> graph; // Todo : use unordered_map (need to define hash)
         graph[{0,0}] = 0;
@@ -503,7 +503,7 @@ namespace alg
         return ans;
     } 
   
-    std::uint32_t job_schedule_iterative_in_subprob(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
+    std::uint32_t job_schedule_iterative_in_matrix(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
         std::uint32_t hard_deadline = std::get<2>(tasks.back());
         matrix<std::uint32_t> mat(tasks.size(), hard_deadline+1, 0);
@@ -567,7 +567,7 @@ namespace alg
         return ans/2;
     }
   
-    std::uint32_t equal_partition_iterative_in_state(const std::vector<std::uint32_t>& numbers)
+    std::uint32_t equal_partition_iterative_in_graph(const std::vector<std::uint32_t>& numbers)
     {
         std::uint32_t target = find_half_of_sum(numbers);
 
@@ -602,7 +602,7 @@ namespace alg
         return ans;
     } 
     
-    std::uint32_t equal_partition_iterative_in_subprob(const std::vector<std::uint32_t>& numbers)
+    std::uint32_t equal_partition_iterative_in_matrix(const std::vector<std::uint32_t>& numbers)
     {
         // Todo : should use alg::matrix<bool>, but don't know why alg::matrix<T> does not support T=bool.
         std::uint32_t target = find_half_of_sum(numbers);
@@ -659,7 +659,7 @@ namespace alg
         z_up
     };
 
-    struct stack_state
+    struct boxes_state
     {
         std::uint32_t m_next_allowed_box; 
         std::uint32_t m_base_min;
@@ -708,7 +708,7 @@ namespace alg
 
     struct stack_state_less
     {
-        bool operator()(const stack_state& lhs, const stack_state& rhs) const noexcept
+        bool operator()(const boxes_state& lhs, const boxes_state& rhs) const noexcept
         {
             if      (lhs.m_next_allowed_box < rhs.m_next_allowed_box) return  true;
             else if (lhs.m_next_allowed_box > rhs.m_next_allowed_box) return false;
@@ -720,12 +720,12 @@ namespace alg
         }
     };
 
-    std::uint32_t box_stacking_iterative_in_state(const std::vector<box>& boxes) 
+    std::uint32_t box_stacking_iterative_in_graph(const std::vector<box>& boxes) 
     {
-        std::map<stack_state, std::uint32_t, stack_state_less> graph; // value = stack height 
+        std::map<boxes_state, std::uint32_t, stack_state_less> graph; // value = stack height 
         graph[{0, inf<std::uint32_t>, inf<std::uint32_t>}] = 0;
 
-        std::queue<stack_state> queue; 
+        std::queue<boxes_state> queue; 
         queue.push({0, inf<std::uint32_t>, inf<std::uint32_t>});
   
         while(!queue.empty())
@@ -787,7 +787,7 @@ namespace alg
     // We do not use matrix here, as we cannot calculate matrix.size_x (can be very large).
     // Therefore we use 2 std::map instead, to represent prev_row and this_row.
     // ************************************************************************************ //
-    std::uint32_t box_stacking_iterative_in_subprob(const std::vector<box>& boxes)
+    std::uint32_t box_stacking_iterative_in_matrix(const std::vector<box>& boxes)
     {
 /* 
         std::map<std::uint32_t> mat(numbers.size(), target+1, 0); 
