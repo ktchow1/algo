@@ -1,7 +1,7 @@
 #include<iostream>
 #include<iomanip>
 #include<cassert>
-#include<state_time_problem.h>
+#include<dp_matrix_and_graph.h>
 #include<utility.h>
 
 
@@ -97,11 +97,6 @@ void test_box_stacking()
 }
 
 
-void test_bin_packing()
-{
-}
-
-
 void test_state_time_problem()
 {
     test_coin_change();
@@ -109,5 +104,4 @@ void test_state_time_problem()
     test_job_schedule();
     test_equal_partition();
     test_box_stacking();
-    test_bin_packing();
 }

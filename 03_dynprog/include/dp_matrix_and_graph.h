@@ -85,7 +85,7 @@ namespace alg
 // eq partition      max v under constraint  s = v  <= sum(num)/2
 //
 // ************************************************************************************************* //
-// Approaches (with speed 4 > 3 > 2 > 1)
+// Approaches 
 // 1. recursive in state_graph
 // 2. recursive in state_subproblem_matrix
 // 3. iterative in state_graph                implemented as region_growing
@@ -121,40 +121,48 @@ namespace alg
 // *  col[1] = state 1 as target
 //    ...
 //
+//
+// Speed
+// * iterative is much faster than recursive
+// * extend state_graph in time, it will become state_subproblem_matrix (subproblem size = time)
+//   (a) if links between rows in matrix is dense,  implies duplication in graph, so matrix is faster
+//   (b) if links between rows in matrix is sparse, implies redundancy in matrix, so graph is faster
+// * when state is 1D scaler, like coin_change, knapsack, job_schedule & equal_partition, use matrix
+//   when state is 2D vector, like box_stacking, use graph
+//
 // ************************************************************************************************* //
 // Remark 1. For min coin change : 
-// - all 4 implementations involve "std::numeric_limits<T>::max() + 1" 
-// - overflow will happen, which can be avoided by either :
+// * all 4 implementations involve "std::numeric_limits<T>::max() + 1" 
+// * overflow will happen, which can be avoided by either :
 //   (a) $1 is always in the coin set 
 //   (b) using alg::inf<T>, alg::one<T> and alg::add(x,y)
 //
 // Remark 2. For knapsack :
-// - there is a change in constraint
+// * there is a change in constraint
 //   state == target       for coin change
 //   state <= weight_limit for knapsack 
-// - hence at the end of algo, we need to :
-//   scan for optimum in state_graph            
-//   scan for optimum in state_subproblem_matrix
+// * hence at the end of algo, we need to :
+//   (a) scan for optimum in state_graph            
+//   (b) scan for optimum in state_subproblem_matrix
 //  
 // Remark 3. For job schedule : 
-// - there are constraints on param
+// * there are constraints on param
 //   (a) takes 0/1 only 
 //   (b) tasks[i] cannot be done after tasks[j], if i < j
-// - to handle these constraints 
-//   state_graph             needs to add next_allowed_job as part of the state
-//   state_subproblem_matrix needs to modify recursion eq, so that it depends on prev rows only
+// * to handle these constraints 
+//   (a) state_graph             needs to add next_allowed_job as part of the state
+//   (b) state_subproblem_matrix needs to modify recursion eq, so that it depends on prev rows only
 //
 // Remark 4. For equal partition 
-// - it is a simiplified version of job schedule 
+// * it is a simiplified version of job schedule 
 //   (a) with same constraints on param
 //   (b) no constraint on state
 //   (c) with value = state 
 //
 // Remark 5. For box stacking 
-// - it is like job schedule, as param = {0,1}
-// - state is not a scaler (plus next_allowed_item)
-// - state is a 2D vector  (plus next_allowed_item) 
-// - hence cannot use state_subproblem_matrix approach
+// * it is like job schedule, as param = {0,1}
+// * state is not a scaler (plus next_allowed_item)
+// * state is a 2D vector  (plus next_allowed_item) 
 //
 // ************************************************************************************************* //
 
@@ -783,10 +791,10 @@ namespace alg
         return ans;
     } 
    
-    // ************************************************************************************ //
-    // We do not use matrix here, as we cannot calculate matrix.size_x (can be very large).
-    // Therefore we use 2 std::map instead, to represent prev_row and this_row.
-    // ************************************************************************************ //
+    // ******************************************* // 
+    // Since state is 2D { base_min * base_max }
+    // need 3D matrix for iterative implementation
+    // ******************************************* // 
     std::uint32_t box_stacking_iterative_in_matrix(const std::vector<box>& boxes)
     {
 /* 
