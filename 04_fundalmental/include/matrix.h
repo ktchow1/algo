@@ -152,8 +152,8 @@ namespace alg
                     for(std::uint32_t x=0; x!=m_size_x; ++x) 
                     {
                         auto temp = operator()(z,y,x);
-                        if (temp == inf<T>)
-                             std::cout << "inf, ";
+                        if (y > x)
+                             std::cout << "*  ";
                         else std::cout << temp << ", ";
                     }
                 }

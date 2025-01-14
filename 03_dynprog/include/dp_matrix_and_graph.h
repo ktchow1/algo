@@ -127,8 +127,6 @@ namespace alg
 // * extend state_graph in time, it will become state_subproblem_matrix (subproblem size = time)
 //   (a) if links between rows in matrix is dense,  implies duplication in graph, so matrix is faster
 //   (b) if links between rows in matrix is sparse, implies redundancy in matrix, so graph is faster
-// * when state is 1D scaler, like coin_change, knapsack, job_schedule & equal_partition, use matrix
-//   when state is 2D vector, like box_stacking, use graph
 //
 // ************************************************************************************************* //
 // Remark 1. For min coin change : 
@@ -811,7 +809,7 @@ namespace alg
     // ********************************************** // 
     // Since state is 2D { base_min * base_max }
     // need tensor for iterative implementation
-    // * tensor.n <---> subproblem size
+    // * tensor.n <---> subproblem size 
     // * tensor.m <---> base_min
     // * tensor.k <---> base_max 
     //
@@ -820,32 +818,12 @@ namespace alg
     std::uint32_t box_stacking_iterative_in_matrix(const std::vector<box>& boxes)
     {
         std::uint32_t side = max_box_side(boxes);
-        tensor<std::uint32_t> ten(boxes.size(), side+1, side+1, 0);
+        tensor<std::uint32_t> ten(boxes.size(), side+1, side+1, 0); // value = max height achieved by base mxk
         
         // init 1st layer
-        for(std::uint32_t m=0; m<=side; ++m)
-        {
-            for(std::uint32_t k=m; k<=side; ++k) // k >= m
-            {
-                // pick boxes[0] in x_up 
-                if (m <= boxes[0].m_y && k <= boxes[0].m_z)
-                {
-                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_x);
-                }
-
-                // pick boxes[0] in y_up 
-                if (m <= boxes[0].m_x && k <= boxes[0].m_z)
-                {
-                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_y);
-                }
-
-                // pick boxes[0] in z_up 
-                if (m <= boxes[0].m_x && k <= boxes[0].m_y)
-                {
-                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_z);
-                }
-            }
-        }
+        ten(0,boxes[0].m_y,boxes[0].m_z) = std::max(ten(0,boxes[0].m_y,boxes[0].m_z), boxes[0].m_x);
+        ten(0,boxes[0].m_x,boxes[0].m_z) = std::max(ten(0,boxes[0].m_x,boxes[0].m_z), boxes[0].m_y);
+        ten(0,boxes[0].m_x,boxes[0].m_y) = std::max(ten(0,boxes[0].m_x,boxes[0].m_y), boxes[0].m_z);
   
         // main iteration
         for(std::uint32_t n=1; n!=boxes.size(); ++n)
@@ -860,19 +838,25 @@ namespace alg
                     // pick boxes[n] in x_up 
                     if (m <= boxes[n].m_y && k <= boxes[n].m_z)
                     {
-                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_x);
+                        std::uint32_t m0 = boxes[n].m_y;
+                        std::uint32_t k0 = boxes[n].m_z;
+                        ten(n,m0,k0) = std::max(ten(n,m0,k0), ten(n-1,m,k) + boxes[n].m_x);
                     }
 
                     // pick boxes[n] in y_up 
                     if (m <= boxes[n].m_x && k <= boxes[n].m_z)
                     {
-                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_y);
+                        std::uint32_t m0 = boxes[n].m_x;
+                        std::uint32_t k0 = boxes[n].m_z;
+                        ten(n,m0,k0) = std::max(ten(n,m0,k0), ten(n-1,m,k) + boxes[n].m_y);
                     }
 
                     // pick boxes[n] in z_up 
                     if (m <= boxes[n].m_x && k <= boxes[n].m_y)
                     {
-                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_z);
+                        std::uint32_t m0 = boxes[n].m_x;
+                        std::uint32_t k0 = boxes[n].m_y;
+                        ten(n,m0,k0) = std::max(ten(n,m0,k0), ten(n-1,m,k) + boxes[n].m_z);
                     }
                 }
             }
@@ -883,8 +867,8 @@ namespace alg
         {
             for(std::uint32_t k=m; k<=side; ++k) 
             {
-                if (ans < ten(boxes.size(), m, k))
-                    ans = ten(boxes.size(), m, k);
+                if (ans < ten(boxes.size()-1, m, k))
+                    ans = ten(boxes.size()-1, m, k);
             }
         }
         return ans;

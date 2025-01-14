@@ -88,12 +88,12 @@ void test_equal_partition()
 
 void test_box_stacking()
 {
-    std::uint32_t num_trial = 10;
+    std::uint32_t num_trial = 1000;
     benchmark<1>("box_stacking ------ graph vs matrix (iterative)",           
-                 std::bind(gen_random_boxes, 20, 5, 50), 
+                 std::bind(gen_random_boxes, 80, 5, 50), 
                  std::bind(alg::box_stacking_iterative_in_graph,  _1),      
                  std::bind(alg::box_stacking_iterative_in_matrix, _1), 
-                 num_trial, true);  
+                 num_trial); 
 }
 
 
