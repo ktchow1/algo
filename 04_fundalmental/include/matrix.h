@@ -20,6 +20,7 @@ namespace alg
     }
 }
 
+
 namespace alg
 {
     template<typename T>
@@ -80,6 +81,87 @@ namespace alg
         }
 
     private:
+        std::uint32_t  m_size_y;
+        std::uint32_t  m_size_x;
+        std::vector<T> m_impl;        
+    };
+}
+
+
+namespace alg
+{
+    template<typename T>
+    class tensor
+    {
+    public:
+        tensor(std::uint32_t size_z, 
+               std::uint32_t size_y, 
+               std::uint32_t size_x)
+               : m_size_z(size_z), 
+                 m_size_y(size_y), 
+                 m_size_x(size_x),
+                 m_impl(size_z * size_y * size_x)
+        {
+        }
+
+        tensor(std::uint32_t size_z, 
+               std::uint32_t size_y, 
+               std::uint32_t size_x,
+               T init)
+               : m_size_y(size_y), 
+                 m_size_z(size_z), 
+                 m_size_x(size_x),
+                 m_impl(size_z * size_y * size_x, init)
+        {
+        }
+
+        const T& operator()(std::uint32_t z, std::uint32_t y, std::uint32_t x) const noexcept
+        {
+            return m_impl[z * m_size_y * m_size_x + y * m_size_x + x];
+        }
+
+        T& operator()(std::uint32_t z, std::uint32_t y, std::uint32_t x) 
+        {
+            return m_impl[z * m_size_y * m_size_x + y * m_size_x + x];
+        }
+
+        const std::uint32_t size_z() const noexcept
+        {
+            return m_size_z;
+        }
+
+        const std::uint32_t size_y() const noexcept
+        {
+            return m_size_y;
+        }
+
+        const std::uint32_t size_x() const noexcept
+        {
+            return m_size_x;
+        }
+        
+        void debug() const noexcept
+        {
+            std::cout << "tensor";
+            for(std::uint32_t z=0; z!=m_size_z; ++z)
+            {
+                std::cout << "\nz=" << z;
+                for(std::uint32_t y=0; y!=m_size_y; ++y)
+                {
+                    std::cout << "\n";
+                    for(std::uint32_t x=0; x!=m_size_x; ++x) 
+                    {
+                        auto temp = operator()(z,y,x);
+                        if (temp == inf<T>)
+                             std::cout << "inf, ";
+                        else std::cout << temp << ", ";
+                    }
+                }
+            }
+        }
+
+    private:
+        std::uint32_t  m_size_z;
         std::uint32_t  m_size_y;
         std::uint32_t  m_size_x;
         std::vector<T> m_impl;        

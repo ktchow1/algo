@@ -656,10 +656,24 @@ namespace alg
 // ******************** //
 // *** Box stacking *** //
 // ******************** //
-// Let pick from bottom up.
+// Let pick boxes by top-down manner. 
+// Whenever adding next box b to the bottom, it must be 
+// greater than / equal to boxes_state::m_base_min / max.
 //
 namespace alg
 { 
+    std::uint32_t max_box_side(const std::vector<box>& boxes)
+    {
+        std::uint32_t ans = 0;
+        for(const auto& b:boxes)
+        {
+            if (ans < b.m_x) ans = b.m_x;
+            if (ans < b.m_y) ans = b.m_y;
+            if (ans < b.m_z) ans = b.m_z;
+        }
+        return ans;
+    }
+
     enum class orientation : std::uint8_t
     {
         x_up,
@@ -673,22 +687,22 @@ namespace alg
         std::uint32_t m_base_min;
         std::uint32_t m_base_max;
 
-        bool is_greater_eq(const box& b, orientation b_ori) const noexcept // assuming each box has x <= y <= z
+        bool is_smaller_eq(const box& b, orientation b_ori) const noexcept // assuming each box has x <= y <= z
         {
             if (b_ori == orientation::x_up)
             {
-                if (m_base_min < b.m_y) return false;
-                if (m_base_max < b.m_z) return false;
+                if (m_base_min > b.m_y) return false;
+                if (m_base_max > b.m_z) return false;
             }
             else if (b_ori == orientation::y_up)
             {
-                if (m_base_min < b.m_x) return false;
-                if (m_base_max < b.m_z) return false;
+                if (m_base_min > b.m_x) return false;
+                if (m_base_max > b.m_z) return false;
             }
             else
             {
-                if (m_base_min < b.m_x) return false;
-                if (m_base_max < b.m_y) return false;
+                if (m_base_min > b.m_x) return false;
+                if (m_base_max > b.m_y) return false;
             }
             return true;
         }
@@ -714,7 +728,7 @@ namespace alg
         } 
     };
 
-    struct stack_state_less
+    struct boxes_state_less
     {
         bool operator()(const boxes_state& lhs, const boxes_state& rhs) const noexcept
         {
@@ -727,14 +741,17 @@ namespace alg
             else                                                      return false; 
         }
     };
+}
 
+namespace alg
+{ 
     std::uint32_t box_stacking_iterative_in_graph(const std::vector<box>& boxes) 
     {
-        std::map<boxes_state, std::uint32_t, stack_state_less> graph; // value = stack height 
+        std::map<boxes_state, std::uint32_t, boxes_state_less> graph; // value = total height 
         graph[{0, inf<std::uint32_t>, inf<std::uint32_t>}] = 0;
 
         std::queue<boxes_state> queue; 
-        queue.push({0, inf<std::uint32_t>, inf<std::uint32_t>});
+        queue.push({0, 0, 0});
   
         while(!queue.empty())
         {
@@ -747,19 +764,19 @@ namespace alg
                 // ********* //
                 // *** x *** //
                 // ********* //
-                if (s_prev.is_greater_eq(boxes[n], orientation::x_up))
+                if (s_prev.is_smaller_eq(boxes[n], orientation::x_up)) // current base is smaller next box 
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_x; 
                     s.update(n+1, boxes[n], orientation::x_up);
 
-                    if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
+                    if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s); // get a greater height
                 }
 
                 // ********* //
                 // *** y *** //
                 // ********* //
-                if (s_prev.is_greater_eq(boxes[n], orientation::y_up))
+                if (s_prev.is_smaller_eq(boxes[n], orientation::y_up))
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_y; 
@@ -771,7 +788,7 @@ namespace alg
                 // ********* //
                 // *** z *** //
                 // ********* //
-                if (s_prev.is_greater_eq(boxes[n], orientation::z_up))
+                if (s_prev.is_smaller_eq(boxes[n], orientation::z_up))
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_z; 
@@ -791,47 +808,85 @@ namespace alg
         return ans;
     } 
    
-    // ******************************************* // 
+    // ********************************************** // 
     // Since state is 2D { base_min * base_max }
-    // need 3D matrix for iterative implementation
-    // ******************************************* // 
+    // need tensor for iterative implementation
+    // * tensor.n <---> subproblem size
+    // * tensor.m <---> base_min
+    // * tensor.k <---> base_max 
+    //
+    // Dont confuse tensor (n,m,k) with boxes (z,y,x)
+    // ********************************************** // 
     std::uint32_t box_stacking_iterative_in_matrix(const std::vector<box>& boxes)
     {
-/* 
-        std::map<std::uint32_t> mat(numbers.size(), target+1, 0); 
-
-        // init 1st row
-        mat(0,numbers[0]) = 1; 
-
-        // init 1st col
-        for(std::uint32_t n=0; n!=numbers.size(); ++n)
+        std::uint32_t side = max_box_side(boxes);
+        tensor<std::uint32_t> ten(boxes.size(), side+1, side+1, 0);
+        
+        // init 1st layer
+        for(std::uint32_t m=0; m<=side; ++m)
         {
-            mat(n,0) = 1;
-        }
-
-        // main iteration
-        for(std::uint32_t n=1; n!=numbers.size(); ++n)
-        {
-            for(std::uint32_t m=1; m<=target; ++m)
+            for(std::uint32_t k=m; k<=side; ++k) // k >= m
             {
-                if (m >= numbers[n])
+                // pick boxes[0] in x_up 
+                if (m <= boxes[0].m_y && k <= boxes[0].m_z)
                 {
-                    if (mat(n-1,m)            == 1) mat(n,m) = 1;
-                    if (mat(n-1,m-numbers[n]) == 1) mat(n,m) = 1;
+                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_x);
                 }
-                else
+
+                // pick boxes[0] in y_up 
+                if (m <= boxes[0].m_x && k <= boxes[0].m_z)
                 {
-                    mat(n,m) = mat(n-1,m);
+                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_y);
+                }
+
+                // pick boxes[0] in z_up 
+                if (m <= boxes[0].m_x && k <= boxes[0].m_y)
+                {
+                    ten(0,m,k) = std::max(ten(0,m,k), boxes[0].m_z);
                 }
             }
         }
-*/
+  
+        // main iteration
+        for(std::uint32_t n=1; n!=boxes.size(); ++n)
+        {
+            for(std::uint32_t m=0; m<=side; ++m)
+            {
+                for(std::uint32_t k=m; k<=side; ++k) // k >= m
+                {
+                    // no pick boxes[n]
+                    ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k)); 
+
+                    // pick boxes[n] in x_up 
+                    if (m <= boxes[n].m_y && k <= boxes[n].m_z)
+                    {
+                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_x);
+                    }
+
+                    // pick boxes[n] in y_up 
+                    if (m <= boxes[n].m_x && k <= boxes[n].m_z)
+                    {
+                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_y);
+                    }
+
+                    // pick boxes[n] in z_up 
+                    if (m <= boxes[n].m_x && k <= boxes[n].m_y)
+                    {
+                        ten(n,m,k) = std::max(ten(n,m,k), ten(n-1,m,k) + boxes[n].m_z);
+                    }
+                }
+            }
+        }
+  
         std::uint32_t ans = 0;
-//      for(std::uint32_t m=0; m!=mat.size_x(); ++m)
-//      {
-//          if (ans < m && mat(numbers.size()-1, m) == 1)
-//              ans = m;
-//      }
+        for(std::uint32_t m=0; m<=side; ++m)
+        {
+            for(std::uint32_t k=m; k<=side; ++k) 
+            {
+                if (ans < ten(boxes.size(), m, k))
+                    ans = ten(boxes.size(), m, k);
+            }
+        }
         return ans;
     } 
 }
