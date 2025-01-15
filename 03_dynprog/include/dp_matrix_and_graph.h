@@ -1,3 +1,4 @@
+#pragma once
 #include<iostream>
 #include<cstdint>
 #include<limits>
@@ -120,6 +121,7 @@ namespace alg
 // *  col[0] = state 0 as target
 // *  col[1] = state 1 as target
 //    ...
+//    Todo : in fact, no need to store whole matrix, just cache this_row and prev_row
 //
 //
 // Speed

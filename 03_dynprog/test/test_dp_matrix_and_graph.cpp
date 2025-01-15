@@ -97,11 +97,11 @@ void test_box_stacking()
 }
 
 
-void test_state_time_problem()
+void test_dp_matrix_and_graph()
 {
-//  test_coin_change();
-//  test_knapsack();
-//  test_job_schedule();
-//  test_equal_partition();
+    test_coin_change();
+    test_knapsack();
+    test_job_schedule();
+    test_equal_partition();
     test_box_stacking();
 }

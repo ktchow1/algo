@@ -19,9 +19,8 @@ void test_stack_problem();
 void test_sorting_problem();
 
 // *** 03_dynprog *** //
-void test_singly_link_subproblem();
-void test_multi_link_subproblem();
-void test_state_time_problem();
+void test_dp_matrix_and_graph();
+void test_dp_matrix_only();
 
 // *** 04_fundalmental *** //
 void test_rvalue();
@@ -84,9 +83,8 @@ int main()
 //  test_sorting_problem();
       
     banner("03_dynprog");
-//  test_singly_link_subproblem();
-//  test_multi_link_subproblem();
-    test_state_time_problem();
+//  test_dp_matrix_and_graph();
+    test_dp_matrix_only();
   
     // *** 04_fundalmental *** //
 //  test_rvalue();
