@@ -10,8 +10,15 @@
 // ***************************** //
 // *** Longest common subseq *** //
 // ***************************** //
-// matrix in "dp_matrix_and_graph.h"  = subproblem size vs state
-// matrix in "dp_matrix_only.h"       = subproblem size vs subproblem size
+// 1. Various matrix representation
+// matrix in "dp_matrix_and_graph.h"  = subproblem size  vs state
+// matrix in "dp_matrix_only.h"       = subproblem size  vs subproblem size
+// matrix in LCS    and edit dist     = subproblem str0  vs subproblem str1
+// matrix in bool() and coin game     = subproblem begin vs subproblem end of the same str
+//
+// 2. Various matrix scanning
+// matrix in LCS    and edit dist : horizontal scan, from top to bottom
+// matric in bool() and coin game :   diagonal scan, from middle to upper-right
 //
 namespace alg
 {
@@ -138,3 +145,33 @@ namespace alg
         return mat(mat.size_y()-1, mat.size_x()-1);
     }
 }
+
+
+// *************************** //
+// *** Boolean parenthesis *** //
+// *************************** //
+// Expression = input[0].first input[0].second 
+//              input[1].first input[1].second
+//              ...
+//              input[N-2].first input[N-2].second
+//              input[N-1].first
+//
+namespace alg
+{
+/*
+    std::uint32_t bool_parenthesis(const std::vector<std::pair<bool,logic>>& input) // The last logic is don't care.
+    {
+
+        return 0;
+    }*/
+}
+
+
+// ***************** //
+// *** Coin game *** //
+// ***************** //
+
+namespace alg
+{
+}
+
