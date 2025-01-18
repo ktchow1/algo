@@ -67,7 +67,7 @@ void test_coin_game()
     std::uint32_t input_size = 20;
     benchmark<1>("coin_game --------------- recursive vs iterative",
                  std::bind(gen_random_vec<std::uint32_t>, input_size, 1, 20), 
-                 std::bind(alg::coin_game_iterative, _1),
+                 std::bind(alg::coin_game_recursive, _1),
                  std::bind(alg::coin_game_iterative, _1),      
                  num_trial, true); 
 }

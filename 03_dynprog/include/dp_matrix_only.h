@@ -318,6 +318,25 @@ namespace alg
 // ***************** //
 namespace alg
 {
+    std::uint32_t coin_game_recursive(const std::vector<std::uint32_t>& coins) 
+    {
+        if (coins.size() == 1) return coins[0];
+        if (coins.size() == 2) return std::max(coins[0], coins[1]);
+        std::uint32_t N = coins.size();
+
+        std::vector<std::uint32_t> trim_coins_20(coins.begin()+2, coins.end()  );
+        std::vector<std::uint32_t> trim_coins_11(coins.begin()+1, coins.end()-1);
+        std::vector<std::uint32_t> trim_coins_02(coins.begin()  , coins.end()-2);
+        
+        return std::max
+        (
+             coins[0]   + std::min(coin_game_recursive(trim_coins_20),
+                                   coin_game_recursive(trim_coins_11)),
+             coins[N-1] + std::min(coin_game_recursive(trim_coins_11),
+                                   coin_game_recursive(trim_coins_02))
+        );
+    }
+
     std::uint32_t coin_game_iterative(const std::vector<std::uint32_t>& coins) 
     {
         std::uint32_t N = coins.size();
