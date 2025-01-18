@@ -213,7 +213,7 @@ namespace alg
     // *** Exchaustive search *** //
     // ************************** //
     // What is tree_permutation?
-    // * tree_permutation is a node-sequence, when branched in order, defines a tree topology, with leaves come first and root at last
+    // * tree_permutation is a node-sequence, when branched in order, defines a tree topology, with leaves come first and root at last (post-ordered)
     // * tree_permutation is different from std::permutation, multiple std::permutation may refer to the same tree_permutation
     // * tree_permutation when applied to bool expression, should be evaluated from leaves to root 
     //
@@ -316,8 +316,39 @@ namespace alg
 // ***************** //
 // *** Coin game *** //
 // ***************** //
-
 namespace alg
 {
+    std::uint32_t coin_game_iterative(const std::vector<std::uint32_t>& coins) 
+    {
+        std::uint32_t N = coins.size();
+        alg::matrix<std::uint32_t> mat(N,N,0); 
+
+        // Main diagonal
+        for(std::uint32_t n=0; n!=N; ++n)
+        {
+            mat(n,n) =  coins[n];
+        }
+
+        // Adjacent diagonal
+        for(std::uint32_t n=0; n!=N-1; ++n)
+        {
+            mat(n,n+1) =  std::max(coins[n], coins[n+1]);
+        }
+
+        // Iterate to UR
+        for(std::uint32_t diag=2; diag!=N; ++diag) 
+        {
+            for(std::uint32_t n=0; n!=N-diag; ++n)
+            {
+                std::uint32_t m = n+diag;
+                mat(n,m) = std::max
+                (
+                     coins[n] + std::min(mat(n+2,m), mat(n+1,m-1)),
+                     coins[m] + std::min(mat(n+1,m-1), mat(n,m-2))
+                );
+            }
+        }
+        return mat(0,N-1); 
+    }
 }
 

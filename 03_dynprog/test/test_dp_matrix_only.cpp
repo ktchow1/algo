@@ -53,7 +53,7 @@ void test_boolean_parenthesis()
 
     std::uint32_t num_trial  = 100;
     std::uint32_t input_size = 9;
-    benchmark<1>("bool_parenthesis -------- iterative vs exhaustive (matrix)",
+    benchmark<1>("bool_parenthesis -------- iterative vs exhaustive",
                  std::bind(gen_random_bool_expression, input_size), 
                  std::bind(alg::bool_parenthesis_iterative,  _1),
                  std::bind(alg::bool_parenthesis_exhaustive, _1),      
@@ -61,9 +61,22 @@ void test_boolean_parenthesis()
 }
 
 
+void test_coin_game()
+{
+    std::uint32_t num_trial  = 100;
+    std::uint32_t input_size = 20;
+    benchmark<1>("coin_game --------------- recursive vs iterative",
+                 std::bind(gen_random_vec<std::uint32_t>, input_size, 1, 20), 
+                 std::bind(alg::coin_game_iterative, _1),
+                 std::bind(alg::coin_game_iterative, _1),      
+                 num_trial, true); 
+}
+
+
 void test_dp_matrix_only()
 {
 //  test_longest_common_subseq();
 //  test_edit_distance();
-    test_boolean_parenthesis();
+//  test_boolean_parenthesis();
+    test_coin_game();
 }
