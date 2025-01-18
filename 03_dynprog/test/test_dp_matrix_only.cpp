@@ -17,6 +17,7 @@ void test_longest_common_subseq()
                  num_trial);
 }
 
+
 void test_edit_distance()
 {
     std::uint32_t num_trial     = 100;
@@ -30,8 +31,14 @@ void test_edit_distance()
 }
 
 
+void test_boolean_parenthesis()
+{
+}
+
+
 void test_dp_matrix_only()
 {
     test_longest_common_subseq();
     test_edit_distance();
+    test_boolean_parenthesis();
 }

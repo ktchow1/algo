@@ -1,6 +1,9 @@
 #pragma once
 #include<iostream>
 #include<cstdint>
+#include<vector>
+#include<list>
+#include<algorithm>
 
 // from alg
 #include<matrix.h>
@@ -154,16 +157,148 @@ namespace alg
 //              input[1].first input[1].second
 //              ...
 //              input[N-2].first input[N-2].second
-//              input[N-1].first
+//              input[N-1].first                   <--- The last logic is don't care.
 //
 namespace alg
 {
-/*
-    std::uint32_t bool_parenthesis(const std::vector<std::pair<bool,logic>>& input) // The last logic is don't care.
+    std::uint32_t bool_parenthesis_iterative(const std::vector<bool_symbol>& input) 
     {
+        std::uint32_t N = input.size();
+        alg::matrix<std::uint32_t> f(N,N,0); // for  true expression
+        alg::matrix<std::uint32_t> g(N,N,0); // for false expression
 
-        return 0;
-    }*/
+        // Main diagonal
+        for(std::uint32_t n=0; n!=N; ++n)
+        {
+            f(n,n) =  input[n].m_value;
+            g(n,n) = !input[n].m_value;
+        }
+
+        // Iterate from main diagonal to UR
+        for(std::uint32_t diag=1; diag!=N; ++diag) // shift of diagonal = diag
+        {
+            for(std::uint32_t n=0; n!=N-diag; ++n) // length of diagonal = N-diag
+            {
+                std::uint32_t m = n+diag;
+
+                // hori_dist between diagonal & (n,m) = m-n
+                // vert_dist between diagonal & (n,m) = m-n
+                for(std::uint32_t k=0 ; k!=m-n ; ++k)
+                {
+                    if (input[k].m_logic == logic::OR)
+                    {
+                        f(n,m) += f(n,n+k) * f(n+k+1,m) +
+                                  f(n,n+k) * g(n+k+1,m) +
+                                  g(n,n+k) * f(n+k+1,m);
+                        g(n,m) += g(n,n+k) * g(n+k+1,m); 
+                    }
+                    else
+                    {
+                        f(n,m) += f(n,n+k) * f(n+k+1,m);
+                        g(n,m) += g(n,n+k) * g(n+k+1,m) + 
+                                  g(n,n+k) * f(n+k+1,m) +
+                                  f(n,n+k) * g(n+k+1,m);
+                    }
+                }
+            }
+        }
+        // most UR corner
+        return f(0,N-1); 
+    }
+
+    // ************************* //
+    // *** Exhaustive search *** //
+    // ************************* //
+    std::vector<std::vector<std::uint32_t>> permutations(std::uint32_t N)
+    {
+        std::vector<std::vector<std::uint32_t>> ans;
+        if (N == 0) return ans;
+
+        // for N = 1
+        for(std::uint32_t n=0; n!=N; ++n)
+        {
+            std::vector<std::uint32_t> tmp;
+            tmp.push_back(n);
+            ans.push_back(tmp);
+        }
+    
+        // for N > 1
+        for(std::uint32_t n=1; n!=N; ++n)
+        {
+            std::vector<std::vector<std::uint32_t>> ans0;
+            for(auto tmp:ans)
+            {
+                for(std::uint32_t m=0; m!=N; ++m)
+                {
+                    tmp.push_back(m);
+                    ans0.push_back(tmp);
+                }
+            }
+            ans = std::move(ans0);
+        }
+        return ans;
+    }
+
+    bool evaluate(const std::vector<bool_symbol>& input, const std::vector<std::uint32_t>& perm)
+    {
+        if (input.size()-1 != perm.size()) 
+        {
+            throw std::runtime_error("evaluate boolean parenthesis - input and perm size not matched");
+        }
+
+        // ************************************************* //
+        // *** Convert input into list and list-iterator *** //
+        // ************************************************* //
+        std::list<bool_symbol> list;
+        std::vector<std::list<bool_symbol>::iterator> list_iters;
+
+        for(const auto& x:input)
+        {
+            list.push_back(x);
+        }
+        for(auto& x:perm)
+        {
+            auto iter = list.begin();
+            std::advance(iter, x);
+            list_iters.push_back(iter);
+        }
+
+        // ****************** //
+        // *** Evaluation *** //
+        // ****************** //
+        for(const auto& this_iter : list_iters)
+        {
+            auto next_iter = this_iter;
+            ++next_iter;
+
+            if (this_iter->m_logic == logic::OR)
+                 next_iter->m_value = this_iter->m_value || next_iter->m_value;
+            else next_iter->m_value = this_iter->m_value && next_iter->m_value;
+            list.erase(this_iter);
+        }
+
+        // ************** //
+        // *** Result *** //
+        // ************** //
+        if (list.size() != 1)
+        {
+            throw std::runtime_error("evaluate boolean parenthesis - final list size not equal to 1");
+        }
+        return list.front().m_value;
+    }
+
+    std::uint32_t bool_parenthesis_exhaustive(const std::vector<bool_symbol>& input) 
+    {
+        auto perms = permutations(input.size()-1); // last OP logic is not used
+
+        std::uint32_t ans = 0;
+        for(const auto& perm:perms)
+        {
+            auto flag = evaluate(input, perm);
+            if (flag) ++ans;
+        }
+        return ans;
+    }
 }
 
 

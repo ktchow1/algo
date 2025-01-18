@@ -281,6 +281,18 @@ inline void print_progress(const std::string& test_name, std::uint32_t t, std::u
     }
 }
 
+enum class logic : std::uint32_t
+{
+    OR,AND
+};
+
+struct bool_symbol
+{
+    bool  m_value;
+    logic m_logic;
+};
+
+
 
 // ****************** //
 // *** Statistics *** //
