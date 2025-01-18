@@ -1,6 +1,8 @@
 #include<iostream>
 #include<iomanip>
 #include<cassert>
+
+// from alg
 #include<dp_matrix_only.h>
 #include<utility.h>
 
@@ -30,15 +32,38 @@ void test_edit_distance()
                  num_trial);
 }
 
+void print(const auto& tree_perms)
+{
+    std::uint32_t n=0;
+    for(const auto& perm:tree_perms)
+    {
+        std::cout << "\nperm_" << n << " "; ++n;
+        for(const auto& x:perm) std::cout << x << ",";
+    }
+}
+
 
 void test_boolean_parenthesis()
 {
+    assert(alg::tree_permutations(1).size() ==  1);
+    assert(alg::tree_permutations(2).size() ==  2);
+    assert(alg::tree_permutations(3).size() ==  5);
+    assert(alg::tree_permutations(4).size() == 14);
+    assert(alg::tree_permutations(5).size() == 42);
+
+    std::uint32_t num_trial  = 100;
+    std::uint32_t input_size = 9;
+    benchmark<1>("bool_parenthesis -------- iterative vs exhaustive (matrix)",
+                 std::bind(gen_random_bool_expression, input_size), 
+                 std::bind(alg::bool_parenthesis_iterative,  _1),
+                 std::bind(alg::bool_parenthesis_exhaustive, _1),      
+                 num_trial); 
 }
 
 
 void test_dp_matrix_only()
 {
-    test_longest_common_subseq();
-    test_edit_distance();
+//  test_longest_common_subseq();
+//  test_edit_distance();
     test_boolean_parenthesis();
 }

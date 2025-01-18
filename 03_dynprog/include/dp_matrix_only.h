@@ -159,13 +159,16 @@ namespace alg
 //              input[N-2].first input[N-2].second
 //              input[N-1].first                   <--- The last logic is don't care.
 //
+// Must fulfill :
+// f(0,N-1) + g(0,N-1) = tree_permutation(N-1).size()
+// 
 namespace alg
 {
     std::uint32_t bool_parenthesis_iterative(const std::vector<bool_symbol>& input) 
     {
         std::uint32_t N = input.size();
-        alg::matrix<std::uint32_t> f(N,N,0); // for  true expression
-        alg::matrix<std::uint32_t> g(N,N,0); // for false expression
+        alg::matrix<std::uint32_t> f(N,N,0); 
+        alg::matrix<std::uint32_t> g(N,N,0);
 
         // Main diagonal
         for(std::uint32_t n=0; n!=N; ++n)
@@ -183,9 +186,10 @@ namespace alg
 
                 // hori_dist between diagonal & (n,m) = m-n
                 // vert_dist between diagonal & (n,m) = m-n
-                for(std::uint32_t k=0 ; k!=m-n ; ++k)
+                for(std::uint32_t k=0; k!=m-n ; ++k)
                 {
-                    if (input[k].m_logic == logic::OR)
+                //  if (input[  k].m_logic == logic::OR) // BUG
+                    if (input[n+k].m_logic == logic::OR)
                     {
                         f(n,m) += f(n,n+k) * f(n+k+1,m) +
                                   f(n,n+k) * g(n+k+1,m) +
@@ -199,53 +203,60 @@ namespace alg
                                   g(n,n+k) * f(n+k+1,m) +
                                   f(n,n+k) * g(n+k+1,m);
                     }
-                }
+                } 
             }
         }
-        // most UR corner
         return f(0,N-1); 
     }
 
-    // ************************* //
-    // *** Exhaustive search *** //
-    // ************************* //
-    std::vector<std::vector<std::uint32_t>> permutations(std::uint32_t N)
+    // ************************** //
+    // *** Exchaustive search *** //
+    // ************************** //
+    // What is tree_permutation?
+    // * tree_permutation is a node-sequence, when branched in order, defines a tree topology, with leaves come first and root at last
+    // * tree_permutation is different from std::permutation, multiple std::permutation may refer to the same tree_permutation
+    // * tree_permutation when applied to bool expression, should be evaluated from leaves to root 
+    //
+    auto tree_permutations_impl(auto iter_begin, auto iter_end)
     {
         std::vector<std::vector<std::uint32_t>> ans;
-        if (N == 0) return ans;
-
-        // for N = 1
-        for(std::uint32_t n=0; n!=N; ++n)
+        if (iter_begin == iter_end) 
         {
-            std::vector<std::uint32_t> tmp;
-            tmp.push_back(n);
-            ans.push_back(tmp);
+            ans.push_back(std::vector<std::uint32_t>{});
+            return ans;
         }
-    
-        // for N > 1
-        for(std::uint32_t n=1; n!=N; ++n)
+
+        for(auto iter=iter_begin; iter!=iter_end; ++iter)
         {
-            std::vector<std::vector<std::uint32_t>> ans0;
-            for(auto tmp:ans)
+            auto tmp0 = tree_permutations_impl(iter_begin, iter);
+            auto tmp1 = tree_permutations_impl(iter+1, iter_end);
+            for(const auto x0:tmp0)
             {
-                for(std::uint32_t m=0; m!=N; ++m)
+                for(const auto x1:tmp1)
                 {
-                    tmp.push_back(m);
-                    ans0.push_back(tmp);
+                    std::vector<std::uint32_t> perm;
+                    perm.insert(perm.end(), x0.begin(), x0.end());
+                    perm.insert(perm.end(), x1.begin(), x1.end());
+                    perm.push_back(*iter); // BUG : parent comes last, as evaluation starts from leaves
+                    ans.push_back(perm);
                 }
             }
-            ans = std::move(ans0);
         }
         return ans;
+    }
+    
+    auto tree_permutations(std::uint32_t num_nodes) // num of nodes in tree = num of logic operators
+    {
+        std::vector<std::uint32_t> indices;
+        for(std::uint32_t n=0; n!=num_nodes; ++n)
+        {
+            indices.push_back(n);            
+        }
+        return tree_permutations_impl(indices.begin(), indices.end());
     }
 
     bool evaluate(const std::vector<bool_symbol>& input, const std::vector<std::uint32_t>& perm)
     {
-        if (input.size()-1 != perm.size()) 
-        {
-            throw std::runtime_error("evaluate boolean parenthesis - input and perm size not matched");
-        }
-
         // ************************************************* //
         // *** Convert input into list and list-iterator *** //
         // ************************************************* //
@@ -256,11 +267,11 @@ namespace alg
         {
             list.push_back(x);
         }
-        for(auto& x:perm)
+        for(const auto& n:perm)
         {
-            auto iter = list.begin();
-            std::advance(iter, x);
-            list_iters.push_back(iter);
+            auto list_iter = list.begin();
+            std::advance(list_iter, n);
+            list_iters.push_back(list_iter);
         }
 
         // ****************** //
@@ -271,7 +282,7 @@ namespace alg
             auto next_iter = this_iter;
             ++next_iter;
 
-            if (this_iter->m_logic == logic::OR)
+            if  (this_iter->m_logic == logic::OR)
                  next_iter->m_value = this_iter->m_value || next_iter->m_value;
             else next_iter->m_value = this_iter->m_value && next_iter->m_value;
             list.erase(this_iter);
@@ -282,21 +293,21 @@ namespace alg
         // ************** //
         if (list.size() != 1)
         {
-            throw std::runtime_error("evaluate boolean parenthesis - final list size not equal to 1");
+            throw std::runtime_error("boolean parenthesis evaluation - final list size not equal to 1");
         }
         return list.front().m_value;
     }
 
     std::uint32_t bool_parenthesis_exhaustive(const std::vector<bool_symbol>& input) 
     {
-        auto perms = permutations(input.size()-1); // last OP logic is not used
+        auto tree_perms = tree_permutations(input.size()-1);
 
         std::uint32_t ans = 0;
-        for(const auto& perm:perms)
+        for(const auto& tree_perm : tree_perms)
         {
-            auto flag = evaluate(input, perm);
+            auto flag = evaluate(input, tree_perm);
             if (flag) ++ans;
-        }
+        } 
         return ans;
     }
 }

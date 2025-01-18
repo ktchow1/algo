@@ -64,17 +64,17 @@ namespace alg
             return m_size_x;
         }
         
-        void debug() const noexcept
+        void debug(const std::string& name, bool print_half) const noexcept
         {
-            std::cout << "matrix";
+            std::cout << "\nmatrix " << name;
             for(std::uint32_t y=0; y!=m_size_y; ++y)
             {
                 std::cout << "\n";
                 for(std::uint32_t x=0; x!=m_size_x; ++x) 
                 {
                     auto temp = operator()(y,x);
-                    if (temp == inf<T>)
-                         std::cout << "inf, ";
+                    if (print_half && y > x)
+                         std::cout << "*  ";
                     else std::cout << temp << ", ";
                 }
             }
@@ -140,9 +140,9 @@ namespace alg
             return m_size_x;
         }
         
-        void debug() const noexcept
+        void debug(const std::string& name, bool print_half) const noexcept
         {
-            std::cout << "tensor";
+            std::cout << "\ntensor " << name;
             for(std::uint32_t z=0; z!=m_size_z; ++z)
             {
                 std::cout << "\nz=" << z;
@@ -152,7 +152,7 @@ namespace alg
                     for(std::uint32_t x=0; x!=m_size_x; ++x) 
                     {
                         auto temp = operator()(z,y,x);
-                        if (y > x)
+                        if (print_half && y > x)
                              std::cout << "*  ";
                         else std::cout << temp << ", ";
                     }

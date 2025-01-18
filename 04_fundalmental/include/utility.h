@@ -187,6 +187,38 @@ inline auto gen_random_boxes(std::uint32_t size,
     return ans;
 }
 
+enum class logic : std::uint32_t
+{
+    OR,AND
+};
+
+struct bool_symbol
+{
+    bool  m_value;
+    logic m_logic;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const bool_symbol& x)
+{
+    if (x.m_logic == logic::OR) os << x.m_value << " OR ";
+    else                        os << x.m_value << " AND "; 
+
+    return os;
+}
+
+inline auto gen_random_bool_expression(std::uint32_t size)
+{
+    std::vector<bool_symbol> ans;
+    for(std::uint32_t n=0; n!=size; ++n)
+    {
+        bool_symbol x;
+        x.m_value = (rand()%2==0);
+        x.m_logic = (rand()%2==0? logic::OR : logic::AND);
+        ans.push_back(x);
+    }
+    return ans;
+}
+
 
 // *************** //
 // *** Compare *** //
@@ -280,18 +312,6 @@ inline void print_progress(const std::string& test_name, std::uint32_t t, std::u
         std::cout << "." << std::flush; 
     }
 }
-
-enum class logic : std::uint32_t
-{
-    OR,AND
-};
-
-struct bool_symbol
-{
-    bool  m_value;
-    logic m_logic;
-};
-
 
 
 // ****************** //
