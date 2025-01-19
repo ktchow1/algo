@@ -5,6 +5,7 @@
 #include<queue>
 #include<set>
 #include<map>
+#include<unordered_set>
 #include<unordered_map>
 #include<optional>
 
@@ -629,10 +630,10 @@ namespace alg
     {
         std::uint32_t target = find_half_of_sum(numbers);
 
-        std::set<std::pair<std::uint32_t, std::uint32_t>> graph;
+        std::unordered_set<partition_state, partition_state_hash> graph;
         graph.insert({0,0});
 
-        std::queue<std::pair<std::uint32_t, std::uint32_t>> queue; 
+        std::queue<partition_state> queue; 
         queue.push({0,0});
 
         while(!queue.empty())
@@ -641,10 +642,10 @@ namespace alg
             queue.pop();
 
             // for each neighbour
-            for(std::uint32_t n=s_prev.second; n!=numbers.size(); ++n)
+            for(std::uint32_t n=s_prev.m_next_allowed_num; n!=numbers.size(); ++n)
             {
-                std::uint32_t s = s_prev.first + numbers[n];
-                if (s <= target && euler_update(graph, std::make_pair(s,n+1))) 
+                std::uint32_t s = s_prev.m_sum + numbers[n];
+                if (s <= target && euler_update(graph, partition_state{s,n+1})) 
                 {
                     queue.push({s,n+1});
                 }
@@ -654,8 +655,8 @@ namespace alg
         std::uint32_t ans = 0;
         for(const auto& x:graph)
         {
-            if (ans < x.first)
-                ans = x.first;
+            if (ans < x.m_sum)
+                ans = x.m_sum;
         }   
         return ans;
     } 
