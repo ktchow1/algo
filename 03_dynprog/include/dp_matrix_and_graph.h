@@ -466,11 +466,11 @@ namespace alg
 // get<0> = single task workload
 // get<1> = single task profit
 // get<2> = single task deadline <--- tasks are ordered in ascending deadline
-// 
-// for std::unordered_map<...> "graph"  
-// key.first  = total task workload
-// key.second = next  task possible
-// value      = total task profit
+//
+// Always define 3 things for state-graph
+// 1. state
+// 2. state operator=
+// 3. state hash
 //
 namespace alg
 { 
@@ -501,7 +501,7 @@ namespace alg
 { 
     std::uint32_t job_schedule_iterative_in_graph(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
-        std::unordered_map<job_state, std::uint32_t, job_state_hash> graph; // Verified to be faster than std::map
+        std::unordered_map<job_state, std::uint32_t, job_state_hash> graph; // value = total profit
         graph[{0,0}] = 0;
         
         std::queue<job_state> queue;    
