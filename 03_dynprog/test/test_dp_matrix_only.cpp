@@ -64,19 +64,19 @@ void test_boolean_parenthesis()
 void test_coin_game()
 {
     std::uint32_t num_trial  = 100;
-    std::uint32_t input_size = 20;
+    std::uint32_t input_size = 18;
     benchmark<1>("coin_game --------------- recursive vs iterative",
                  std::bind(gen_random_vec<std::uint32_t>, input_size, 1, 20), 
                  std::bind(alg::coin_game_recursive, _1),
                  std::bind(alg::coin_game_iterative, _1),      
-                 num_trial, true); 
+                 num_trial); 
 }
 
 
 void test_dp_matrix_only()
 {
-//  test_longest_common_subseq();
-//  test_edit_distance();
-//  test_boolean_parenthesis();
+    test_longest_common_subseq();
+    test_edit_distance();
+    test_boolean_parenthesis();
     test_coin_game();
 }
