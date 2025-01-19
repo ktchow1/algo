@@ -111,7 +111,7 @@ namespace alg
 // *  vertices  = all possible states (i.e. 0, 1, 2, ..., target)
 // *  edges     = between any 2 states, whenever they can be connected by a coin
 // *  objective = minimize distance from state_0 to state_target
-// *  implement = region_growing (Dijkstra) on the state_graph, represented as std::map<state,value>
+// *  implement = region_growing (Dijkstra) on the state_graph, represented as unordered_map<state,value>
 //
 //
 // 4. State_subproblem_matrix is a 2D matrix of "states" vs "subproblem size" :
@@ -466,19 +466,44 @@ namespace alg
 // get<1> = single task profit
 // get<2> = single task deadline <--- tasks are ordered in ascending deadline
 // 
-// for std::map<...> "graph"  
+// for std::unordered_map<...> "graph"  
 // key.first  = total task workload
 // key.second = next  task possible
 // value      = total task profit
 //
 namespace alg
 { 
+    struct job_state
+    {
+        std::uint32_t m_total_profit;
+        std::uint32_t m_next_allowed_job;
+    };
+
+    bool operator==(const job_state& lhs, const job_state& rhs) // required by job_state_hash
+    {
+        return lhs.m_total_profit == rhs.m_total_profit &&
+               lhs.m_next_allowed_job == rhs.m_next_allowed_job;
+    }
+
+    struct job_state_hash 
+    {
+        size_t operator()(const job_state& state) const noexcept
+        {
+            size_t h0 = std::hash<std::uint32_t>{}(state.m_total_profit);
+            size_t h1 = std::hash<std::uint32_t>{}(state.m_next_allowed_job);
+            return (h0 << 16) ^ h1;
+        }
+    };
+}
+
+namespace alg
+{ 
     std::uint32_t job_schedule_iterative_in_graph(const std::vector<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>>& tasks)
     {
-        std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t> graph; // Todo : use unordered_map (need to define hash)
+        std::unordered_map<job_state, std::uint32_t, job_state_hash> graph; // Verified to be faster than std::map
         graph[{0,0}] = 0;
         
-        std::queue<std::pair<std::uint32_t, std::uint32_t>> queue;    
+        std::queue<job_state> queue;    
         queue.push({0,0});
   
         while(!queue.empty())
@@ -488,13 +513,13 @@ namespace alg
             queue.pop();
 
             // for each neighbour (Remark 3. Ensure no duplicated task. Ensure task in sequence.)
-            for(std::uint32_t n=s_prev.second; n!=tasks.size(); ++n)
+            for(std::uint32_t n=s_prev.m_next_allowed_job; n!=tasks.size(); ++n)
             {
-                std::uint32_t s = s_prev.first + std::get<0>(tasks[n]);
-                std::uint32_t v = v_prev       + std::get<1>(tasks[n]);
-                std::uint32_t deadline =         std::get<2>(tasks[n]);
+                std::uint32_t s = s_prev.m_total_profit + std::get<0>(tasks[n]);
+                std::uint32_t v = v_prev                + std::get<1>(tasks[n]);
+                std::uint32_t deadline =                  std::get<2>(tasks[n]);
                 
-                if (s <= deadline && euler_update<std::greater<std::uint32_t>>(graph, std::make_pair(s,n+1), v)) 
+                if (s <= deadline && euler_update<std::greater<std::uint32_t>>(graph, job_state{s,n+1}, v)) 
                 {
                     queue.push({s,n+1});
                 }
@@ -565,6 +590,28 @@ namespace alg
 // *********************** //
 namespace alg
 { 
+    struct partition_state
+    {
+        std::uint32_t m_sum;
+        std::uint32_t m_next_allowed_num;
+    };
+
+    bool operator==(const partition_state& lhs, const partition_state& rhs) // required by partition_state_hash
+    {
+        return lhs.m_sum == rhs.m_sum &&
+               lhs.m_next_allowed_num == rhs.m_next_allowed_num;
+    }
+
+    struct partition_state_hash 
+    {
+        size_t operator()(const partition_state& state) const noexcept
+        {
+            size_t h0 = std::hash<std::uint32_t>{}(state.m_sum);
+            size_t h1 = std::hash<std::uint32_t>{}(state.m_next_allowed_num);
+            return (h0 << 16) ^ h1;
+        }
+    };
+
     std::uint32_t find_half_of_sum(const std::vector<std::uint32_t>& numbers)
     {
         std::uint32_t ans = 0;
@@ -574,7 +621,10 @@ namespace alg
         }
         return ans/2;
     }
-  
+}
+
+namespace alg
+{ 
     std::uint32_t equal_partition_iterative_in_graph(const std::vector<std::uint32_t>& numbers)
     {
         std::uint32_t target = find_half_of_sum(numbers);
@@ -662,18 +712,6 @@ namespace alg
 //
 namespace alg
 { 
-    std::uint32_t max_box_side(const std::vector<box>& boxes)
-    {
-        std::uint32_t ans = 0;
-        for(const auto& b:boxes)
-        {
-            if (ans < b.m_x) ans = b.m_x;
-            if (ans < b.m_y) ans = b.m_y;
-            if (ans < b.m_z) ans = b.m_z;
-        }
-        return ans;
-    }
-
     enum class orientation : std::uint8_t
     {
         x_up,
@@ -683,9 +721,9 @@ namespace alg
 
     struct boxes_state
     {
-        std::uint32_t m_next_allowed_box; 
         std::uint32_t m_base_min;
         std::uint32_t m_base_max;
+        std::uint32_t m_next_allowed_box; 
 
         bool is_smaller_eq(const box& b, orientation b_ori) const noexcept // assuming each box has x <= y <= z
         {
@@ -707,9 +745,8 @@ namespace alg
             return true;
         }
 
-        void update(std::uint32_t next_allowed_box, const box& b, orientation b_ori) 
+        void update(const box& b, orientation b_ori, std::uint32_t next_allowed_box) 
         {
-            m_next_allowed_box = next_allowed_box;
             if (b_ori == orientation::x_up)
             {
                 m_base_min = b.m_y;
@@ -725,29 +762,61 @@ namespace alg
                 m_base_min = b.m_x;
                 m_base_max = b.m_y;
             }
+            m_next_allowed_box = next_allowed_box;
         } 
     };
 
-    struct boxes_state_less
+    bool operator==(const boxes_state& lhs, const boxes_state& rhs) // required by boxes_state_hash
+    {
+        return lhs.m_base_min == rhs.m_base_min &&
+               lhs.m_base_max == rhs.m_base_max &&
+               lhs.m_next_allowed_box == rhs.m_next_allowed_box;
+    }
+
+    struct boxes_state_less // required by std::map
     {
         bool operator()(const boxes_state& lhs, const boxes_state& rhs) const noexcept
         {
-            if      (lhs.m_next_allowed_box < rhs.m_next_allowed_box) return  true;
-            else if (lhs.m_next_allowed_box > rhs.m_next_allowed_box) return false;
-            else if (lhs.m_base_min < rhs.m_base_min)                 return  true;
+            if      (lhs.m_base_min < rhs.m_base_min)                 return  true;
             else if (lhs.m_base_min > rhs.m_base_min)                 return false;
             else if (lhs.m_base_max < rhs.m_base_max)                 return  true;
             else if (lhs.m_base_max > rhs.m_base_max)                 return false;
+            else if (lhs.m_next_allowed_box < rhs.m_next_allowed_box) return  true;
+            else if (lhs.m_next_allowed_box > rhs.m_next_allowed_box) return false;
             else                                                      return false; 
         }
     };
+
+    struct boxes_state_hash // required by std::unordered_map
+    {
+        size_t operator()(const boxes_state& state) const noexcept
+        {
+            size_t h0 = std::hash<std::uint32_t>{}(state.m_base_min);
+            size_t h1 = std::hash<std::uint32_t>{}(state.m_base_max);
+            size_t h2 = std::hash<std::uint32_t>{}(state.m_next_allowed_box);
+            return (h0 << 16) ^ (h1 << 8) ^ h2;
+        }
+    };
+
+    std::uint32_t max_box_side(const std::vector<box>& boxes)
+    {
+        std::uint32_t ans = 0;
+        for(const auto& b:boxes)
+        {
+            if (ans < b.m_x) ans = b.m_x;
+            if (ans < b.m_y) ans = b.m_y;
+            if (ans < b.m_z) ans = b.m_z;
+        }
+        return ans;
+    }
 }
 
 namespace alg
 { 
     std::uint32_t box_stacking_iterative_in_graph(const std::vector<box>& boxes) 
     {
-        std::map<boxes_state, std::uint32_t, boxes_state_less> graph; // value = total height 
+    //  std::map          <boxes_state, std::uint32_t, boxes_state_less> graph; // value = total height (slower)
+        std::unordered_map<boxes_state, std::uint32_t, boxes_state_hash> graph; // value = total height (faster)
         graph[{0, inf<std::uint32_t>, inf<std::uint32_t>}] = 0;
 
         std::queue<boxes_state> queue; 
@@ -768,7 +837,7 @@ namespace alg
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_x; 
-                    s.update(n+1, boxes[n], orientation::x_up);
+                    s.update(boxes[n], orientation::x_up, n+1);
 
                     if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s); // get a greater height
                 }
@@ -780,7 +849,7 @@ namespace alg
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_y; 
-                    s.update(n+1, boxes[n], orientation::y_up);
+                    s.update(boxes[n], orientation::y_up, n+1);
 
                     if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
                 }
@@ -792,7 +861,7 @@ namespace alg
                 {
                     auto s = s_prev;
                     auto v = v_prev + boxes[n].m_z; 
-                    s.update(n+1, boxes[n], orientation::z_up);
+                    s.update(boxes[n], orientation::z_up, n+1);
 
                     if (euler_update<std::greater<std::uint32_t>>(graph, s, v)) queue.push(s);
                 }
@@ -875,4 +944,29 @@ namespace alg
         }
         return ans;
     } 
+}
+
+// ******************* //
+// *** Bin packing *** //
+// ******************* //
+namespace alg
+{
+    struct bin_packing_problem
+    {
+    };
+}
+
+namespace alg
+{
+    std::uint32_t bin_packing_iterative_in_graph(const bin_packing_problem& prob) 
+    {
+        std::uint32_t ans;
+        return ans;
+    }
+
+    std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
+    {
+        std::uint32_t ans;
+        return ans;
+    }
 }

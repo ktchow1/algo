@@ -53,10 +53,10 @@ void test_boolean_parenthesis()
 
     std::uint32_t num_trial  = 100;
     std::uint32_t input_size = 9;
-    benchmark<1>("bool_parenthesis -------- iterative vs exhaustive",
+    benchmark<1>("bool_parenthesis -------- exhaustive vs iterative",
                  std::bind(gen_random_bool_expression, input_size), 
-                 std::bind(alg::bool_parenthesis_iterative,  _1),
                  std::bind(alg::bool_parenthesis_exhaustive, _1),      
+                 std::bind(alg::bool_parenthesis_iterative,  _1),
                  num_trial); 
 }
 

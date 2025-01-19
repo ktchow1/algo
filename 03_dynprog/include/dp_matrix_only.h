@@ -209,9 +209,9 @@ namespace alg
         return f(0,N-1); 
     }
 
-    // ************************** //
-    // *** Exchaustive search *** //
-    // ************************** //
+    // ************************* //
+    // *** Exhaustive search *** //
+    // ************************* //
     // What is tree_permutation?
     // * tree_permutation is a node-sequence, when branched in order, defines a tree topology, with leaves come first and root at last (post-ordered)
     // * tree_permutation is different from std::permutation, multiple std::permutation may refer to the same tree_permutation
