@@ -187,6 +187,32 @@ inline auto gen_random_boxes(std::uint32_t size,
     return ans;
 }
 
+struct bin_packing_problem
+{
+    // Assume there are 2 types of objects, A & B (unlike dynprog.doc which has 3 types)
+    std::uint32_t m_num_objA;
+    std::uint32_t m_num_objB;
+    std::uint32_t m_size_objA;
+    std::uint32_t m_size_objB;
+    std::uint32_t m_size_bin;
+};
+
+inline auto gen_random_bins(std::uint32_t num_obj_min, 
+                            std::uint32_t num_obj_max,
+                            std::uint32_t size_obj_min,
+                            std::uint32_t size_obj_max,
+                            std::uint32_t size_bin_min,
+                            std::uint32_t size_bin_max)
+{
+    bin_packing_problem ans;
+    ans.m_num_objA  =  num_obj_min + rand() % ( num_obj_max -  num_obj_min);
+    ans.m_num_objB  =  num_obj_min + rand() % ( num_obj_max -  num_obj_min);
+    ans.m_size_objA = size_obj_min + rand() % (size_obj_max - size_obj_min);
+    ans.m_size_objB = size_obj_min + rand() % (size_obj_max - size_obj_min);
+    ans.m_size_bin  = size_bin_min + rand() % (size_bin_max - size_bin_min);
+    return ans;
+}
+
 enum class logic : std::uint32_t
 {
     OR,AND

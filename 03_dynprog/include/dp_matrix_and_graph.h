@@ -950,20 +950,118 @@ namespace alg
 // ******************* //
 // *** Bin packing *** //
 // ******************* //
+// For bin_packing_iterative_in_matrix, point mat(n,m) has connection to all mat(n',m'), where n'<n and m'<m.
+//
 namespace alg
 {
-    struct bin_packing_problem
+    struct bin_state
     {
+        std::uint32_t m_num_objA_picked;
+        std::uint32_t m_num_objB_picked;
+    };
+
+    bool operator==(const bin_state& lhs, const bin_state& rhs)
+    {
+        return lhs.m_num_objA_picked == rhs.m_num_objA_picked &&
+               lhs.m_num_objB_picked == rhs.m_num_objB_picked;
+    }
+
+    struct bin_state_hash
+    {
+        size_t operator()(const bin_state& state) const noexcept
+        {
+            size_t h0 = std::hash<std::uint32_t>{}(state.m_num_objA_picked);
+            size_t h1 = std::hash<std::uint32_t>{}(state.m_num_objB_picked);
+            return (h0 << 16) ^ h1;
+        }
     };
 }
 
 namespace alg
 {
+    void max_update(std::optional<std::uint32_t>& max_m, std::uint32_t m)
+    {
+        if (max_m)
+        {
+            if (*max_m < m) 
+                *max_m = m;
+        }
+        else 
+        {
+            max_m = std::make_optional(m);
+        }
+    }
+
     std::uint32_t bin_packing_iterative_in_graph(const bin_packing_problem& prob) 
     {
-        std::uint32_t ans;
-        return ans;
+        // ********************************************************************************************** //
+        // push " all states that can be accommodated by 1 bin" into graph
+        // push "only states that can be accommodated by 1 bin" AND "cannot fill extra object" into queue
+        // ********************************************************************************************** //
+        std::unordered_map<bin_state, std::uint32_t, bin_state_hash> graph; // value = total num of bin used
+        std::queue<bin_state> queue;    
+
+
+        // ********************** //
+        // *** Initialization *** //
+        // ********************** //
+        for(std::uint32_t n=0; n<=prob.m_num_objA; ++n)
+        {
+            std::optional<std::uint32_t> max_m;
+            for(std::uint32_t m=0; m<=prob.m_num_objB; ++m)
+            {
+                if (n == 0 && m == 0) continue; // skip this case
+                if (n * prob.m_size_objA + m * prob.m_size_objB <= prob.m_size_bin) 
+                {
+                    graph[{n,m}] = 1;
+                    max_update(max_m, m);
+                }
+                else break; // no need to try greater m
+            }
+            if (max_m) queue.push({n,*max_m});
+        }
+  
+
+        // ********************** //
+        // *** Region growing *** //
+        // ********************** //
+        while(!queue.empty())
+        {
+            auto s_prev = queue.front();
+            auto v_prev = graph[queue.front()];
+            queue.pop();
+
+            // for each neighbour 
+            for(std::uint32_t n=s_prev.m_num_objA_picked; n<=prob.m_num_objA; ++n)
+            {
+                std::optional<std::uint32_t> max_m;
+                for(std::uint32_t m=s_prev.m_num_objB_picked; m<=prob.m_num_objB; ++m)
+                {
+                    if (n == s_prev.m_num_objA_picked &&
+                        m == s_prev.m_num_objB_picked) continue; // skip this case 
+
+                    std::uint32_t dn = n - s_prev.m_num_objA_picked;
+                    std::uint32_t dm = m - s_prev.m_num_objB_picked;
+                    auto iter = graph.find({dn, dm});
+                    if (iter != graph.end())
+                    {
+                        euler_update<std::less<std::uint32_t>>(graph, bin_state{n,m}, v_prev + iter->second);
+                        max_update(max_m, m);
+                    }
+                    else break; // no need to try greater m
+                }
+                if (max_m) queue.push({n,*max_m});
+            }
+        }
+  
+        auto iter = graph.find(bin_state{prob.m_num_objA, prob.m_num_objB});
+        if (iter != graph.end())
+        {
+            return iter->second;
+        }
+        return inf<std::uint32_t>;
     }
+
 
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
@@ -971,3 +1069,6 @@ namespace alg
         return ans;
     }
 }
+
+
+
