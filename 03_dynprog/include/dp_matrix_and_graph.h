@@ -1081,8 +1081,26 @@ namespace alg
 
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
-        std::uint32_t ans;
-        return ans;
+        matrix<std::uint32_t> mat(prob.m_num_objA + 1, prob.m_num_objB + 1, inf<std::uint32_t>);
+        
+        // main iteration
+        for(std::uint32_t n=0; n!=prob.m_num_objA; ++n)
+        {
+            for(std::uint32_t m=0; m!=prob.m_num_objB; ++m)
+            {
+                // case 1 : n objA & m objB can be put into a bin
+                if (n * prob.m_size_objA + m * prob.m_size_objB <= prob.m_size_bin) 
+                {
+                    mat(n,m) = 1;
+                }
+                else
+                {
+
+                }
+            }
+        }
+
+        return mat(prob.m_num_objA, prob.m_num_objB);
     }
 }
 
