@@ -1010,13 +1010,20 @@ namespace alg
             std::optional<std::uint32_t> max_m;
             for(std::uint32_t m=0; m<=prob.m_num_objB; ++m)
             {
-                if (n == 0 && m == 0) continue; // skip this case
+                if (n == 0 && m == 0) 
+                {
+                    continue; // skip itself
+                }
+
+                // **************************************** //
+                // *** Check link between (0,0) & (n,m) *** //
+                // **************************************** //
                 if (n * prob.m_size_objA + m * prob.m_size_objB <= prob.m_size_bin) 
                 {
                     graph[{n,m}] = 1;
                     max_update(max_m, m);
                 }
-                else break; // no need to try greater m
+                else break; // no need to try greater m 
             }
             if (max_m) queue.push({n,*max_m});
         }
@@ -1031,17 +1038,23 @@ namespace alg
             auto v_prev = graph[queue.front()];
             queue.pop();
 
-            // for each neighbour 
+            // for each neighbour (2D scan) 
             for(std::uint32_t n=s_prev.m_num_objA_picked; n<=prob.m_num_objA; ++n)
             {
                 std::optional<std::uint32_t> max_m;
                 for(std::uint32_t m=s_prev.m_num_objB_picked; m<=prob.m_num_objB; ++m)
                 {
                     if (n == s_prev.m_num_objA_picked &&
-                        m == s_prev.m_num_objB_picked) continue; // skip this case 
-
+                        m == s_prev.m_num_objB_picked) 
+                    {
+                        continue; // skip itself  
+                    }
                     std::uint32_t dn = n - s_prev.m_num_objA_picked;
                     std::uint32_t dm = m - s_prev.m_num_objB_picked;
+
+                    // ***************************************** //
+                    // *** Check link between s_prev & (n,m) *** //
+                    // ***************************************** //
                     auto iter = graph.find({dn, dm});
                     if (iter != graph.end())
                     {
@@ -1053,7 +1066,11 @@ namespace alg
                 if (max_m) queue.push({n,*max_m});
             }
         }
-  
+ 
+
+        // ************** // 
+        // *** Answer *** //
+        // ************** // 
         auto iter = graph.find(bin_state{prob.m_num_objA, prob.m_num_objB});
         if (iter != graph.end())
         {
@@ -1061,7 +1078,6 @@ namespace alg
         }
         return inf<std::uint32_t>;
     }
-
 
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
