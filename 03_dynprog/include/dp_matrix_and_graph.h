@@ -1059,7 +1059,6 @@ namespace alg
                         euler_update<std::less<std::uint32_t>>(graph, bin_state{n,m}, v_prev + iter->second);
                         max_update(max_m, m);
                     }
-                    else break; // no need to try greater m
                 }
                 if (max_m) queue.push({n,*max_m});
             }
@@ -1079,12 +1078,6 @@ namespace alg
 
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
-/*      std::cout << "\nprob.m_num_objA  = " << prob.m_num_objA; 
-        std::cout << "\nprob.m_num_objB  = " << prob.m_num_objB; 
-        std::cout << "\nprob.m_size_objA = " << prob.m_size_objA; 
-        std::cout << "\nprob.m_size_objB = " << prob.m_size_objB; 
-        std::cout << "\nprob.m_size_bin  = " << prob.m_size_bin;  */
-
         if (prob.m_size_bin < prob.m_size_objA) return inf<std::uint32_t>;
         if (prob.m_size_bin < prob.m_size_objB) return inf<std::uint32_t>;
         matrix<std::uint32_t> mat(prob.m_num_objA + 1, prob.m_num_objB + 1, inf<std::uint32_t>);
@@ -1116,14 +1109,11 @@ namespace alg
                             {
                                 mat(n,m) = std::min(mat(n,m), mat(n0,m0) + mat(n1,m1));
                             }
-                        //  else break; // Todo : any possible optimization by early stop
                         }
                     }
                 }
             }
         }
-
-    //  mat.debug("bin");
         return mat(prob.m_num_objA, prob.m_num_objB);
     }
 }
