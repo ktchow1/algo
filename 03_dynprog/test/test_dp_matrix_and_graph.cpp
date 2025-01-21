@@ -99,20 +99,28 @@ void test_box_stacking()
 
 void test_bin_packing()
 {
-    std::uint32_t num_trial    = 100;
+/*  std::uint32_t num_trial    = 100;
     std::uint32_t num_obj_min  =  10; 
     std::uint32_t num_obj_max  =  20;
     std::uint32_t size_obj_min =  50;
     std::uint32_t size_obj_max = 100;
     std::uint32_t size_bin_min = 100;
-    std::uint32_t size_bin_max = 200;
+    std::uint32_t size_bin_max = 200;  */
+   
+    std::uint32_t num_trial    = 10;
+    std::uint32_t num_obj_min  = 10; 
+    std::uint32_t num_obj_max  = 20;
+    std::uint32_t size_obj_min =  3;
+    std::uint32_t size_obj_max = 10;
+    std::uint32_t size_bin_min = 12;
+    std::uint32_t size_bin_max = 30; 
 
     benchmark<1>("bin_packing ------------- graph vs matrix (iterative)",           
                  std::bind(gen_random_bins,  num_obj_min,  num_obj_max,
                                             size_obj_min, size_obj_max,
                                             size_bin_min, size_bin_max),
-                 std::bind(alg::bin_packing_iterative_in_graph, _1),      
-                 std::bind(alg::bin_packing_iterative_in_graph, _1), 
+                 std::bind(alg::bin_packing_iterative_in_graph,  _1),      
+                 std::bind(alg::bin_packing_iterative_in_matrix, _1), 
                  num_trial, true); 
 }
 

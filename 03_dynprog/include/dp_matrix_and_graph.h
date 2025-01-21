@@ -994,6 +994,9 @@ namespace alg
 
     std::uint32_t bin_packing_iterative_in_graph(const bin_packing_problem& prob) 
     {
+        if (prob.m_size_bin < prob.m_size_objA) return inf<std::uint32_t>; // this implementation ables to return inf without this checking
+        if (prob.m_size_bin < prob.m_size_objB) return inf<std::uint32_t>; // this implementation ables to return inf without this checking
+
         // ********************************************************************************************** //
         // push " all states that can be accommodated by 1 bin" into graph
         // push "only states that can be accommodated by 1 bin" AND "cannot fill extra object" into queue
@@ -1010,10 +1013,7 @@ namespace alg
             std::optional<std::uint32_t> max_m;
             for(std::uint32_t m=0; m<=prob.m_num_objB; ++m)
             {
-                if (n == 0 && m == 0) 
-                {
-                    continue; // skip itself
-                }
+                if (n == 0 && m == 0) continue; // skip itself
 
                 // **************************************** //
                 // *** Check link between (0,0) & (n,m) *** //
@@ -1045,10 +1045,8 @@ namespace alg
                 for(std::uint32_t m=s_prev.m_num_objB_picked; m<=prob.m_num_objB; ++m)
                 {
                     if (n == s_prev.m_num_objA_picked &&
-                        m == s_prev.m_num_objB_picked) 
-                    {
-                        continue; // skip itself  
-                    }
+                        m == s_prev.m_num_objB_picked) continue; // skip itself  
+
                     std::uint32_t dn = n - s_prev.m_num_objA_picked;
                     std::uint32_t dm = m - s_prev.m_num_objB_picked;
 
@@ -1081,25 +1079,51 @@ namespace alg
 
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
+/*      std::cout << "\nprob.m_num_objA  = " << prob.m_num_objA; 
+        std::cout << "\nprob.m_num_objB  = " << prob.m_num_objB; 
+        std::cout << "\nprob.m_size_objA = " << prob.m_size_objA; 
+        std::cout << "\nprob.m_size_objB = " << prob.m_size_objB; 
+        std::cout << "\nprob.m_size_bin  = " << prob.m_size_bin;  */
+
+        if (prob.m_size_bin < prob.m_size_objA) return inf<std::uint32_t>;
+        if (prob.m_size_bin < prob.m_size_objB) return inf<std::uint32_t>;
         matrix<std::uint32_t> mat(prob.m_num_objA + 1, prob.m_num_objB + 1, inf<std::uint32_t>);
         
         // main iteration
-        for(std::uint32_t n=0; n!=prob.m_num_objA; ++n)
+        for(std::uint32_t n=0; n<=prob.m_num_objA; ++n)
         {
-            for(std::uint32_t m=0; m!=prob.m_num_objB; ++m)
+            for(std::uint32_t m=0; m<=prob.m_num_objB; ++m)
             {
                 // case 1 : n objA & m objB can be put into a bin
                 if (n * prob.m_size_objA + m * prob.m_size_objB <= prob.m_size_bin) 
                 {
                     mat(n,m) = 1;
                 }
+                // case 2 : breakdown into 2 subproblems (n0,m0) + (n1,m1)
                 else
                 {
+                    for(std::uint32_t n0=0; n0<=n; ++n0)
+                    {
+                        for(std::uint32_t m0=0; m0<=m; ++m0)
+                        {
+                            std::uint32_t n1 = n-n0;
+                            std::uint32_t m1 = m-m0;
+                            if (n0 == 0 && m0 == 0) continue; // skip itself
+                            if (n1 == 0 && m1 == 0) continue; // skip itself
 
+                            if (mat(n0,m0) < inf<std::uint32_t> &&
+                                mat(n1,m1) < inf<std::uint32_t>)
+                            {
+                                mat(n,m) = std::min(mat(n,m), mat(n0,m0) + mat(n1,m1));
+                            }
+                        //  else break; // Todo : any possible optimization by early stop
+                        }
+                    }
                 }
             }
         }
 
+    //  mat.debug("bin");
         return mat(prob.m_num_objA, prob.m_num_objB);
     }
 }

@@ -64,7 +64,7 @@ namespace alg
             return m_size_x;
         }
         
-        void debug(const std::string& name, bool print_half) const noexcept
+        void debug(const std::string& name, bool print_half = false) const noexcept
         {
             std::cout << "\nmatrix " << name;
             for(std::uint32_t y=0; y!=m_size_y; ++y)
@@ -140,7 +140,7 @@ namespace alg
             return m_size_x;
         }
         
-        void debug(const std::string& name, bool print_half) const noexcept
+        void debug(const std::string& name, bool print_half = false) const noexcept
         {
             std::cout << "\ntensor " << name;
             for(std::uint32_t z=0; z!=m_size_z; ++z)
