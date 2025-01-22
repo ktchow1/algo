@@ -1,6 +1,7 @@
 #pragma once
 #include<iostream>
 #include<cstdint>
+#include<cmath>
 #include<vector>
 #include<list>
 #include<algorithm>
@@ -368,6 +369,39 @@ namespace alg
             }
         }
         return mat(0,N-1); 
+    }
+}
+
+
+// *********************************** //
+// *** Piecewise linear regression *** //
+// *********************************** //
+// Regression of : x =    0,     1,     2,  ...
+//                 y = ys[0], ys[1], ys[2], ...
+//
+namespace alg
+{
+    double error(const std::vector<double>::iterator& begin, 
+                 const std::vector<double>::iterator& end)
+    {
+        double Dx  = (double)std::distance(begin, end-1);
+        double Dy  = *(end-1) - *begin;
+        double ans = 0;
+
+        for(auto iter=begin; iter!=end; ++iter)
+        {
+            double dx  = (double)std::distance(begin, iter);
+            double dy  = *iter - *begin;
+            double err = dy - dx * Dy / Dx; 
+            ans += err * err;
+        }
+        return sqrt(ans);
+    }
+    
+    double piecewise_linear_equation(const std::vector<double>& ys) 
+    {
+        double ans = 0;
+        return ans;
     }
 }
 
