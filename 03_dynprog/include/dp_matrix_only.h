@@ -381,8 +381,8 @@ namespace alg
 //
 namespace alg
 {
-    double error(const std::vector<double>::iterator& begin, 
-                 const std::vector<double>::iterator& end)
+    double sum_of_error_square(const std::vector<double>::const_iterator& begin, 
+                               const std::vector<double>::const_iterator& end)
     {
         double Dx  = (double)std::distance(begin, end-1);
         double Dy  = *(end-1) - *begin;
@@ -392,16 +392,51 @@ namespace alg
         {
             double dx  = (double)std::distance(begin, iter);
             double dy  = *iter - *begin;
-            double err = dy - dx * Dy / Dx; 
+            double err = dy - Dy * (dx / Dx); 
             ans += err * err;
         }
-        return sqrt(ans);
+        return ans;
     }
     
-    double piecewise_linear_equation(const std::vector<double>& ys) 
+    double piecewise_linear_equation(const std::vector<double>& ys, std::uint32_t num_lines) 
     {
-        double ans = 0;
-        return ans;
+        std::uint32_t N = ys.size();
+        std::uint32_t M = num_lines;
+        if (N <= M+1) return 0; // perfect fit
+
+        // For subproblem mat(n,m)
+        // num of data  = n+1, hence n = index of last data point   in subproblem
+        // num of lines = m+1, hence m = index of last line segment in subproblem
+        alg::matrix<double> mat(N,M,0); 
+
+        // Diagonal
+        for(std::uint32_t m=0; m!=M; ++m)
+        {
+            mat(m+1,m) = 0;
+        }
+
+        // 1st column
+        for(std::uint32_t n=2; n!=N; ++n)
+        {
+            mat(n,0) = sum_of_error_square(ys.begin(), ys.begin()+n+1);
+        }
+
+        // Iterate to UR
+        for(std::uint32_t m=1; m!=M; ++m) 
+        {
+            for(std::uint32_t n=m+2; n!=N; ++n) // n = index of last data point in subproblem mat(n,m)
+            {
+                double min_err = std::numeric_limits<double>::max();
+                for(std::uint32_t k=m; k!=n; ++k)
+                {
+                    double err = mat(k,m-1) + sum_of_error_square(ys.begin()+k, ys.begin()+n+1);
+                    if (min_err > err)
+                        min_err = err;
+                }
+                mat(n,m) = min_err;
+            }
+        }
+        return mat(N-1,M-1); 
     }
 }
 

@@ -74,8 +74,20 @@ namespace alg
                 {
                     auto temp = operator()(y,x);
                     if (print_half && y > x)
-                         std::cout << "*  ";
-                    else std::cout << temp << ", ";
+                    {
+                        std::cout << "* ";
+                    }
+                    else 
+                    {
+                        if constexpr(std::is_same_v<T,double>)
+                        {
+                            std::cout << std::setprecision(4) << temp << " ";
+                        }
+                        else
+                        {
+                            std::cout << temp << " ";
+                        }
+                    }
                 }
             }
         }
@@ -153,8 +165,13 @@ namespace alg
                     {
                         auto temp = operator()(z,y,x);
                         if (print_half && y > x)
-                             std::cout << "*  ";
-                        else std::cout << temp << ", ";
+                        {
+                             std::cout << "* ";
+                        }
+                        else 
+                        {
+                            std::cout << temp << " ";
+                        }
                     }
                 }
             }

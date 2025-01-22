@@ -992,11 +992,13 @@ namespace alg
         }
     }
 
+    // ******************************************** //
+    // This implementation ables to return inf when
+    // m_size_bin < m_size_objA ... or 
+    // m_size_bin < m_size_objB 
+    // ******************************************** //
     std::uint32_t bin_packing_iterative_in_graph(const bin_packing_problem& prob) 
     {
-        if (prob.m_size_bin < prob.m_size_objA) return inf<std::uint32_t>; // this implementation ables to return inf without this checking
-        if (prob.m_size_bin < prob.m_size_objB) return inf<std::uint32_t>; // this implementation ables to return inf without this checking
-
         // ********************************************************************************************** //
         // push " all states that can be accommodated by 1 bin" into graph
         // push "only states that can be accommodated by 1 bin" AND "cannot fill extra object" into queue
@@ -1076,10 +1078,13 @@ namespace alg
         return inf<std::uint32_t>;
     }
 
+    // ******************************************** //
+    // This implementation ables to return inf when
+    // m_size_bin < m_size_objA ... or 
+    // m_size_bin < m_size_objB 
+    // ******************************************** //
     std::uint32_t bin_packing_iterative_in_matrix(const bin_packing_problem& prob) 
     {
-        if (prob.m_size_bin < prob.m_size_objA) return inf<std::uint32_t>;
-        if (prob.m_size_bin < prob.m_size_objB) return inf<std::uint32_t>;
         matrix<std::uint32_t> mat(prob.m_num_objA + 1, prob.m_num_objB + 1, inf<std::uint32_t>);
         
         // main iteration

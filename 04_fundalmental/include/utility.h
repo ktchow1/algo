@@ -245,6 +245,29 @@ inline auto gen_random_bool_expression(std::uint32_t size)
     return ans;
 }
 
+inline auto gen_random_piecewise_linear(std::uint32_t num_lines, std::uint32_t num_data_min, std::uint32_t num_data_max, double noise_level)
+{
+    std::vector<double> ans;
+    double y0 = 0;
+    double y1 = 0;
+
+    for(std::uint32_t m=0; m!=num_lines; ++m)
+    {
+        y0 = y1;
+        y1 = (rand() % 2000) / 100.0 - 10.0;
+
+        std::uint32_t num_data = num_data_min + rand() % (num_data_max - num_data_min);
+        for(std::uint32_t n=0; n!=num_data; ++n)
+        {
+            double e = ((rand() % 2000) / 1000.0 - 1.0) * noise_level;
+            double y = y0 + (y1-y0) * ((double)n / (double)num_data) + e;
+            ans.push_back(y);
+        }
+    }
+    ans.push_back(y1);
+    return ans;
+}
+
 
 // *************** //
 // *** Compare *** //

@@ -73,10 +73,41 @@ void test_coin_game()
 }
 
 
+void test_piecewise_linear_regression(double noise_level)
+{
+    std::uint32_t num_trial    = 100;
+    std::uint32_t num_error    =   0;
+    std::uint32_t num_lines    =   8;
+    std::uint32_t num_data_min =   2; // per line segment
+    std::uint32_t num_data_max =  20; // per line segment
+
+    for(std::uint32_t t=0; t!=num_trial; ++t)
+    {
+        auto ys = gen_random_piecewise_linear(num_lines, num_data_min, num_data_max, noise_level);
+        double sum_error = alg::piecewise_linear_equation(ys, num_lines);
+        double rms_error = std::sqrt(sum_error / ys.size());
+
+    //  std::cout << "\nrms = " << rms_error;
+        if (rms_error > noise_level)
+        {
+            ++num_error;
+        }
+    }
+
+    std::stringstream ss;
+    ss << "piecewise linear regression, noise " << noise_level;
+    print_summary(ss.str(), num_error, num_trial);
+}
+
+
 void test_dp_matrix_only()
 {
     test_longest_common_subseq();
     test_edit_distance();
     test_boolean_parenthesis();
     test_coin_game();
+    test_piecewise_linear_regression(0.1);
+    test_piecewise_linear_regression(0.5);
+    test_piecewise_linear_regression(1.0);
+    test_piecewise_linear_regression(5.0);
 }

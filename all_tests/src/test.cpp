@@ -83,8 +83,8 @@ int main()
 //  test_sorting_problem();
       
     banner("03_dynprog");
-    test_dp_matrix_and_graph();
-//  test_dp_matrix_only();
+//  test_dp_matrix_and_graph();
+    test_dp_matrix_only();
   
     // *** 04_fundalmental *** //
 //  test_rvalue();
