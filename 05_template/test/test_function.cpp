@@ -1,35 +1,42 @@
 #include<iostream>
+#include<cassert>
 #include<string>
 #include<vector>
 #include<function.h>
 #include<utility.h>
 
+std::uint32_t nullary_function_count = 0;
+std::uint32_t nullary_functor_count = 0;
+std::uint32_t nullary_lambda_count = 0;
+std::uint32_t N_ary_function_count = 0;
+std::uint32_t N_ary_functor_count = 0;
+std::uint32_t N_ary_lambda_count = 0;
 
 
-void sample_function0() 
+void nullary_function() 
 { 
-    std::cout << "\nsample_function0"; 
+    ++nullary_function_count;
 }
 
-struct sample_functor0
+struct nullary_functor
 {
     void operator()() const 
     {
-       std::cout << "\nsample_functor0"; 
+        ++nullary_functor_count;
     }
 };
 
-std::string sample_function1(int, int) 
+std::string N_ary_function(int, int) 
 {
-    std::cout << "\nsample_function1"; 
+    ++N_ary_function_count;
     return "xxx"; 
 }
 
-struct sample_functor1
+struct N_ary_functor
 {
     std::string operator()(int, int) const 
     { 
-        std::cout << "\nsample_functor1"; 
+        ++N_ary_functor_count;
         return "xxx"; 
     }
 };
@@ -42,25 +49,25 @@ struct sample_functor1
 // *******************************************//
 void test_simple_function()
 {
-    sample_functor0 f;
+    nullary_functor f;
     std::vector<alg::simple_function> fs; 
 
     // using raw type
-    fs.push_back(&sample_function0);   // <--- cannot compile all these lines, if "explicit" is added to simple_function constructor
-    fs.push_back(sample_functor0{});
+    fs.push_back(&nullary_function);   // <--- cannot compile all these lines, if "explicit" is added to simple_function constructor
+    fs.push_back(nullary_functor{});
     fs.push_back(f);                   // <--- cannot compile this line, if std::decay_t is removed
     fs.push_back([]()
-    {
-        std::cout << "\nsample_lambda0"; 
+    { 
+        ++nullary_lambda_count;
     });
 
     // using simple_function type
-    alg::simple_function f0(&sample_function0);
-    alg::simple_function f1(sample_functor0{});
+    alg::simple_function f0(&nullary_function);
+    alg::simple_function f1(nullary_functor{});
     alg::simple_function f2(f);
     alg::simple_function f3([]()
     {
-        std::cout << "\nsample_lambda0"; 
+        ++nullary_lambda_count;
     });
     fs.push_back(f0);                  // <--- cannot compile all these lines, if unique_ptr is used instead of shared_ptr inside simple_function
     fs.push_back(f1);                  //      std::unique_ptr makes simple_function non-copyable 
@@ -68,32 +75,34 @@ void test_simple_function()
     fs.push_back(f3);
 
     for(const auto& f:fs) f();    
-
-    print_summary("re-implement function - nullary", "succeeded");
+    assert(nullary_function_count == 2);
+    assert(nullary_functor_count == 4);
+    assert(nullary_lambda_count == 2);
+    print_summary("re-implement function - nullary returning void", "succeeded");
 }
   
 void test_general_function()
 {
-    sample_functor1 f;
+    N_ary_functor f;
     std::vector<alg::function<std::string,int,int>> fs; 
 
     // using raw type
-    fs.push_back(&sample_function1);   
-    fs.push_back(sample_functor1{});
+    fs.push_back(&N_ary_function);   
+    fs.push_back(N_ary_functor{});
     fs.push_back(f);           
     fs.push_back([](int,int) -> std::string
     {
-        std::cout << "\nsample_lambda1";
+        ++N_ary_lambda_count;
         return "xxx"; 
     });
 
     // using simple_function type
-    alg::function<std::string,int,int> f0(&sample_function1);
-    alg::function<std::string,int,int> f1(sample_functor1{});
+    alg::function<std::string,int,int> f0(&N_ary_function);
+    alg::function<std::string,int,int> f1(N_ary_functor{});
     alg::function<std::string,int,int> f2(f);
     alg::function<std::string,int,int> f3([](int,int) -> std::string
     {
-        std::cout << "\nsample_lambda1";
+        ++N_ary_lambda_count;
         return "xxx"; 
     });
     fs.push_back(f0); 
@@ -102,8 +111,10 @@ void test_general_function()
     fs.push_back(f3);
 
     for(const auto& f:fs) f(123,123);    
-
-    print_summary("re-implement function - N-ary return R", "succeeded");
+    assert(N_ary_function_count == 2);
+    assert(N_ary_functor_count == 4);
+    assert(N_ary_lambda_count == 2);
+    print_summary("re-implement function - N-ary returning R", "succeeded");
 }
 
 void test_function()
