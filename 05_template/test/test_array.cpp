@@ -1,5 +1,6 @@
 #include<cassert>
 #include<array.h>
+#include<utility.h>
 
 
 struct A
@@ -79,4 +80,6 @@ void test_array()
     assert((ar4[3] == A{30,31,32})); 
     assert(ar2.capacity() == 0);
     assert(ar2.size() == 0);
+
+    print_summary("re-implement array", "succeeded");
 }

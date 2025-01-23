@@ -2,6 +2,7 @@
 #include<string>
 #include<vector>
 #include<function.h>
+#include<utility.h>
 
 
 
@@ -67,6 +68,8 @@ void test_simple_function()
     fs.push_back(f3);
 
     for(const auto& f:fs) f();    
+
+    print_summary("re-implement function - nullary", "succeeded");
 }
   
 void test_general_function()
@@ -99,6 +102,8 @@ void test_general_function()
     fs.push_back(f3);
 
     for(const auto& f:fs) f(123,123);    
+
+    print_summary("re-implement function - N-ary return R", "succeeded");
 }
 
 void test_function()
