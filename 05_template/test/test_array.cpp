@@ -81,5 +81,5 @@ void test_array()
     assert(ar2.capacity() == 0);
     assert(ar2.size() == 0);
 
-    print_summary("re-implement array", "succeeded");
+    print_summary("array", "succeeded");
 }

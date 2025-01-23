@@ -1,5 +1,7 @@
 #include<iostream>
 #include<metaprog.h>
+#include<utility.h>
+
 
 void test_metaprog()
 {
@@ -47,4 +49,6 @@ void test_metaprog()
     static_assert(alg::reverse_boolean<false,  true, true>::value == 6, "failed to reverse boolean");
     static_assert(alg::reverse_boolean<true,   true, true>::value == 7, "failed to reverse boolean");
     static_assert(alg::reverse_boolean<false, false, true, true>::value == 12, "failed to reverse boolean");
+
+    print_summary("metaprogramming", "succeeded in compile time");
 }

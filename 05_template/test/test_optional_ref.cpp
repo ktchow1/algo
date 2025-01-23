@@ -2,6 +2,8 @@
 #include<cassert>
 #include<type_traits>
 #include<optional_ref.h>
+#include<utility.h>
+
 
 struct A
 {
@@ -21,17 +23,23 @@ struct B : public A
 {
 };
 
-// ************************************************************* //
-// First argument of the following function can bind to either :
+
+// ***************** //
+// *** Reference *** //
+// ***************** //
+//
+// ******************************************************** //
+// 1st argument of fct_for_reference() can bind to either :
 // * const reference_wrapper<const A> ...  or
 // * const reference_wrapper<A> 
 // 
 // When it binds to the latter, a temporary instance of
-// reference_wrapper<const A> is created, which is rvalue
-// ************************************************************* //
+// reference_wrapper<const A> is created, which is rvalue.
+// 
 // reference_wrapper can be
 // * std::reference_wrapper or
 // * alg::reference_wrapper
+// ******************************************************** //
 //
 template<template<typename> typename reference_wrapper>
 void fct_for_reference(const reference_wrapper<const A>& cr, const A& a, bool equal)
@@ -40,10 +48,11 @@ void fct_for_reference(const reference_wrapper<const A>& cr, const A& a, bool eq
     else        assert(&cr.get() != &a);
 }
 
+
 template<template<typename> typename reference_wrapper,
          reference_wrapper<      A>(* ref)(      A&),
          reference_wrapper<const A>(*cref)(const A&)>
-void test_reference()
+void test_reference(const std::string& test_name)
 {
     A a0(10,11,12);
     A& a1(a0);
@@ -135,19 +144,30 @@ void test_reference()
     reference_wrapper<B> rb1(b);
     assert(&rb0.get() == &b);
     assert(&rb1.get() == &b);
+    print_summary(test_name, "succeeded");
 }
 
+
+// **************** //
+// *** Optional *** //
+// **************** //
 template<typename T>
 requires std::same_as<T,std::optional<A>> || 
          std::same_as<T,alg::optional<A>>
-void fct_for_optional(const T& oa)
+void fct_for_optional(const T& oa, std::uint32_t count)
 {
-    if (!oa) std::cout << "\noptional = nullopt";
-    else     std::cout << "\noptional = {" << oa->m_x << ", " << oa->m_y << ", " << oa->m_z << "}"; 
+    if      (count == 0) assert(!oa);
+    else if (count == 1) assert(oa && oa->m_x == 50 && oa->m_y == 51 && oa->m_z == 52);
+    else if (count == 2) assert(oa && oa->m_x == 20 && oa->m_y == 21 && oa->m_z == 22);
+    else if (count == 3) assert(oa && oa->m_x == 30 && oa->m_y == 31 && oa->m_z == 32);
+    else if (count == 4) assert(oa && oa->m_x == 40 && oa->m_y == 41 && oa->m_z == 42);
+    else if (count == 5) assert(oa && oa->m_x == 50 && oa->m_y == 51 && oa->m_z == 52);
+    else if (count == 6) assert(oa && oa->m_x == 50 && oa->m_y == 51 && oa->m_z == 52);
 }
 
+
 template<template<typename> typename optional, typename nullopt>
-void test_optional()
+void test_optional(const std::string& test_name)
 {
     A a(10,11,12);
     A& ra = a;
@@ -222,15 +242,22 @@ void test_optional()
     vec.push_back(oa6);
 
     // 4b. used in function
+    std::uint32_t count = 0;
     for(const auto& x:vec) 
     {
-        fct_for_optional(x);
+        fct_for_optional(x, count);
+        ++count;
     }
+    print_summary(test_name, "succeeded");
 }
 
+
+// ************************** // 
+// *** Optional reference *** //
+// ************************** // 
 template<template<typename> typename reference_wrapper,
          template<typename> typename optional>
-void test_optional_reference() 
+void test_optional_reference(const std::string& test_name) 
 {
 //  optional<A&> ora; // compile error
     optional<reference_wrapper<A>> ora;
@@ -248,16 +275,23 @@ void test_optional_reference()
     ora = reference_wrapper<A>(a1);
     assert(ora);
     assert(ora->get().m_x == 20 && ora->get().m_y == 21 && ora->get().m_z == 22);
+
+    print_summary(test_name, "succeeded");
 }
+
 
 void test_optional_ref()
 {
-    test_reference<std::reference_wrapper, std::ref, std::cref>();
-    test_optional<std::optional, std_nullopt>();
-    test_optional_reference<std::reference_wrapper, std::optional>();
-    test_reference<alg::reference_wrapper, alg::ref, alg::cref>();
-    test_optional<alg::optional, alg_nullopt>();
-//  test_optional_reference<alg::reference_wrapper, alg::optional>(); <--- todo
+    test_reference<std::reference_wrapper, std::ref, std::cref>   ("std::reference");
+    test_optional<std::optional, std_nullopt>                     ("std::optional");
+    test_optional_reference<std::reference_wrapper, std::optional>("std::optional of std::reference");
 
-    // very like, we cannot implement optional with value, use ptr instead
+    test_reference<alg::reference_wrapper, alg::ref, alg::cref>   ("alg::reference");
+    test_optional<alg::optional, alg_nullopt>                     ("alg::optional");
+//  test_optional_reference<alg::reference_wrapper, alg::optional>("alg::optioanl of alg::reference"); <--- Todo
+
+
+    // The failure in the last case above, is likely, to be solved 
+    // by changing implementation of optional from value into ptr.
 }
+
