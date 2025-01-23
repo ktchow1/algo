@@ -78,7 +78,7 @@ void test_simple_function()
     assert(nullary_function_count == 2);
     assert(nullary_functor_count == 4);
     assert(nullary_lambda_count == 2);
-    print_summary("function - nullary returning void", "succeeded");
+    print_summary("alg::simple_function - nullary returning void", "succeeded");
 }
   
 void test_general_function()
@@ -114,7 +114,7 @@ void test_general_function()
     assert(N_ary_function_count == 2);
     assert(N_ary_functor_count == 4);
     assert(N_ary_lambda_count == 2);
-    print_summary("function - N-ary returning R", "succeeded");
+    print_summary("alg::function - N-ary returning R", "succeeded");
 }
 
 void test_function()

@@ -96,7 +96,7 @@ int main()
     test_idx_seq();
     test_metaprog();
     test_optional_ref();
-//  test_shared_ptr();
+    test_shared_ptr();
 //  test_specialization(); 
 //  test_template(); 
 //  test_traits();

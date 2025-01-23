@@ -4,6 +4,8 @@
 #include<typeinfo> 
 #include<shared_ptr.h> 
 #include<type_erasure.h> 
+#include<utility.h> 
+
 
 // ************************** //
 // *** Normal inheritance *** //
@@ -35,9 +37,10 @@ public:
     void memfct() const override       {             std::cout << "\nderived1 memfct";       }
 };
 
-// ****************************************************** //
-// *** Virtual is omitted in destructor intentionally *** //
-// ****************************************************** //
+
+// ***************************************************************************** //
+// *** Abnormal inheritance - virtual is omitted in destructor intentionally *** //
+// ***************************************************************************** //
 class no_virtual_base
 {
 public:
@@ -65,6 +68,7 @@ public:
     void memfct() const override                             {             std::cout << "\nno_virtual_derived1 memfct";       }
 };
 
+
 // *************** //
 // *** Deleter *** //
 // *************** //
@@ -86,11 +90,12 @@ public:
     }
 };
 
-// ************ //
-// *** Test *** //
-// ************ //
+
+// ******************************** //
+// *** Test for reference count *** //
+// ******************************** //
 template<typename T>
-void shared_ptr_test()
+void shared_ptr_test(const std::string& test_name)
 {
     T pA(new derived0(false)); 
     T pB(pA); 
@@ -169,19 +174,16 @@ void shared_ptr_test()
     }
     assert(pA.ref_count() == 1);
     assert(pB.ref_count() == 1);
+    print_summary(test_name, "succeeded");
 }
 
-void test_simple_shared_ptr_ref_count()
-{
-    shared_ptr_test<alg::simple_shared_ptr<base>>();
-}
 
-void test_shared_ptr_ref_count()
-{
-    shared_ptr_test<alg::shared_ptr<base>>();
-}
 
-void test_simple_shared_ptr_deleter()
+
+// ************************ //
+// *** Test for deleter *** //
+// ************************ //
+void test_simple_shared_ptr_constructor_deleter_sequence()
 {
     std::cout << "\n\n### using alg::simple_shared_ptr for base ###";
     {
@@ -228,7 +230,8 @@ void test_simple_shared_ptr_deleter()
     std::cout << "\n";
 }
 
-void test_shared_ptr_deleter()
+
+void test_shared_ptr_constructor_deleter_sequence()
 {
     std::cout << "\n\n### using alg::shared_ptr for base ###";
     {
@@ -275,10 +278,17 @@ void test_shared_ptr_deleter()
     std::cout << "\n";
 }
 
+
 void test_shared_ptr()
 {
-    test_simple_shared_ptr_ref_count();
-    test_shared_ptr_ref_count();
-    test_simple_shared_ptr_deleter();
-    test_shared_ptr_deleter();
+    // Test reference counting
+    shared_ptr_test<alg::simple_shared_ptr<base>>("alg::simple_shared_ptr --- reference counting");
+    shared_ptr_test<alg::       shared_ptr<base>>("alg::shared_ptr ---------- reference counting");
+
+    // Test constructor & deleter sequence <--- turn it ON if need
+    if (false) 
+    {
+        test_simple_shared_ptr_constructor_deleter_sequence();
+        test_shared_ptr_constructor_deleter_sequence();
+    }
 }

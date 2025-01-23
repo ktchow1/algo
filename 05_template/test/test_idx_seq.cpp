@@ -78,7 +78,7 @@ void test_idx_seq_basic()
     using T17 = alg::dedupe_idx_seq<alg::idx_seq<1,1,1,1,1,1,2,3,3,3,3,3,4,4,4,5,6,6,7,7,7,7>>::type;
     static_assert(std::is_same_v<T17, alg::idx_seq<1,2,3,4,5,6,7>>, "failed to dedupe_idx_seq");
 
-    print_summary("idx_seq - basic usage", "succeeded in compile time");
+    print_summary("alg::idx_seq - basic usage", "succeeded in compile time");
 }
 
 
@@ -108,7 +108,7 @@ void test_idx_seq_maven()
                                 alg::idx_seq<4,5,6,7,8>>::type;
     static_assert(std::is_same_v<T6, alg::idx_seq<1*2*3*4,2*3*4*5,3*4*5*6,4*5*6*7,5*6*7*8>>, "failed to zip product");
 
-    print_summary("idx_seq - Maven usage", "succeeded in compile time");
+    print_summary("alg::idx_seq - Maven usage", "succeeded in compile time");
 }
 
 
