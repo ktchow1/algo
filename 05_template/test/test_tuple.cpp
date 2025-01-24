@@ -1,11 +1,13 @@
 #include<iostream>
 #include<cassert>
 #include<cstdint>
+#include<cmath>
 #include<vector>
 #include<tuple.h>
+#include<utility.h>
 
 
-void test_alg_tuple()
+void test_construct()
 {
     alg::tuple<std::uint32_t,std::uint32_t,std::uint32_t> tup0
     {
@@ -71,7 +73,9 @@ void test_alg_tuple()
     assert(alg::get<2>(tup5)[0] == 0.123);
     assert(alg::get<3>(tup5) == 2.718238);
     assert(alg::get<4>(tup5) == "hello");
+    print_summary("tuple - construct", "succeeded in compile time");
 }
+
 
 // ******************************************************** //
 // *** Start from here, use std::tuple (not alg::tuple) *** //
@@ -157,7 +161,9 @@ void test_make_tuple_and_tie() // and structural_binding
     assert(b3 == false);
     assert(c3 == 'd');
     assert(i3 == 456); // modify succeed
+    print_summary("tuple - make and tie", "succeeded in compile time");
 }
+
 
 void test_size_and_element()
 {
@@ -212,7 +218,9 @@ void test_size_and_element()
     static_assert(std::is_same_v<Y2, std::string>,              "failed to tuple_element");
     static_assert(std::is_same_v<Y3, std::pair<double,double>>, "failed to tuple_element");
     static_assert(std::is_same_v<Y4, double>,                   "failed to tuple_element");
+    print_summary("tuple - size and element", "succeeded in compile time");
 }
+
 
 void test_shuffle()
 {
@@ -237,7 +245,9 @@ void test_shuffle()
     static_assert(std::is_same_v<decltype(x2),ANS>, "failed to make_shuffle_tuple");
     assert(std::get<1>(t) == std::get<2>(x2));
     assert(std::get<2>(t) == std::get<1>(x2));
+    print_summary("tuple - shuffle and element", "succeeded in compile time");
 }
+
 
 void test_push_front()
 {
@@ -265,7 +275,9 @@ void test_push_front()
     static_assert(std::is_same_v<decltype(x3), ANS3>, "failed to make_push_front_tuple");
     static_assert(std::is_same_v<decltype(x4), ANS4>, "failed to make_push_front_tuple");
     static_assert(std::is_same_v<decltype(x5), ANS5>, "failed to make_push_front_tuple");
+    print_summary("tuple - push front", "succeeded in compile time");
 }
+
 
 void test_push_back()
 {
@@ -293,7 +305,9 @@ void test_push_back()
     static_assert(std::is_same_v<decltype(x3), ANS3>, "failed to make_push_back_tuple");
     static_assert(std::is_same_v<decltype(x4), ANS4>, "failed to make_push_back_tuple");
     static_assert(std::is_same_v<decltype(x5), ANS5>, "failed to make_push_back_tuple");
+    print_summary("tuple - push back", "succeeded in compile time");
 }
+
 
 void test_pop_front()
 {
@@ -308,7 +322,9 @@ void test_pop_front()
     static_assert(std::is_same_v<X0, ANS0>, "failed to pop_N_front_tuple");
     static_assert(std::is_same_v<X1, ANS1>, "failed to pop_N_front_tuple");
     static_assert(std::is_same_v<X2, ANS2>, "failed to pop_N_front_tuple");
+    print_summary("tuple - pop front", "succeeded in compile time");
 }
+
 
 void test_reverse()
 {    
@@ -340,7 +356,9 @@ void test_reverse()
     assert(std::get<0>(t) == std::get<5>(x5));
     assert(std::get<1>(t) == std::get<4>(x5));
     assert(std::get<2>(t) == std::get<3>(x5));
+    print_summary("tuple - reverse", "succeeded in compile time");
 }
+
 
 void test_odd_pick()
 {    
@@ -379,7 +397,9 @@ void test_odd_pick()
     static_assert(std::is_same_v<decltype(x3), ANS3>, "failed to make_reverse_tuple");
     assert(std::get<0>(t) == std::get<0>(x3));
     assert(std::get<4>(t) == std::get<1>(x3));
+    print_summary("tuple - odd pick", "succeeded in compile time");
 }
+
 
 void test_cat()
 {
@@ -401,7 +421,9 @@ void test_cat()
     assert(std::get<0>(x1) == std::get<4>(x2));
     assert(std::get<1>(x1) == std::get<5>(x2));
     assert(std::get<2>(x1) == std::get<6>(x2));
+    print_summary("tuple - cat", "succeeded in compile time");
 }
+
 
 void test_zip()
 {
@@ -428,27 +450,40 @@ void test_zip()
     assert(std::get<1>(x1) == std::get<1>(x2).second);
     assert(std::get<2>(x1) == std::get<2>(x2).second);
     assert(std::get<3>(x1) == std::get<3>(x2).second);
+    print_summary("tuple - zip", "succeeded in compile time");
 }
+
 
 void test_apply()
 {
+    char          ans_c = 'x';
+    std::uint32_t ans_n = 0;
+    std::string   ans_s = "";
+    std::pair<double,double> ans_p{0,0};
+
     using T = std::tuple<char, std::uint32_t, std::string, std::pair<double, double>>;
     auto  t = T{'a', 12345, "wxyz", std::make_pair(3.1415, 1.4141)};
-    auto  f = [](char c, std::uint32_t n, const std::string& s, const std::pair<double,double>& p)
+    auto  f = [&](char c, std::uint32_t n, const std::string& s, const std::pair<double,double>& p)
     {
-        std::cout << "\n\nThis is alg::apply for std::tuple.";
-        std::cout << "\nchar          = " << c;
-        std::cout << "\nstd::uint32_t = " << n;
-        std::cout << "\nstd::string   = " << s;
-        std::cout << "\nstd::pair<>   = " << p.first << "/" << p.second;
-        std::cout << "\n";
+        ans_c = c;
+        ans_n = n;
+        ans_s = s;
+        ans_p = p;
     };
     alg::apply(t,f);
+
+    assert(ans_c == 'a');
+    assert(ans_n == 12345);
+    assert(ans_s == "wxyz");
+    assert(std::abs(ans_p.first  - 3.1415) < 0.000001);
+    assert(std::abs(ans_p.second - 1.4141) < 0.000001);
+    print_summary("tuple - apply", "succeeded");
 }
+
 
 void test_tuple()
 {
-    test_alg_tuple();
+    test_construct();
     test_make_tuple_and_tie(); // and structural_binding
     test_size_and_element();
     test_shuffle();
