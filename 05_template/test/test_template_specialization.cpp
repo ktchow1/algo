@@ -34,7 +34,7 @@ class B{};
 class C{};
 class D{};
 
-void test_template_class_specialization()
+void test_class_template_specialization()
 {
     using Y0 = sample_class<A,B,C>::output_type;
     static_assert(std::is_same_v<Y0, std::tuple<A,B,C>>, "type mapping incorrect");
@@ -51,7 +51,7 @@ void test_template_class_specialization()
                                                 std::pair<C,D>, 
                                                 std::pair<B,D>>>, "type mapping incorrect");
 
-    print_summary("template class specialization", "succeeded in compile time");
+    print_summary("   class template specialization", "succeeded in compile time");
 }
 
 
@@ -94,7 +94,7 @@ void sample_function(const std::tuple<T...>& tup, const U& x)
     which_overload = 5;
 }
 
-void test_template_function_specialization()
+void test_function_template_specialization()
 {
     sample_function(std::uint32_t{1});
     assert(which_overload == 1);
@@ -114,12 +114,12 @@ void test_template_function_specialization()
     assert(which_overload == 5);
     sample_function(std::make_tuple(1,2,3), "123"); 
     assert(which_overload == 5);
-    print_summary("template function specialization", "succeeded");
+    print_summary("function template specialization", "succeeded");
 }
 
 
 void test_template_specialization()
 {
-    test_template_class_specialization();
-    test_template_function_specialization();
+    test_class_template_specialization();
+    test_function_template_specialization();
 }

@@ -1,34 +1,38 @@
 #pragma once
 #include<iostream>
+#include<cstdint>
+
 
 // ******************************************************************************************* //
 // Template basic                                                                              //
-// * function template       with auto deduction                                               //
-// * class template          with class-template-argument-deduction (CTAD) and deduction guide //
+//                                                                                             //
+// *     function template   with auto deduction                                               //
+// *        class template   with class-template-argument-deduction (CTAD) and deduction guide //
 // * class member template                                                                     //
-// * variable template                                                                         //
-// * alias template                                                                            //
-// * template template                                                                         //
+// *     variable template                                                                     //
+// *        alias template                                                                     //
+// *     template template                                                                     //
 // ******************************************************************************************* //
 namespace alg 
 {
+    namespace global
+    {
+        std::uint32_t overload = 0;
+    }
+
     // ************************* //
     // *** function template *** //
     // ************************* //
     template<typename T, typename U>
     void function_template(const T& t, const U& u)
     {
-        std::cout << "\nfunction template :"
-                  << " T=" << typeid(t).name() 
-                  << " U=" << typeid(u).name();
+        global::overload = 1;
     }
 
     template<typename U>
     void function_template(const std::string& str, const U& u)
     {
-        std::cout << "\nfunction template specialization :"
-                  << " T=std::string"
-                  << " U=" << typeid(u).name();
+        global::overload = 2;
     }
 
 
@@ -36,9 +40,12 @@ namespace alg
     // *** class template *** //
     // ********************** //
     // There are 6 cases :
-    // class template with type explicit specified         = generalization + specialization
-    // class template with type deduced by CTAD            = generalization + specialization
-    // class template with type deduced by deduction guide = generalization + specialization
+    // class template with template type explicit specified         = generalization + specialization
+    // class template with template type deduced by CTAD            = generalization + specialization
+    // class template with template type deduced by deduction guide = generalization + specialization
+    // 
+    // CTAD            = compiler deduces all template types in constructor
+    // deduction guide = compiler deduces all template types given hint 
     
     template<typename T, typename U, typename V>
     struct class_template
@@ -66,10 +73,7 @@ namespace alg
     template<typename T, typename U, typename V>
     void class_template<T,U,V>::fct() const noexcept
     {
-        std::cout << "\nclass template :"
-                  << " T=" << typeid(m_t).name() 
-                  << " U=" << typeid(m_u).name()
-                  << " V=" << typeid(m_v).name();
+        global::overload = 3;
     }
 
     // *** specialization *** //
@@ -82,7 +86,7 @@ namespace alg
 
         class_template() = default;
 
-        class_template(const T& t) : m_t(t), m_u(), m_str("deduction guide B to specialization") // support deduction guide B
+        class_template(const T& t) : m_t(t), m_u(), m_str("xxx") // support deduction guide B
         {
         }
         class_template(const T& t, const U& u, const std::string& str) : m_t(t), m_u(u), m_str(str) // support CTAD
@@ -99,15 +103,12 @@ namespace alg
     template<typename T, typename U>
     void class_template<T,U,std::string>::fct() const noexcept
     {
-        std::cout << "\nclass template specialization :"
-                  << " T=" << typeid(m_t).name()
-                  << " U=" << typeid(m_u).name()
-                  << " V=std::string";
+        global::overload = 4;
     }
 
     // *** deduction guide *** //
     template<typename T, typename U>
-    class_template(const T&, const U&) -> class_template<T,U,int>; // <--- deduction guide A
+    class_template(const T&, const U&) -> class_template<T,U,int>;         // <--- deduction guide A
     template<typename T>
     class_template(const T&) -> class_template<T,std::string,std::string>; // <--- deduction guide B
 
@@ -126,10 +127,7 @@ namespace alg
     template<typename U>
     void class_member_template<T>::template fct() const noexcept // BUG : cannot compile without template
     {
-        T t; U u;
-        std::cout << "\nclass member template :"
-                  << " T=" << typeid(t).name() 
-                  << " U=" << typeid(u).name();
+        global::overload = 5;
     }
 
     template<>
@@ -143,10 +141,7 @@ namespace alg
     template<typename U>
     void class_member_template<std::string>::template fct() const noexcept 
     {
-        U u;
-        std::cout << "\nclass member template specialization :"
-                  << " T=std::string"
-                  << " U=" << typeid(u).name();
+        global::overload = 6;
     }
 
 

@@ -97,9 +97,9 @@ int main()
     test_metaprog();
     test_optional_ref();
     test_shared_ptr();
-//  test_template(); 
+    test_template(); 
     test_template_specialization(); 
-//  test_traits();
+    test_traits();
 //  test_tuple();
 //  test_type_erasure();
 //  test_type_erasure_example();
