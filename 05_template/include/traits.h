@@ -218,14 +218,12 @@ namespace alg
     template<typename T, typename U, typename enable_if<is_target_types_v<T,U>, int>::type dummy = 0> 
     bool sfinae_fct_method1()
     {
-        std::cout << "\nsfinae_fct_method1 : resolve to A";
         return true;
     }
 
     template<typename T, typename U, typename enable_if<!is_target_types_v<T,U>, int>::type dummy = 0> 
     bool sfinae_fct_method1()
     {
-        std::cout << "\nsfinae_fct_method1 : resolve to B";
         return false;
     }
 
@@ -233,14 +231,12 @@ namespace alg
     template<typename T, typename U> 
     typename enable_if<is_target_types_v<T,U>, bool>::type sfinae_fct_method2()
     {
-        std::cout << "\nsfinae_fct_method2 : resolve to C";
         return true;
     }
 
     template<typename T, typename U> 
     typename enable_if<!is_target_types_v<T,U>, bool>::type sfinae_fct_method2()
     {
-        std::cout << "\nsfinae_fct_method2 : resolve to D";
         return false;
     }
 
@@ -251,14 +247,12 @@ namespace alg
     template<typename T, typename enable_if<std::is_lvalue_reference<T>::value, int>::type dummy = 0> 
     bool sfinae_impl(T&& arg)
     {
-        std::cout << "\nsfinae : resolve to lvalue";
         return true;
     }
 
     template<typename T, typename enable_if<!std::is_lvalue_reference<T>::value, int>::type dummy = 0> 
     bool sfinae_impl(T&& arg)
     {
-        std::cout << "\nsfinae : resolve to rvalue";
         return false;
     }
 

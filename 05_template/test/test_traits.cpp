@@ -2,6 +2,7 @@
 #include<vector>
 #include<list>
 #include<traits.h>
+#include<utility.h>
 
 
 void test_simple_traits()
@@ -41,7 +42,10 @@ void test_simple_traits()
     static_assert(alg::is_same_v<alg::value2type_traits_t<bool,int,double,15>, int>,    "failed to use value2type_traits_t");
     static_assert(alg::is_same_v<alg::value2type_traits_t<bool,int,double,20>, double>, "failed to use value2type_traits_t");
     static_assert(alg::is_same_v<alg::value2type_traits_t<bool,int,double,25>, double>, "failed to use value2type_traits_t");
+
+    print_summary("simple traits", "succeeded in compile time");
 }
+
 
 void test_runtime_traits()
 {
@@ -97,7 +101,10 @@ void test_runtime_traits()
     static_assert(alg::is_same_v<alg::value2type_variadic_compiletime< 8,1,2,4,8,16>::type, alg::derivedN< 8>>, "failed to use value2type_hardcoded_compiletime");
     static_assert(alg::is_same_v<alg::value2type_variadic_compiletime<16,1,2,4,8,16>::type, alg::derivedN<16>>, "failed to use value2type_hardcoded_compiletime");
     static_assert(alg::is_same_v<alg::value2type_variadic_compiletime<32,1,2,4,8,16>::type,              void>, "failed to use value2type_hardcoded_compiletime");
+
+    print_summary("runtime traits", "succeeded");
 }
+
 
 void test_sfinae_traits()
 {
@@ -326,7 +333,10 @@ void test_sfinae_traits()
     static_assert(alg::is_convertible_v<int, dst>  == false, "failed to use is_convertible");
     static_assert(alg::is_convertible_v<int, src>  == false, "failed to use is_convertible");
     static_assert(alg::is_convertible_v<int, src2> == false, "failed to use is_convertible");
+
+    print_summary("sfinae traits", "succeeded");
 }
+
 
 void test_traits()
 {
