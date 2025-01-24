@@ -4,61 +4,66 @@
 #include<utility.h>
 
 
-std::string invoked = "";
-
-class A
+namespace type_erasure
 {
-public: 
-    A(std::uint32_t x, std::uint32_t y) : _x(x), _y(y) {}
-    inline std::uint32_t function  (const std::string& str) const { invoked = "A::function";   return 0; }
-    inline std::uint32_t operator()(const std::string& str) const { invoked = "A::operator()"; return 0; }
+    std::string invoked = "";
 
-private:
-    std::uint32_t _x;
-    std::uint32_t _y;
-};
+    class A
+    {
+    public: 
+        A(std::uint32_t x, std::uint32_t y) : _x(x), _y(y) {}
+        inline std::uint32_t function  (const std::string& str) const { invoked = "A::function";   return 0; }
+        inline std::uint32_t operator()(const std::string& str) const { invoked = "A::operator()"; return 0; }
 
-class B
-{
-public: 
-    B(std::uint32_t x, std::uint32_t y, std::uint32_t z) : _x(x), _y(y), _z(z) {}
-    inline std::uint32_t function  (const std::string& str) const { invoked = "B::function";   return 0; }
-    inline std::uint32_t operator()(const std::string& str) const { invoked = "B::operator()"; return 0; }
+    private:
+        std::uint32_t _x;
+        std::uint32_t _y;
+    };
 
-private:
-    std::uint32_t _x;
-    std::uint32_t _y;
-    std::uint32_t _z;
-};
+    class B
+    {
+    public: 
+        B(std::uint32_t x, std::uint32_t y, std::uint32_t z) : _x(x), _y(y), _z(z) {}
+        inline std::uint32_t function  (const std::string& str) const { invoked = "B::function";   return 0; }
+        inline std::uint32_t operator()(const std::string& str) const { invoked = "B::operator()"; return 0; }
 
-class C
-{
-public: 
-    C(std::string x, std::string y, std::string z) : _x(x), _y(y), _z(z) {}
-    inline std::uint32_t function  (const std::string& str) const { invoked = "C::function";   return 0; }
-    inline std::uint32_t operator()(const std::string& str) const { invoked = "C::operator()"; return 0; }
+    private:
+        std::uint32_t _x;
+        std::uint32_t _y;
+        std::uint32_t _z;
+    };
 
-private:
-    std::string _x;
-    std::string _y;
-    std::string _z;
-};
+    class C
+    {
+    public: 
+        C(std::string x, std::string y, std::string z) : _x(x), _y(y), _z(z) {}
+        inline std::uint32_t function  (const std::string& str) const { invoked = "C::function";   return 0; }
+        inline std::uint32_t operator()(const std::string& str) const { invoked = "C::operator()"; return 0; }
 
-inline std::uint32_t f(const std::string& str)
-{
-    invoked = "global f";
-    return 0;
-}
+    private:
+        std::string _x;
+        std::string _y;
+        std::string _z;
+    };
 
-inline std::uint32_t g(const std::string& str)
-{
-    invoked = "global g";
-    return 0;
+    inline std::uint32_t f(const std::string& str)
+    {
+        invoked = "global f";
+        return 0;
+    }
+
+    inline std::uint32_t g(const std::string& str)
+    {
+        invoked = "global g";
+        return 0;
+    }
 }
 
 
 void test_type_erasure()
 {
+    using namespace type_erasure;
+
     // ******************************** //
     // *** Test type erasure memfct *** //
     // ******************************** //
@@ -102,9 +107,9 @@ void test_type_erasure()
     print_summary("type erasure - functor", "succeeded");
 
 
-    // ********************************* //
-    // *** Test type erasure functor *** //
-    // ********************************* //
+    // ***************************************** //
+    // *** Test type erasure vector<functor> *** //
+    // ***************************************** //
     std::vector<alg::type_erase_functor> vec;
 
     // 1. rvalue type_erasure

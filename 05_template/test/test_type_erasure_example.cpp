@@ -1,69 +1,76 @@
 #include<iostream>
+#include<cassert>
 #include<memory>
 #include<vector>
+#include<utility.h>
 
-class animal
+
+namespace type_erasure_example
 {
-public:
-    virtual void see() const = 0;    
-    virtual void say() const = 0;
-    virtual void eat() const = 0;    
-};
+    std::string invoked = "";
 
-class dog : public animal
-{
-public:
-    explicit dog(const std::string&){}
-    void see() const{ std::cout << "\ndog see"; }
-    void say() const{ std::cout << "\ndog say"; }
-    void eat() const{ std::cout << "\ndog eat"; }  
-};
+    class animal
+    {
+    public:
+        virtual void see() const = 0;    
+        virtual void say() const = 0;
+        virtual void eat() const = 0;    
+    };
 
-class cow : public animal
-{
-public:
-    cow(const std::string&, int){}
-    void see() const{ std::cout << "\ncow see"; }
-    void say() const{ std::cout << "\ncow say"; }
-    void eat() const{ std::cout << "\ncow eat"; }  
-};
+    class dog : public animal
+    {
+    public:
+        explicit dog(const std::string&){}
+        void see() const{ invoked = "dog see"; }
+        void say() const{ invoked = "dog say"; }
+        void eat() const{ invoked = "dog eat"; }  
+    };
 
-class pig : public animal
-{
-public:
-    pig(const std::string&, int, int){}
-    void see() const{ std::cout << "\npig see"; }
-    void say() const{ std::cout << "\npig say"; }
-    void eat() const{ std::cout << "\npig eat"; }  
-};
+    class cow : public animal
+    {
+    public:
+        cow(const std::string&, int){}
+        void see() const{ invoked = "cow see"; }
+        void say() const{ invoked = "cow say"; }
+        void eat() const{ invoked = "cow eat"; }  
+    };
 
-class any_dog
-{
-public:
-    explicit any_dog(const std::string&){}
-    void see() const{ std::cout << "\nany dog see"; }
-    void say() const{ std::cout << "\nany dog say"; }
-    void eat() const{ std::cout << "\nany dog eat"; }  
-};
+    class pig : public animal
+    {
+    public:
+        pig(const std::string&, int, int){}
+        void see() const{ invoked = "pig see"; }
+        void say() const{ invoked = "pig say"; }
+        void eat() const{ invoked = "pig eat"; }  
+    };
 
-class any_cow
-{
-public:
-    any_cow(const std::string&, int){}
-    void see() const{ std::cout << "\nany cow see"; }
-    void say() const{ std::cout << "\nany cow say"; }
-    void eat() const{ std::cout << "\nany cow eat"; }  
-};
+    class any_dog
+    {
+    public:
+        explicit any_dog(const std::string&){}
+        void see() const{ invoked = "any dog see"; }
+        void say() const{ invoked = "any dog say"; }
+        void eat() const{ invoked = "any dog eat"; }  
+    };
 
-class any_pig
-{
-public:
-    any_pig(const std::string&, int, int){}
-    void see() const{ std::cout << "\nany pig see"; }
-    void say() const{ std::cout << "\nany pig say"; }
-    void eat() const{ std::cout << "\nany pig eat"; }  
-};
+    class any_cow
+    {
+    public:
+        any_cow(const std::string&, int){}
+        void see() const{ invoked = "any cow see"; }
+        void say() const{ invoked = "any cow say"; }
+        void eat() const{ invoked = "any cow eat"; }  
+    };
 
+    class any_pig
+    {
+    public:
+        any_pig(const std::string&, int, int){}
+        void see() const{ invoked = "any pig see"; }
+        void say() const{ invoked = "any pig say"; }
+        void eat() const{ invoked = "any pig eat"; }  
+    };
+}
 
 
 // *******************************
@@ -74,20 +81,36 @@ public:
 
 void test_type_erasure_example1()
 {
+    using namespace type_erasure_example;
+
     std::vector<animal*> animals = 
     {
         new dog("dog"),
         new cow("cow",123),
         new pig("pig",44,55),
     };
-    for (const auto* x : animals)
-    {
-        x->see();
-        x->say();
-        x->eat();
-    }
-}  
 
+    animals[0]->see();
+    assert(invoked == "dog see");
+    animals[0]->say();
+    assert(invoked == "dog say");
+    animals[0]->eat();
+    assert(invoked == "dog eat");
+    animals[1]->see();
+    assert(invoked == "cow see");
+    animals[1]->say();
+    assert(invoked == "cow say");
+    animals[1]->eat();
+    assert(invoked == "cow eat");
+    animals[2]->see();
+    assert(invoked == "pig see");
+    animals[2]->say();
+    assert(invoked == "pig say");
+    animals[2]->eat();
+    assert(invoked == "pig eat");
+
+    print_summary("type erasure - example 1", "succeeded");
+}  
 
 
 // ***************************
@@ -108,15 +131,21 @@ template<typename T> void invoke(const T& x)
 
 void test_type_erasure_example2()
 {
+    using namespace type_erasure_example;
+
     any_dog d("dog");
     any_cow c("cow",123);
     any_pig p("pig",44,55);
 
     invoke(d);
+    assert(invoked == "any dog eat");
     invoke(c);
+    assert(invoked == "any cow eat");
     invoke(p);
-}
+    assert(invoked == "any pig eat");
 
+    print_summary("type erasure - example 2", "succeeded");
+}
 
 
 // ***************************************
@@ -176,6 +205,8 @@ private:
 
 void test_type_erasure_example3()
 {
+    using namespace type_erasure_example;
+
     any_dog d("dog");
     any_cow c("cow",123);
     any_pig p("pig",44,55);
@@ -205,13 +236,26 @@ void test_type_erasure_example3()
     animals.push_back(std::move(p));
 
     // We put non-inheritance animals into a vector.
+    std::uint32_t n = 0;
     for(const auto&x : animals)
     {
         x.see();
+        if      (n % 3 == 0)  assert(invoked == "any dog see");
+        else if (n % 3 == 1)  assert(invoked == "any cow see");
+        else if (n % 3 == 2)  assert(invoked == "any pig see");
         x.say();
+        if      (n % 3 == 0)  assert(invoked == "any dog say");
+        else if (n % 3 == 1)  assert(invoked == "any cow say");
+        else if (n % 3 == 2)  assert(invoked == "any pig say");
         x.eat();
+        if      (n % 3 == 0)  assert(invoked == "any dog eat");
+        else if (n % 3 == 1)  assert(invoked == "any cow eat");
+        else if (n % 3 == 2)  assert(invoked == "any pig eat");
+        ++n;
     }
+    print_summary("type erasure - example 3", "succeeded");
 }  
+
 
 void test_type_erasure_example()
 {
