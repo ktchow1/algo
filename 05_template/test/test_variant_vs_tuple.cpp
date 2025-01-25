@@ -1,10 +1,14 @@
 #include<iostream>
+#include<cassert>
 #include<functional>
 #include<variant>
 #include<tuple>
 #include<string>
+#include<sstream>
 #include<utility.h>
 
+
+std::string visitor_invoked;
 
 // *************************************************************************************************** //
 // Variant vs tuple
@@ -17,9 +21,9 @@
 // *************************************************************************************************** //
 void test_variant_vs_tuple()
 {
-    bool b = true;
-    char c = 'c';
-    int  i = 12345;
+    bool        b = true;
+    char        c = 'c';
+    int         i = 12345;
     std::string s = "str";
 
     std::variant<bool,char,int,std::string> v0 = b;
@@ -38,11 +42,13 @@ void test_variant_vs_tuple()
     {
         try
         {
-            if      (v.index()==0) std::cout << "\nvariant " << name << " is bool, value = " << std::get<0>(v);
-            else if (v.index()==1) std::cout << "\nvariant " << name << " is char, value = " << std::get<1>(v);
-            else if (v.index()==2) std::cout << "\nvariant " << name << " is int,  value = " << std::get<2>(v);
-            else if (v.index()==3) std::cout << "\nvariant " << name << " is str,  value = " << std::get<3>(v);
-            else                   std::cout << "\nvariant " << name << " is unknown type";
+            std::stringstream ss;
+            if      (v.index()==0) ss << "variant " << name << " is bool, value = " << std::get<0>(v);
+            else if (v.index()==1) ss << "variant " << name << " is char, value = " << std::get<1>(v);
+            else if (v.index()==2) ss << "variant " << name << " is int,  value = " << std::get<2>(v);
+            else if (v.index()==3) ss << "variant " << name << " is str,  value = " << std::get<3>(v);
+            else                   ss << "variant " << name << " is unknown type";
+            visitor_invoked = ss.str();
         }
         catch(const std::bad_variant_access& ex) { std::cout << "\nbad variant access for " << name; }
     };
@@ -51,11 +57,13 @@ void test_variant_vs_tuple()
     {
         try
         {
-            if      (std::holds_alternative<bool>(v))        std::cout << "\nvariant " << name << " is bool, value = " << std::get<bool>(v);
-            else if (std::holds_alternative<char>(v))        std::cout << "\nvariant " << name << " is char, value = " << std::get<char>(v);
-            else if (std::holds_alternative<int>(v))         std::cout << "\nvariant " << name << " is int,  value = " << std::get<int>(v);
-            else if (std::holds_alternative<std::string>(v)) std::cout << "\nvariant " << name << " is str,  value = " << std::get<std::string>(v);
-            else                                             std::cout << "\nvariant " << name << " is unknown type";
+            std::stringstream ss;
+            if      (std::holds_alternative<bool>(v))        ss << "variant " << name << " is bool, value = " << std::get<bool>(v);
+            else if (std::holds_alternative<char>(v))        ss << "variant " << name << " is char, value = " << std::get<char>(v);
+            else if (std::holds_alternative<int>(v))         ss << "variant " << name << " is int,  value = " << std::get<int>(v);
+            else if (std::holds_alternative<std::string>(v)) ss << "variant " << name << " is str,  value = " << std::get<std::string>(v);
+            else                                             ss << "variant " << name << " is unknown type";
+            visitor_invoked = ss.str();
         }
         catch(const std::bad_variant_access& ex) { std::cout << "\nbad variant access for " << name; }
     };
@@ -63,29 +71,32 @@ void test_variant_vs_tuple()
     auto variant_access_method2 = [](const auto& v, const std::string& name)
     {
         try
-        {   //       Don't forget the address operator ---v
-            if      (const auto& iter = std::get_if<bool>(&v);        iter) std::cout << "\nvariant " << name << " is bool, value = " << *iter;
-            else if (const auto& iter = std::get_if<char>(&v);        iter) std::cout << "\nvariant " << name << " is char, value = " << *iter;
-            else if (const auto& iter = std::get_if<int>(&v);         iter) std::cout << "\nvariant " << name << " is int,  value = " << *iter;
-            else if (const auto& iter = std::get_if<std::string>(&v); iter) std::cout << "\nvariant " << name << " is str,  value = " << *iter;
-            else                                                            std::cout << "\nvariant " << name << " is unknown type";
+        { 
+            std::stringstream ss;
+            //       Don't forget the address operator ---v
+            if      (const auto& iter = std::get_if<bool>(&v);        iter) ss << "variant " << name << " is bool, value = " << *iter;
+            else if (const auto& iter = std::get_if<char>(&v);        iter) ss << "variant " << name << " is char, value = " << *iter;
+            else if (const auto& iter = std::get_if<int>(&v);         iter) ss << "variant " << name << " is int,  value = " << *iter;
+            else if (const auto& iter = std::get_if<std::string>(&v); iter) ss << "variant " << name << " is str,  value = " << *iter;
+            else                                                            ss << "variant " << name << " is unknown type";
+            visitor_invoked = ss.str();
         }
         catch(const std::bad_variant_access& ex) { std::cout << "\nbad variant access for " << name; }
     };
 
-    std::cout << "\n\nvariant access";
-    variant_access_method0(v0, "v0");
-    variant_access_method0(v1, "v1");
-    variant_access_method0(v2, "v2");
-    variant_access_method0(v3, "v3");
-    variant_access_method1(v0, "v0");
-    variant_access_method1(v1, "v1");
-    variant_access_method1(v2, "v2");
-    variant_access_method1(v3, "v3");
-    variant_access_method2(v0, "v0");
-    variant_access_method2(v1, "v1");
-    variant_access_method2(v2, "v2");
-    variant_access_method2(v3, "v3");
+    variant_access_method0(v0, "v0");   assert(visitor_invoked == "variant v0 is bool, value = 1");
+    variant_access_method0(v1, "v1");   assert(visitor_invoked == "variant v1 is char, value = c");
+    variant_access_method0(v2, "v2");   assert(visitor_invoked == "variant v2 is int,  value = 12345");
+    variant_access_method0(v3, "v3");   assert(visitor_invoked == "variant v3 is str,  value = str");
+    variant_access_method1(v0, "v0");   assert(visitor_invoked == "variant v0 is bool, value = 1");
+    variant_access_method1(v1, "v1");   assert(visitor_invoked == "variant v1 is char, value = c");
+    variant_access_method1(v2, "v2");   assert(visitor_invoked == "variant v2 is int,  value = 12345");
+    variant_access_method1(v3, "v3");   assert(visitor_invoked == "variant v3 is str,  value = str");
+    variant_access_method2(v0, "v0");   assert(visitor_invoked == "variant v0 is bool, value = 1");
+    variant_access_method2(v1, "v1");   assert(visitor_invoked == "variant v1 is char, value = c");
+    variant_access_method2(v2, "v2");   assert(visitor_invoked == "variant v2 is int,  value = 12345");
+    variant_access_method2(v3, "v3");   assert(visitor_invoked == "variant v3 is str,  value = str");
+    print_summary("variant - variant access", "succeeded");
 
 
     // ********************* //
@@ -94,19 +105,20 @@ void test_variant_vs_tuple()
     struct visitor
     {
         explicit visitor(const std::string& name) : m_name(name) {}
-        void operator()(const bool& b)        const { std::cout << "\nvariant " << m_name << " is bool, value = " << b; } 
-        void operator()(const char& c)        const { std::cout << "\nvariant " << m_name << " is char, value = " << c; } 
-        void operator()(const int&  i)        const { std::cout << "\nvariant " << m_name << " is int,  value = " << i; } 
-        void operator()(const std::string& s) const { std::cout << "\nvariant " << m_name << " is str,  value = " << s; } 
+        void operator()(const bool& b)        { m_ss << "variant " << m_name << " is bool, value = " << b; visitor_invoked = m_ss.str(); } 
+        void operator()(const char& c)        { m_ss << "variant " << m_name << " is char, value = " << c; visitor_invoked = m_ss.str(); } 
+        void operator()(const int&  i)        { m_ss << "variant " << m_name << " is int,  value = " << i; visitor_invoked = m_ss.str(); } 
+        void operator()(const std::string& s) { m_ss << "variant " << m_name << " is str,  value = " << s; visitor_invoked = m_ss.str(); } 
 
         std::string m_name;
+        std::stringstream m_ss;
     };
 
-    std::cout << "\n\nvariant visit";
-    std::visit(visitor{"v0"}, v0);
-    std::visit(visitor{"v1"}, v1);
-    std::visit(visitor{"v2"}, v2);
-    std::visit(visitor{"v3"}, v3);
+    std::visit(visitor{"v0"}, v0);   assert(visitor_invoked == "variant v0 is bool, value = 1");
+    std::visit(visitor{"v1"}, v1);   assert(visitor_invoked == "variant v1 is char, value = c");
+    std::visit(visitor{"v2"}, v2);   assert(visitor_invoked == "variant v2 is int,  value = 12345");
+    std::visit(visitor{"v3"}, v3);   assert(visitor_invoked == "variant v3 is str,  value = str");
+    print_summary("variant - variant visit", "succeeded");
     
 
     // ******************** //
@@ -114,15 +126,18 @@ void test_variant_vs_tuple()
     // ******************** //
     auto tuple_access = [](const auto& t, const std::string& name)
     {
-        std::cout << "\ntuple " << name << " has bool, value = " << std::get<0>(t);
-        std::cout << "\ntuple " << name << " has char, value = " << std::get<1>(t);
-        std::cout << "\ntuple " << name << " has int,  value = " << std::get<2>(t);
-        std::cout << "\ntuple " << name << " has str,  value = " << std::get<3>(t);
+        std::stringstream ss;
+        ss << "tuple " << name 
+           << " has value " << std::get<0>(t)
+                    << ", " << std::get<1>(t)
+                    << ", " << std::get<2>(t)
+                    << ", " << std::get<3>(t);
+        visitor_invoked = ss.str();
     };
 
-    std::cout << "\n\ntuple access";
-    tuple_access(t0, "t0");
-    tuple_access(t1, "t1");
+    tuple_access(t0, "t0");   assert(visitor_invoked == "tuple t0 has value 1, c, 12345, str");
+    tuple_access(t1, "t1");   assert(visitor_invoked == "tuple t1 has value 1, c, 12345, str");
+    print_summary("variant - tuple access", "succeeded");
 
 
     // ******************* //
@@ -134,23 +149,20 @@ void test_variant_vs_tuple()
                        const std::string& s,
                        const std::string& name)
     {
-        std::cout << "\ntuple " << name << " has bool, value = " << b;
-        std::cout << "\ntuple " << name << " has char, value = " << c;
-        std::cout << "\ntuple " << name << " has int,  value = " << i;
-        std::cout << "\ntuple " << name << " has str,  value = " << s;
+        std::stringstream ss;
+        ss << "tuple " << name 
+           << " has value " << b
+                    << ", " << c
+                    << ", " << i
+                    << ", " << s;
+        visitor_invoked = ss.str();
     };
 
-    std::cout << "\n\ntuple apply";
-    std::apply(std::bind(function, std::placeholders::_1, 
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   "t0"), t0);
-
-    std::apply(std::bind(function, std::placeholders::_1, 
-                                   std::placeholders::_2,
-                                   std::placeholders::_3,
-                                   std::placeholders::_4,
-                                   "t1"), t1);
+    using namespace std::placeholders;
+    std::apply(std::bind(function, _1, _2, _3, _4, "t0"), t0);
+    assert(visitor_invoked == "tuple t0 has value 1, c, 12345, str");
+    std::apply(std::bind(function, _1, _2, _3, _4, "t1"), t1);
+    assert(visitor_invoked == "tuple t1 has value 1, c, 12345, str");
+    print_summary("variant - tuple apply", "succeeded");
 }
 

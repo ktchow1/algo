@@ -159,6 +159,7 @@ void test_inheritance_visitor()
     assert(v1.m_A_visit_count == 2);
     assert(v1.m_B_visit_count == 1);
     assert(v1.m_C_visit_count == 1);
+    print_summary("variant - inheritance visitor", "succeeded");
 }
 
 
@@ -204,6 +205,7 @@ void test_variant_visitor()
     assert(v1.m_A_visit_count == 2);
     assert(v1.m_B_visit_count == 1);
     assert(v1.m_C_visit_count == 1);
+    print_summary("variant - variant visitor", "succeeded");
 }
 
 

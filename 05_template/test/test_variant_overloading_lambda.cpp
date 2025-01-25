@@ -1,7 +1,9 @@
 #include<iostream>
-#include<functional>
-#include<variant>
+#include<cstdint>
+#include<cassert>
 #include<string>
+#include<variant>
+#include<utility.h>
 
 
 // ************************** // 
@@ -14,10 +16,11 @@
 
 namespace alg { namespace overloading_lambda
 {           
-    bool b = true;
-    char c = 'a';
-    int  i = 123;
+    bool        b = true;
+    char        c = 'a';
+    int         i = 123;
     std::string s = "abc";
+    std::uint32_t invoked = 0;
     
 
     // ********************* //
@@ -25,10 +28,10 @@ namespace alg { namespace overloading_lambda
     // ********************* //
     void step1()
     {
-        struct vb { void operator()(const bool& b)        const { std::cout << "\nvariant has bool, value = " << b; } };
-        struct vc { void operator()(const char& c)        const { std::cout << "\nvariant has char, value = " << c; } };
-        struct vi { void operator()(const  int& i)        const { std::cout << "\nvariant has inr,  value = " << i; } };
-        struct vs { void operator()(const std::string& s) const { std::cout << "\nvariant has str,  value = " << s; } };
+        struct vb { void operator()(const bool& x)        const { invoked = 1; } };
+        struct vc { void operator()(const char& x)        const { invoked = 2; } };
+        struct vi { void operator()(const  int& x)        const { invoked = 3; } };
+        struct vs { void operator()(const std::string& x) const { invoked = 4; } };
         struct hardcoded_visitor : public vb,vc,vi,vs
         {
             using vb::operator(); // without this using, there will be ambiguous error, but why?
@@ -37,12 +40,15 @@ namespace alg { namespace overloading_lambda
             using vs::operator();
         };
         
-        std::cout << "\n\noverloading lambda step 1";
         hardcoded_visitor visitor;
         visitor(b);
+        assert(invoked == 1);
         visitor(c);
+        assert(invoked == 2);
         visitor(i);
+        assert(invoked == 3);
         visitor(s);
+        assert(invoked == 4);
     }
     
 
@@ -56,17 +62,20 @@ namespace alg { namespace overloading_lambda
 
     void step2()
     {
-        auto vb = [](const bool& b)        { std::cout << "\nvariant has bool, value = " << b; };
-        auto vc = [](const char& c)        { std::cout << "\nvariant has char, value = " << c; };
-        auto vi = [](const  int& i)        { std::cout << "\nvariant has inr,  value = " << i; };
-        auto vs = [](const std::string& s) { std::cout << "\nvariant has str,  value = " << s; };
+        auto vb = [](const bool& x)        { invoked = 5; };
+        auto vc = [](const char& x)        { invoked = 6; };
+        auto vi = [](const  int& x)        { invoked = 7; };
+        auto vs = [](const std::string& x) { invoked = 8; };
         
-        std::cout << "\n\noverloading lambda step 2";
         variadic_visitor<decltype(vb), decltype(vc), decltype(vi), decltype(vs)> visitor; // will remove decltype in step3
         visitor(b);
+        assert(invoked == 5);
         visitor(c);
+        assert(invoked == 6);
         visitor(i);
+        assert(invoked == 7);
         visitor(s);
+        assert(invoked == 8);
     }
 
 
@@ -85,28 +94,34 @@ namespace alg { namespace overloading_lambda
 
     void step3()
     {
-        std::cout << "\n\noverloading lambda step 3";
         overloading_lambda_visitor visitor
         {
-            [](const bool& b)        { std::cout << "\nvariant has bool, value = " << b; },
-            [](const char& c)        { std::cout << "\nvariant has char, value = " << c; },
-            [](const  int& i)        { std::cout << "\nvariant has inr,  value = " << i; },
-            [](const std::string& s) { std::cout << "\nvariant has str,  value = " << s; }
+            [](const bool& x)        { invoked =  9; },
+            [](const char& x)        { invoked = 10; },
+            [](const  int& x)        { invoked = 11; },
+            [](const std::string& x) { invoked = 12; }
         };
         visitor(b);
+        assert(invoked == 9);
         visitor(c);
+        assert(invoked == 10);
         visitor(i);
+        assert(invoked == 11);
         visitor(s);
+        assert(invoked == 12);
 
-        std::cout << "\n\noverloading lambda step 3 (with std::visit)";
         std::variant<bool,char,int,std::string> v0 = b;
         std::variant<bool,char,int,std::string> v1 = c;
         std::variant<bool,char,int,std::string> v2 = i;
         std::variant<bool,char,int,std::string> v3 = s;
         std::visit(visitor, v0);
+        assert(invoked == 9);
         std::visit(visitor, v1);
+        assert(invoked == 10);
         std::visit(visitor, v2);
+        assert(invoked == 11);
         std::visit(visitor, v3);
+        assert(invoked == 12);
     }
 }}
 
@@ -116,4 +131,5 @@ void test_variant_overloading_lambda()
     alg::overloading_lambda::step1();
     alg::overloading_lambda::step2();
     alg::overloading_lambda::step3();
+    print_summary("variant - overloading lambda", "succeeded");
 }

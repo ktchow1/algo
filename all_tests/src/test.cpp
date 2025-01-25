@@ -67,7 +67,7 @@ inline void banner(const std::string str)
 
 int main()
 {
-/*  banner("01_algorithm");
+    banner("01_algorithm");
     test_arithmetic();
     test_bisection();
     test_stack();
@@ -87,7 +87,7 @@ int main()
     banner("03_dynprog");
     test_dp_matrix_and_graph();
     test_dp_matrix_only(); 
-*/  
+    
     // *** 04_fundalmental *** //
 //  test_rvalue();
 //  test_timer();
