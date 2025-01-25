@@ -135,7 +135,6 @@ void test_other_variadic()
 //  static_assert(alg::is_same_v<typename alg::pack_indexing<2,bool,char,int,std::string>::type,         int>, "failed to use pack indexing"); 
 //  static_assert(alg::is_same_v<typename alg::pack_indexing<3,bool,char,int,std::string>::type, std::string>, "failed to use pack indexing"); 
     print_summary("variadic - other expansion", "succeeded");
-    
 }
 
 

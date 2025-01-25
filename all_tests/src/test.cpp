@@ -43,6 +43,8 @@ void test_type_erasure_example();
 void test_unique_ptr();
 void test_variadic();
 void test_variant();
+void test_variant_overloading_lambda();  
+void test_variant_vs_tuple();
 
 // *** 06_threading *** //
 void test_thread_create();
@@ -105,7 +107,9 @@ int main()
     test_type_erasure();
     test_unique_ptr();
     test_variadic(); 
-//  test_variant();  
+    test_variant();  
+    test_variant_overloading_lambda();  
+    test_variant_vs_tuple();
     
     // *** 06_threading *** //
 //  test_thread_create();

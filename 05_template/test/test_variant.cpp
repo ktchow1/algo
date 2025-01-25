@@ -1,6 +1,6 @@
 #include<cassert>
 #include<memory>
-#include<variant.h>
+#include<utility.h>
 
 
 // **************************************************** //
@@ -161,6 +161,7 @@ void test_inheritance_visitor()
     assert(v1.m_C_visit_count == 1);
 }
 
+
 void test_variant_visitor()
 {
     std::vector<std::variant<componentA, componentB, componentC>> vec;
@@ -205,13 +206,9 @@ void test_variant_visitor()
     assert(v1.m_C_visit_count == 1);
 }
 
+
 void test_variant()
 {
-    alg::variant_vs_tuple();
-    alg::overloading_lambda::step1();
-    alg::overloading_lambda::step2();
-    alg::overloading_lambda::step3();
-
     test_inheritance_visitor();
     test_variant_visitor();
 }
