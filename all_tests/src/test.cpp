@@ -103,8 +103,8 @@ int main()
     test_tuple();
     test_type_erasure_example();
     test_type_erasure();
-//  test_unique_ptr();
-//  test_variadic(); 
+    test_unique_ptr();
+    test_variadic(); 
 //  test_variant();  
     
     // *** 06_threading *** //

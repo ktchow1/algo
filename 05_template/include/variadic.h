@@ -47,9 +47,10 @@ namespace alg
         std::uint32_t n = 0;
         (       // outer bracket for comma fold expression
             (   // inner bracket for comma fold expression
-                ostream_in_old_way(os, "\nostream_nested row ", n++, " = ", std::forward<ARGS>(args)...) 
+                ostream_in_old_way(os, "row ", n++, " = ", std::forward<ARGS>(args)...) 
                 << " + " 
-                << args
+                << args 
+                << ", "
             )
             ,...
         );
@@ -149,12 +150,12 @@ namespace alg
         return x + x;
     }
 
-    template<typename...ARGS>
-    void double_up_and_ostream(ARGS&&...args)
+    template<typename OS, typename...ARGS>
+    void double_up_and_ostream(OS& os, ARGS&&...args)
     {
-        ostream_by_comma_op_decorated(std::cout, "\nparameter-pack-expansion ", double_up(args)   ...);
-       (ostream_by_comma_op_decorated(std::cout, "\nfold-expression-of-comma0", double_up(args)), ...);
-        ostream_by_comma_op_decorated(std::cout, "\nfold-expression-of-comma1",(double_up(args),  ...));
+        ostream_by_comma_op_decorated(os, "\nparameter-pack-expansion ", double_up(args)   ...);
+       (ostream_by_comma_op_decorated(os, "\nfold-expression-of-comma0", double_up(args)), ...);
+        ostream_by_comma_op_decorated(os, "\nfold-expression-of-comma1",(double_up(args),  ...));
     }
 }
 
@@ -182,8 +183,6 @@ namespace alg
 
         void run() noexcept
         {
-            std::cout << "\nDerived from " << num_of_base << " base classes";
-
             // fold expression with comma operator
             (..., (Bs::fct()));
         }

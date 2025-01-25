@@ -4,17 +4,36 @@
 #include<string>
 #include<traits.h>
 #include<variadic.h>
+#include<utility.h>
 
 
 void test_parameter_pack_expansion()
 {
-    alg::ostream_in_old_way(std::cout, "\nostream_in_old_way = ", 1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
+    std::stringstream ss;
+    alg::ostream_in_old_way(ss, "row = ", 1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
+
+    assert(ss.str() == "row = 1234ABCDEFGHIJKLMN");
+    print_summary("variadic - parameter pack expansion", "succeeded");
 }
+
 
 void test_parameter_pack_nested_expansion()
 {
-    alg::ostream_nested(std::cout, 1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
+    std::stringstream ss;
+    alg::ostream_nested(ss, 1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
+    std::string ans = std::string{"row 0 = 1234ABCDEFGHIJKLMN + 1, "}    +
+                      std::string{"row 1 = 1234ABCDEFGHIJKLMN + 2, "}    +
+                      std::string{"row 2 = 1234ABCDEFGHIJKLMN + 3, "}    + 
+                      std::string{"row 3 = 1234ABCDEFGHIJKLMN + 4, "}    + 
+                      std::string{"row 4 = 1234ABCDEFGHIJKLMN + ABC, "}  +
+                      std::string{"row 5 = 1234ABCDEFGHIJKLMN + DEF, "}  +
+                      std::string{"row 6 = 1234ABCDEFGHIJKLMN + GHIJ, "} + 
+                      std::string{"row 7 = 1234ABCDEFGHIJKLMN + KLMN, "};
+
+    assert(ss.str() == ans);
+    print_summary("variadic - parameter pack nested expansion", "succeeded");
 }
+
 
 void test_fold_expansion()
 {
@@ -36,20 +55,39 @@ void test_fold_expansion()
     std::stringstream ss5;
     (ss5 << 1, ss5 << 2, ss5 << 3, ss5 << 4, ss5 << "ABC", ss5 << "DEF", ss5 << "GHIJ", ss5 << "KLMN");
 
-    std::cout << "\nostream_by_ostream_op          = " << ss0.str();
-    std::cout << "\nostream_by_comma_op            = " << ss1.str();
-    std::cout << "\nostream_by_comma_op2           = " << ss2.str();
-    std::cout << "\nostream_by_comma_op_decorated  = " << ss3.str();
-    std::cout << "\nostream_by_comma_op_decorated2 = " << ss4.str();
-    std::cout << "\nostream manully                = " << ss5.str();
-    std::cout << "\n";
+    assert(ss0.str() == "1234ABCDEFGHIJKLMN");
+    assert(ss1.str() == "1234ABCDEFGHIJKLMN");
+    assert(ss2.str() == "1234ABCDEFGHIJKLMN");
+    assert(ss3.str() == "1, 2, 3, 4, ABC, DEF, GHIJ, KLMN.");
+    assert(ss4.str() == "1, 2, 3, 4, ABC, DEF, GHIJ, KLMN.");
+    assert(ss5.str() == "1234ABCDEFGHIJKLMN");
+    print_summary("variadic - fold expansion", "succeeded");
 
-    std::cout << "\n[Difference between parameter-pack-expansion & fold-expression-with-comma ]";
-    alg::double_up_and_ostream(1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
 
-    std::cout << "\n";
+    // ************************************************ //
+    // *** Fold-expression-with-comma vs Param-pack *** //
+    // ************************************************ //
+    std::stringstream ss;
+    alg::double_up_and_ostream(ss, 1, 2, 3, 4, std::string{"ABC"}, std::string{"DEF"}, std::string{"GHIJ"}, std::string{"KLMN"});
+    std::string ans = std::string{"\nparameter-pack-expansion , 2, 4, 6, 8, ABCABC, DEFDEF, GHIJGHIJ, KLMNKLMN."} +
+                      std::string{"\nfold-expression-of-comma0, 2."} +
+                      std::string{"\nfold-expression-of-comma0, 4."} +
+                      std::string{"\nfold-expression-of-comma0, 6."} +
+                      std::string{"\nfold-expression-of-comma0, 8."} +
+                      std::string{"\nfold-expression-of-comma0, ABCABC."} +
+                      std::string{"\nfold-expression-of-comma0, DEFDEF."} +
+                      std::string{"\nfold-expression-of-comma0, GHIJGHIJ."} +
+                      std::string{"\nfold-expression-of-comma0, KLMNKLMN."} +
+                      std::string{"\nfold-expression-of-comma1, KLMNKLMN."};
+
+    assert(ss.str() == ans);
+    print_summary("variadic - fold expansion with comma vs param pack", "succeeded");
 }
 
+
+// ********************** //
+// *** Other variadic *** //
+// ********************** //
 template<int N> struct base 
 {
     explicit base(int id) : m_id(id) 
@@ -58,12 +96,13 @@ template<int N> struct base
 
     void fct()  
     { 
-        std::cout << "\nThis is base" << N << " with id " << m_id;
-        m_fct_invoked = true; 
+        std::stringstream ss;
+        ss << "This is base" << N << " with id " << m_id;
+        m_log = ss.str(); 
     }
 
-    bool m_fct_invoked = false;
     int m_id = 0;
+    std::string m_log;
 };
 
 void test_other_variadic()
@@ -80,22 +119,25 @@ void test_other_variadic()
     assert(derived.base<4>::m_id == 12345);
     assert(derived.base<8>::m_id == 12345);
 
-    assert(derived.base<1>::m_fct_invoked == false);
-    assert(derived.base<2>::m_fct_invoked == false);
-    assert(derived.base<4>::m_fct_invoked == false);
-    assert(derived.base<8>::m_fct_invoked == false);
+    assert(derived.base<1>::m_log == "");
+    assert(derived.base<2>::m_log == "");
+    assert(derived.base<4>::m_log == "");
+    assert(derived.base<8>::m_log == "");
     derived.run();
-    assert(derived.base<1>::m_fct_invoked ==  true);
-    assert(derived.base<2>::m_fct_invoked ==  true);
-    assert(derived.base<4>::m_fct_invoked ==  true);
-    assert(derived.base<8>::m_fct_invoked ==  true);
+    assert(derived.base<1>::m_log == "This is base1 with id 12345");
+    assert(derived.base<2>::m_log == "This is base2 with id 12345");
+    assert(derived.base<4>::m_log == "This is base4 with id 12345");
+    assert(derived.base<8>::m_log == "This is base8 with id 12345");
 
     // pack indexing will be available in c++26
-//  static_assert(alg::is_same_v<typename alg::pack_indexing<0,bool,char,int,std::string>::type,        bool>, "failed to use pack idnexing"); 
-//  static_assert(alg::is_same_v<typename alg::pack_indexing<1,bool,char,int,std::string>::type,        char>, "failed to use pack idnexing"); 
-//  static_assert(alg::is_same_v<typename alg::pack_indexing<2,bool,char,int,std::string>::type,         int>, "failed to use pack idnexing"); 
-//  static_assert(alg::is_same_v<typename alg::pack_indexing<3,bool,char,int,std::string>::type, std::string>, "failed to use pack idnexing"); 
+//  static_assert(alg::is_same_v<typename alg::pack_indexing<0,bool,char,int,std::string>::type,        bool>, "failed to use pack indexing"); 
+//  static_assert(alg::is_same_v<typename alg::pack_indexing<1,bool,char,int,std::string>::type,        char>, "failed to use pack indexing"); 
+//  static_assert(alg::is_same_v<typename alg::pack_indexing<2,bool,char,int,std::string>::type,         int>, "failed to use pack indexing"); 
+//  static_assert(alg::is_same_v<typename alg::pack_indexing<3,bool,char,int,std::string>::type, std::string>, "failed to use pack indexing"); 
+    print_summary("variadic - other expansion", "succeeded");
+    
 }
+
 
 void test_variadic()
 {
