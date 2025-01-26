@@ -1,6 +1,6 @@
 #pragma once
 #include<tuple>
-#include<idx_seq.h>
+#include<tuple_idx_seq.h>
 
 // *************************** //
 // *** Design my own tuple *** //
