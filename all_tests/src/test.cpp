@@ -23,8 +23,8 @@ void test_dp_matrix_and_graph();
 void test_dp_matrix_only();
 
 // *** 04_fundalmental *** //
-void test_mem_allocator();
-void test_mem_deleter();
+void test_custom_allocator();
+void test_custom_deleter();
 void test_rvalue();
 void test_timer();
 // void test_polymorphism();
@@ -32,13 +32,13 @@ void test_timer();
 // *** 05_template *** //
 void test_array();
 void test_function();
-void test_idx_seq();
 void test_metaprog();
 void test_optional_ref();
 void test_shared_ptr();
 void test_template();
 void test_template_specialization(); 
 void test_traits();
+void test_tuple_idx_seq();
 void test_tuple();
 void test_type_erasure();
 void test_type_erasure_example();
@@ -93,22 +93,22 @@ int main()
     
     // *** 04_fundalmental *** //
     banner("04_fundalmental");
-    test_mem_allocator();
-//  test_mem_deleter();
+    test_custom_allocator();
+    test_custom_deleter();
 //  test_rvalue();
 //  test_timer();
   
-/*
+  
     banner("05_template");
     test_array();
     test_function();
-    test_idx_seq();
     test_metaprog();
     test_optional_ref();
     test_shared_ptr();
     test_template(); 
     test_template_specialization(); 
     test_traits();
+    test_tuple_idx_seq();
     test_tuple();
     test_type_erasure_example();
     test_type_erasure();
@@ -116,7 +116,7 @@ int main()
     test_variadic(); 
     test_variant();  
     test_variant_overloading_lambda();  
-    test_variant_vs_tuple(); */
+    test_variant_vs_tuple();
     
     // *** 06_threading *** //
 //  test_thread_create();

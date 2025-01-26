@@ -3,7 +3,7 @@
 #include<utility.h>
 
 
-void test_idx_seq_basic()
+void test_tuple_idx_seq_basic()
 {
     static_assert(std::is_same_v<alg::    idx_seq_generator <5>   ::type, alg::idx_seq<0,1,2,3,4>>,        "failed to generate idx_seq");
     static_assert(std::is_same_v<alg::    idx_seq_generator <7>   ::type, alg::idx_seq<0,1,2,3,4,5,6>>,    "failed to generate idx_seq");
@@ -82,7 +82,7 @@ void test_idx_seq_basic()
 }
 
 
-void test_idx_seq_maven()
+void test_tuple_idx_seq_maven()
 {
     using T0 = alg::idx_seq<1,2,3,4,5>;
     using T1 = alg::idx_seq<4,5,6,7,8>;
@@ -112,8 +112,8 @@ void test_idx_seq_maven()
 }
 
 
-void test_idx_seq()
+void test_tuple_idx_seq()
 {
-    test_idx_seq_basic();
-    test_idx_seq_maven();
+    test_tuple_idx_seq_basic();
+    test_tuple_idx_seq_maven();
 }
