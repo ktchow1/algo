@@ -98,7 +98,7 @@ int main()
 //  test_rvalue();
 //  test_timer();
   
-  
+ /* 
     banner("05_template");
     test_array();
     test_function();
@@ -116,7 +116,7 @@ int main()
     test_variadic(); 
     test_variant();  
     test_variant_overloading_lambda();  
-    test_variant_vs_tuple();
+    test_variant_vs_tuple(); */
     
     // *** 06_threading *** //
 //  test_thread_create();
