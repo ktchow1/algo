@@ -23,6 +23,8 @@ void test_dp_matrix_and_graph();
 void test_dp_matrix_only();
 
 // *** 04_fundalmental *** //
+void test_mem_allocator();
+void test_mem_deleter();
 void test_rvalue();
 void test_timer();
 // void test_polymorphism();
@@ -67,6 +69,7 @@ inline void banner(const std::string str)
 
 int main()
 {
+/*
     banner("01_algorithm");
     test_arithmetic();
     test_bisection();
@@ -86,12 +89,16 @@ int main()
       
     banner("03_dynprog");
     test_dp_matrix_and_graph();
-    test_dp_matrix_only(); 
+    test_dp_matrix_only();  */
     
     // *** 04_fundalmental *** //
+    banner("04_fundalmental");
+    test_mem_allocator();
+//  test_mem_deleter();
 //  test_rvalue();
 //  test_timer();
   
+/*
     banner("05_template");
     test_array();
     test_function();
@@ -109,7 +116,7 @@ int main()
     test_variadic(); 
     test_variant();  
     test_variant_overloading_lambda();  
-    test_variant_vs_tuple();
+    test_variant_vs_tuple(); */
     
     // *** 06_threading *** //
 //  test_thread_create();
