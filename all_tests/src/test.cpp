@@ -25,6 +25,7 @@ void test_dp_matrix_only();
 // *** 04_fundalmental *** //
 void test_custom_allocator();
 void test_custom_deleter();
+void test_custom_new_operator();
 void test_rvalue();
 void test_timer();
 // void test_polymorphism();
@@ -95,6 +96,7 @@ int main()
     banner("04_fundalmental");
     test_custom_allocator();
     test_custom_deleter();
+    test_custom_new_operator();
 //  test_rvalue();
 //  test_timer();
   
