@@ -7,11 +7,27 @@
 
 
 // *********************************************************************** //
-// Custom new and delete 
+//   new statement invokes :
+// * new operator, with size = sizeof(T)
+// * T::T()
+// 
+//
+//   delete statement invokes :
+// * T::~T()
+// * delete operator
 //
 //
+//   new[] statement invokes :
+// * new[] operator, with size = sizeof(T) * N + (8 bytes)
+// * T::T() * N
+// * reset  *reinterpret_cast<std::uint64_t*>(ptr) = N
+// * return ptr + (8 bytes)
 //
 //
+//   delete[] statement invokes :
+// * T::~T() * N
+// * delete[] operator
+// * return ptr - (8 bytes)
 // *********************************************************************** //
 namespace alg
 {
