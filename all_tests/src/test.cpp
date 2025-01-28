@@ -26,6 +26,7 @@ void test_dp_matrix_only();
 void test_custom_allocator();
 void test_custom_deleter();
 void test_custom_new_operator();
+void test_custom_placement_new();
 void test_rvalue();
 void test_timer();
 // void test_polymorphism();
@@ -92,11 +93,11 @@ int main()
     test_dp_matrix_and_graph();
     test_dp_matrix_only();  */
     
-    // *** 04_fundalmental *** //
     banner("04_fundalmental");
     test_custom_allocator();
     test_custom_deleter();
     test_custom_new_operator();
+    test_custom_placement_new();
 //  test_rvalue();
 //  test_timer();
   
@@ -120,7 +121,7 @@ int main()
     test_variant_overloading_lambda();  
     test_variant_vs_tuple(); */
     
-    // *** 06_threading *** //
+//  banner("06_threading");
 //  test_thread_create();
 //  test_thread_stop();
 //  test_thread_timing();

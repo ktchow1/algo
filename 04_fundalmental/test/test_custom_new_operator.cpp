@@ -27,7 +27,7 @@
 //   delete[] statement invokes :
 // * T::~T() * N
 // * delete[] operator
-// * return ptr - (8 bytes)
+// * free ptr - (8 bytes)
 // *********************************************************************** //
 namespace alg
 {
@@ -108,7 +108,7 @@ void test_custom_new_operator()
     assert(*(reinterpret_cast<std::uint64_t*>(p1_offset))   == 1);  
     delete[] p1;
 
-    assert("new[] operator invoked, 20 bytes");
+    assert("new[] operator invoked, 20 bytes"); // 1 * 12 + 8 = 20
     assert("constructor invoked");
     assert("destructor invoked");
     assert("delete[] operator invoked");
@@ -135,7 +135,7 @@ void test_custom_new_operator()
     assert(*(reinterpret_cast<std::uint64_t*>(p1_offset))   == 4); 
     delete[] p2;
 
-    assert("new[] operator invoked, 56 bytes");
+    assert("new[] operator invoked, 56 bytes"); // 4 * 12 + 8 = 56
     assert("constructor invoked");
     assert("constructor invoked");
     assert("constructor invoked");
@@ -174,7 +174,7 @@ void test_custom_new_operator()
     assert(*(reinterpret_cast<std::uint64_t*>(p1_offset))   == 7); 
     delete[] p3;
 
-    assert("new[] operator invoked, 92 bytes");
+    assert("new[] operator invoked, 92 bytes"); // 7 * 12 + 8 = 92
     assert("constructor invoked");
     assert("constructor invoked");
     assert("constructor invoked");
