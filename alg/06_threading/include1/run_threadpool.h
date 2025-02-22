@@ -3,9 +3,11 @@
 #include<functional>
 #include<threadpool.h>
 #include<statistics.h>
+#include<utility.h>
 #include<timer.h>
 
-struct result
+
+struct thdpool_output
 {
     std::thread::id tid;
     std::uint64_t ns_response;
@@ -15,18 +17,7 @@ struct result
     double exp_x1;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const result& res)
-{
-    os << "tid = " << res.tid << ", ";
-    os << "ns_response = " << res.ns_response   << ", ";
-    os << "ns_calculate0 = " << res.ns_calculate0 << ", ";
-    os << "ns_calculate1 = " << res.ns_calculate1 << ", ";
-    os << "exp_x0 = " << std::setprecision(8) << res.exp_x0 << ", ";
-    os << "exp_x1 = " << std::setprecision(8) << res.exp_x1;
-    return os;
-}
-
-struct task
+struct thdpool_task
 {
     inline void operator()() 
     {
@@ -60,23 +51,25 @@ struct task
 
     timespec ts_emplace;
     double x;
-    result* res;
+    thdpool_output* res;
 };
 
 
+// *************************** //
+// *** Test for threadpool *** //
+// *************************** //
 namespace alg
 {
     template<template<typename> typename QUEUE>
-    void run_threadpool(const std::string& label, std::uint32_t waiting_in_us)
+    void run_threadpool(const std::string& test_name, std::uint32_t num_threads, std::uint32_t num_tasks)
     {
-        std::uint32_t num_threads = 4;
-        std::uint32_t num_trials = 100;
-        std::vector<result> results;
-        results.resize(num_trials);
+        std::uint32_t waiting_in_us = 10;
+        std::vector<thdpool_output> results;
+        results.resize(num_tasks);
 
         {
-            alg::threadpool<task, QUEUE> pool(num_threads);
-            for(std::uint32_t n=0; n!=num_trials; ++n)
+            alg::threadpool<thdpool_task, QUEUE> pool(num_threads);
+            for(std::uint32_t n=0; n!=num_tasks; ++n)
             {
                 double r = rand() % 1000 / 200.0;
                 timespec time;
@@ -96,12 +89,17 @@ namespace alg
         }
 
         alg::statistics<std::uint64_t> stat; 
-        for(std::uint32_t n=0; n!=num_trials; ++n)
+        for(std::uint32_t n=0; n!=num_tasks; ++n)
         {
             stat.add(results[n].ns_response);
         }
-        std::cout << "\n[" << label << "] " << stat.get_string() << std::flush;
-        std::cout << "\n";
+
+
+
+        // **************** //
+        // *** Checking *** //
+        // **************** //
+        print_summary(test_name, "succeeded, time = " + stat.get_str());
     }
 }
 

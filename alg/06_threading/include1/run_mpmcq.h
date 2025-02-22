@@ -10,14 +10,6 @@
 #include<utility.h>
 
 
-// ****************************************** //
-// *** Test for producer / consumer queue *** //
-// ****************************************** //
-//
-//             producer          consumer
-// mpmcq_task ----------> queue ----------> mpmcq_output
-//
- 
 struct mpmcq_output
 {
     inline void mark_done()
@@ -66,19 +58,22 @@ private:
 };
 
 
-// ***************************************************************************************** //
-// Q is constructed outside test, as constructor for different Qs take different parameters.
-// T is required to be movable only         for   alg::lockfree_queue.
-// T is required to be movable and copyable for boost::lockfree::queue.
-// ***************************************************************************************** //
+// ****************************************** //
+// *** Test for producer / consumer queue *** //
+// ****************************************** //
+//
+//             producer          consumer
+// mpmcq_task ----------> queue ----------> mpmcq_output
+//
 namespace alg
 {
-    template<typename Q> 
-    void run_mpmcq(const std::string& test_name, Q& queue, 
+    template<typename QUEUE> 
+    void run_mpmcq(const std::string& test_name,
                    std::uint32_t num_producers,
                    std::uint32_t num_consumers, 
                    std::uint32_t num_tasks)
     {
+        QUEUE queue;
         std::vector<std::thread>   producers;
         std::vector<std::thread>   consumers;
         std::vector<mpmcq_output>  outputs(num_producers * num_tasks); // Each element is accessed by 1 consumer, no atomic needed.
