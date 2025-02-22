@@ -68,13 +68,13 @@ struct task
 template<template<typename> typename QUEUE>
 void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
 {
+    std::uint32_t num_threads = 4;
     std::uint32_t num_trials = 100;
     std::vector<result> results;
     results.resize(num_trials);
 
     {
-    //  alg::threadpool<task, QUEUE> pool(4, {1,2}); // This mode requires : 1. release mode and 2. sudo 
-        alg::threadpool<task, QUEUE> pool(4);
+        alg::threadpool<task, QUEUE> pool(num_threads);
         for(std::uint32_t n=0; n!=num_trials; ++n)
         {
             double r = rand() % 1000 / 200.0;
@@ -83,7 +83,7 @@ void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
 
             while(!pool.emplace_task(time, r, &results[n])) 
             {
-                std::this_thread::yield();
+                std::this_thread::sleep_for(std::chrono::microseconds(waiting_in_us));
             }
 
             if (waiting_in_us > 0)
@@ -97,10 +97,6 @@ void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
     alg::statistics<std::uint64_t> stat; 
     for(std::uint32_t n=0; n!=num_trials; ++n)
     {
-    /*  if (n >= num_trials-20)
-        {
-            std::cout << "\n[trial " << n << "] " << results[n].ns_response;
-        } */
         stat.add(results[n].ns_response);
     }
     std::cout << "\n[" << label << "] " << stat.get_string() << std::flush;
@@ -109,8 +105,12 @@ void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
 
 void test_threadpool()
 {
-//  test_threadpool_impl<alg::lockfree_queue_long> ("lockfree_queue_long", 10);
-//  test_threadpool_impl<alg::lockfree_queue_short>("lockfree_queue_short",10);
+    test_threadpool_impl<alg::lockfree_queue_long> ("lockfree_queue_long", 10);
+    test_threadpool_impl<alg::lockfree_queue_short>("lockfree_queue_short",10);
     test_threadpool_impl<alg::mutex_locked_queue>  ("mutex_locked_queue",  10);
-//  test_threadpool_impl<alg::spin_locked_queue>   ("spin_locked_queue",   10);
+    test_threadpool_impl<alg::spin_locked_queue>   ("spin_locked_queue",   10);
+    test_threadpool_impl<alg::lockfree_queue_long> ("lockfree_queue_long", 0);
+    test_threadpool_impl<alg::lockfree_queue_short>("lockfree_queue_short",0);
+    test_threadpool_impl<alg::mutex_locked_queue>  ("mutex_locked_queue",  0);
+    test_threadpool_impl<alg::spin_locked_queue>   ("spin_locked_queue",   0);
 }

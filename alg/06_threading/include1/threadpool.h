@@ -21,6 +21,7 @@ namespace alg
     template<std::invocable T, 
              template<typename> typename Q = mutex_locked_queue,  
              sync_primitive S = sync_psemaphore>       
+
     class threadpool
     {
     public:
@@ -46,13 +47,18 @@ namespace alg
             }
         }
 
+        // ****************************************** //
+        // NOT USED FOR HOME-DESKTOP. THIS IS FOR :
+        // * RELEASE MODE
+        // * sudo TO ALLOW CHANGE IN SCHEDULE POLICY
+        // ****************************************** //
         threadpool(std::uint32_t num_threads, const std::vector<std::uint32_t>& affinity) : threadpool(num_threads)
         {   
-        /*  for(auto& x:threads) // Not good for my home-machine, apply these setting in production only.
+            for(auto& x:threads) 
             {
                 set_thread_affinity(x.native_handle(), affinity);
                 set_thread_policy  (x.native_handle(), SCHED_RR);
-            } */ 
+            } 
         }
 
     public: 

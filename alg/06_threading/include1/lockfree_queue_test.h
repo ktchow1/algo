@@ -14,11 +14,11 @@
 // *** Test for producer / consumer queue *** //
 // ****************************************** //
 //
-//       producer          consumer
-// task ----------> queue ----------> task_output
+//             producer          consumer
+// mpmcq_task ----------> queue ----------> mpmcq_output
 //
  
-struct task_output
+struct mpmcq_output
 {
     void mark_done()
     {
@@ -45,12 +45,12 @@ struct task_output
     timespec      m_ts1;
 };
 
-class task
+class mpmcq_task
 {
 public:
-    task() = default;
+    mpmcq_task() = default;
 
-    explicit task(task_output& output) : m_ptr(&output)
+    explicit mpmcq_task(mpmcq_output& output) : m_ptr(&output)
     {
         m_ptr->mark_start_time();
     }
@@ -62,7 +62,7 @@ public:
     }
 
 private:
-    task_output* m_ptr = nullptr;
+    mpmcq_output* m_ptr = nullptr;
 };
 
 
@@ -81,9 +81,9 @@ namespace alg
     {
         std::vector<std::thread>   producers;
         std::vector<std::thread>   consumers;
-        std::vector<task_output>   task_outputs(num_producers * num_tasks); // Each element is accessed by 1 consumer, no atomic needed.
-        std::vector<std::uint32_t> task_counts (num_consumers, 0);          // Each element is accessed by 1 consumer, no atomic needed. 
-//      std::vector<std::uint32_t> task_counts {num_consumers, 0};          // BUG : It is a size-2 vector, leads to incorrect count.
+        std::vector<mpmcq_output>  outputs(num_producers * num_tasks); // Each element is accessed by 1 consumer, no atomic needed.
+        std::vector<std::uint32_t> task_counts (num_consumers, 0);     // Each element is accessed by 1 consumer, no atomic needed. 
+//      std::vector<std::uint32_t> task_counts {num_consumers, 0};     // BUG : It is a size-2 vector, leads to incorrect count.
         std::atomic<std::uint32_t> consumers_ready(0);
         std::stop_source source;
 
@@ -98,7 +98,7 @@ namespace alg
                 set_this_thread_affinity(consumer_id); 
                 set_this_thread_priority();           // This is necessary.
             //  set_this_thread_policy(SCHED_FIFO);   // This is ok, but NOT necessary.
-                task todo;
+                mpmcq_task task;
 
 
                 // *** Step 1 : Loop until stop requested *** //
@@ -106,17 +106,17 @@ namespace alg
                 while(!token.stop_requested())
                 {
                     consumers_ready.fetch_add(1);
-                    if (queue.pop(todo))
+                    if (queue.pop(task))
                     {
-                        todo();
+                        task();
                         ++task_counts[consumer_id];
                     } 
                 }
 
                 // *** Step 2 : Loop until queue is clear *** //
-                while(queue.pop(todo))
+                while(queue.pop(task))
                 {
-                    todo();
+                    task();
                     ++task_counts[consumer_id];
                 } 
             }, n));
@@ -138,10 +138,10 @@ namespace alg
                 while(consumers_ready.load() < num_consumers);
                 for(std::uint32_t m=0; m!=num_tasks; ++m)
                 {
-                    task t{task_outputs[num_tasks * producer_id + m]};
-                    while(!queue.push(t))
+                    mpmcq_task task{outputs[num_tasks * producer_id + m]};
+                    while(!queue.push(task))
                     {
-                        t = task{task_outputs[num_tasks * producer_id + m]}; 
+                        task = mpmcq_task{outputs[num_tasks * producer_id + m]}; 
                     }
                     std::this_thread::sleep_for(std::chrono::nanoseconds(300)); // This is necessary. 
                 }
@@ -163,7 +163,7 @@ namespace alg
         // *** Checking *** //
         // **************** //
         alg::statistics<std::uint64_t> stat;
-        for(const auto& x:task_outputs) 
+        for(const auto& x:outputs) 
         {
             assert(x.m_value == 1);
             stat.add(x.nanosec_elapsed());

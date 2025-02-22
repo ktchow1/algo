@@ -27,10 +27,10 @@
 
 void test_lockfree_queue()
 {
-    using QUEUE0 = alg::locked_queue<task, alg::spinlock>;
-    using QUEUE1 = alg::lockfree_queue<task,1024>;
-//  using QUEUE2 = boost::lockfree::spsc_queue<task, boost::lockfree::capacity<1024>>;
-//  using QUEUE3 = boost::lockfree::queue<task>;
+    using QUEUE0 = alg::  locked_queue<mpmcq_task, alg::spinlock>;
+    using QUEUE1 = alg::lockfree_queue<mpmcq_task, 1024>;
+//  using QUEUE2 = boost::lockfree::spsc_queue<mpmcq_task, boost::lockfree::capacity<1024>>;
+//  using QUEUE3 = boost::lockfree::     queue<mpmcq_task>;
 
     QUEUE0 queue0;
     QUEUE0 queue1;
