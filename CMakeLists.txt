@@ -23,13 +23,15 @@ endif()
 ### (1) include ###
 ###################
 include_directories(
-    01_algorithm/include 
-    02_dynprog_vec/include 
-    03_dynprog/include 
-    04_fundalmental/include 
-    05_template/include 
-    10_interview/include 
-    all_tests/include 
+    alg/01_algorithm/include 
+    alg/02_dynprog_vec/include 
+    alg/03_dynprog/include 
+    alg/04_fundalmental/include 
+    alg/05_template/include 
+    alg/06_threading/include0 
+    alg/06_threading/include1 
+    alg/08_interview/include 
+    alg/all_tests/include 
     /mnt/d/dev/cpp_dependency/boost_1_84_0 
 )
 
@@ -37,13 +39,22 @@ include_directories(
 ### (2) source ###
 ##################
 file(GLOB SOURCES
-     "01_algorithm/src/*.cpp" 
-     "02_dynprog_vec/src/*.cpp" 
-     "03_dynprog//src/*.cpp" 
-     "04_fundalmental/src/*.cpp"
-     "05_template/src/*.cpp"
-     "10_interview/src/*.cpp"
-     "all_tests/src/*.cpp"
+     "alg/01_algorithm/src/*.cpp" 
+     "alg/01_algorithm/test/*.cpp" 
+     "alg/02_dynprog_vec/src/*.cpp" 
+     "alg/02_dynprog_vec/test/*.cpp" 
+     "alg/03_dynprog/src/*.cpp" 
+     "alg/03_dynprog/test/*.cpp" 
+     "alg/04_fundalmental/src/*.cpp"
+     "alg/04_fundalmental/test/*.cpp"
+     "alg/05_template/src/*.cpp"
+     "alg/05_template/test/*.cpp"
+     "alg/06_threading/src/*.cpp"
+     "alg/06_threading/test0/*.cpp"
+     "alg/06_threading/test1/*.cpp"
+     "alg/08_interview/src/*.cpp"
+     "alg/08_interview/test/*.cpp"
+     "alg/all_tests/src/*.cpp"
 )
 add_executable(Test ${SOURCES})       # for building executable
 # add_library(Test STATIC ${SOURCES}) # for building static lib .a
