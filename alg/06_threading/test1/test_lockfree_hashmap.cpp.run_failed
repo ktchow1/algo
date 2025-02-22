@@ -97,14 +97,14 @@ std::ostream& operator<<(std::ostream& os, const B& b)
 void test_lockfree_hashmap_basic()
 {
     std::cout << "\nTest concepts for lockfree_hashmap";
-    std::cout << "\nconcept0 : " << LT8BYTES<std::uint32_t>;
-    std::cout << "\nconcept0 : " << LT8BYTES<std::uint64_t>;
-    std::cout << "\nconcept0 : " << LT8BYTES<A>;
-    std::cout << "\nconcept0 : " << LT8BYTES<B>;
-    std::cout << "\nconcept0 : " << LT8BYTES<C>;
-    std::cout << "\nconcept1 : " << TO8BYTES<F0,A>;
-    std::cout << "\nconcept1 : " << TO8BYTES<F1,A>;
-    std::cout << "\nconcept1 : " << TO8BYTES<F2,A>;
+    std::cout << "\nconcept0 : " << alg::LT8BYTES<std::uint32_t>;
+    std::cout << "\nconcept0 : " << alg::LT8BYTES<std::uint64_t>;
+    std::cout << "\nconcept0 : " << alg::LT8BYTES<A>;
+    std::cout << "\nconcept0 : " << alg::LT8BYTES<B>;
+    std::cout << "\nconcept0 : " << alg::LT8BYTES<C>;
+    std::cout << "\nconcept1 : " << alg::TO8BYTES<F0,A>;
+    std::cout << "\nconcept1 : " << alg::TO8BYTES<F1,A>;
+    std::cout << "\nconcept1 : " << alg::TO8BYTES<F2,A>;
     std::cout << "\n";
 
     // *************************************************** //
@@ -127,7 +127,7 @@ void test_lockfree_hashmap_basic()
 
     // *************************************************** //
     std::cout << "\nTest lockfree_hashmap";
-    lockfree_hashmap<A,B,HA,HB,16> map;
+    alg::lockfree_hashmap<A,B,HA,HB,16> map;
 
     for(std::uint16_t n=0; n!=24; ++n)
     {
@@ -187,7 +187,7 @@ bool verify(const A& a, const B& b)
 template<std::uint32_t NUM_CELLS> // choose 2,4,8,16,32 ...
 auto test_lockfree_hashmap_multithread_impl()
 {
-    lockfree_hashmap<A,B,HA,HB,NUM_CELLS> map;
+    alg::lockfree_hashmap<A,B,HA,HB,NUM_CELLS> map;
     std::vector<std::thread> producers;
     std::vector<std::thread> consumers;
     std::atomic<std::uint16_t> completed_producers = 0;

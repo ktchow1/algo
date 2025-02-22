@@ -20,7 +20,6 @@ namespace alg
 {
     template<std::invocable T, 
              template<typename> typename Q = mutex_locked_queue,  
-    //       sync_primitive S = sync_futex>       
              sync_primitive S = sync_psemaphore>       
     class threadpool
     {

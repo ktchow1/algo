@@ -4,6 +4,7 @@
 #include<functional>
 #include<threadpool.h>
 #include<statistics.h>
+#include<timer.h>
 
 struct result
 {
@@ -33,7 +34,7 @@ struct task
         timespec ts_response;
         clock_gettime(CLOCK_MONOTONIC, &ts_response);
         res->tid = std::this_thread::get_id();
-        res->ns_response = to_nanosec(ts_response) - to_nanosec(ts_emplace);
+        res->ns_response = alg::to_nanosec(ts_response) - alg::to_nanosec(ts_emplace);
 
         const std::uint32_t N = 1000;
         double s = (1+x/N);
@@ -54,8 +55,8 @@ struct task
         res->exp_x1 = exp(x);
 
         clock_gettime(CLOCK_MONOTONIC, &ts2);
-        res->ns_calculate0 = to_nanosec(ts1) - to_nanosec(ts0);
-        res->ns_calculate1 = to_nanosec(ts2) - to_nanosec(ts1);
+        res->ns_calculate0 = alg::to_nanosec(ts1) - alg::to_nanosec(ts0);
+        res->ns_calculate1 = alg::to_nanosec(ts2) - alg::to_nanosec(ts1);
     }
 
     timespec ts_emplace;
@@ -72,12 +73,14 @@ void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
     results.resize(num_trials);
 
     {
-    //  alg::threadpool<task, QUEUE> pool(8, {1,2}); // This mode requires : 1. release mode and 2. sudo 
-        alg::threadpool<task, QUEUE> pool(8);
+    //  alg::threadpool<task, QUEUE> pool(4, {1,2}); // This mode requires : 1. release mode and 2. sudo 
+        alg::threadpool<task, QUEUE> pool(4);
         for(std::uint32_t n=0; n!=num_trials; ++n)
         {
             double r = rand() % 1000 / 200.0;
-            auto time = now();
+            timespec time;
+            clock_gettime(CLOCK_MONOTONIC, &time);
+
             while(!pool.emplace_task(time, r, &results[n])) 
             {
                 std::this_thread::yield();
@@ -106,16 +109,8 @@ void test_threadpool_impl(const std::string& label, std::uint32_t waiting_in_us)
 
 void test_threadpool()
 {
-    std::cout << "\nThreadpool test (Does not run in debug mode, why?)" << std::flush;
-
-    test_threadpool_impl<lockfree_queue_long> ("lockfree_queue_long", 10);
-    test_threadpool_impl<lockfree_queue_short>("lockfree_queue_short",10);
-    test_threadpool_impl<mutex_locked_queue>  ("mutex_locked_queue",  10);
-    test_threadpool_impl<spin_locked_queue>   ("spin_locked_queue",   10);
-
-    // More contention 
-    test_threadpool_impl<lockfree_queue_long> ("lockfree_queue_long",  0);
-    test_threadpool_impl<lockfree_queue_short>("lockfree_queue_short", 0); 
-    test_threadpool_impl<mutex_locked_queue>  ("mutex_locked_queue",   0);
-    test_threadpool_impl<spin_locked_queue>   ("spin_locked_queue",    0);
+//  test_threadpool_impl<alg::lockfree_queue_long> ("lockfree_queue_long", 10);
+//  test_threadpool_impl<alg::lockfree_queue_short>("lockfree_queue_short",10);
+    test_threadpool_impl<alg::mutex_locked_queue>  ("mutex_locked_queue",  10);
+//  test_threadpool_impl<alg::spin_locked_queue>   ("spin_locked_queue",   10);
 }

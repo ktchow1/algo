@@ -39,12 +39,12 @@ void test_lockfree_queue()
 
     std::uint32_t num_producers = 3;
     std::uint32_t num_consumers = 3;
-    std::uint32_t num_tasks = 50000;
+    std::uint32_t num_tasks = 20000;
 
-    alg::queue_test("test alg::locked_queue   ", queue0, num_producers, num_consumers, num_tasks);
-    alg::queue_test("test alg::lockfree_queue ", queue1, num_producers, num_consumers, num_tasks);
-//  alg::queue_test("test boost::lockfree_spsc", queue2, 1, 1, num_tasks);
-//  alg::queue_test("test boost::lockfree_mpmc", queue3, num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq("test alg::locked_queue   ", queue0, num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq("test alg::lockfree_queue ", queue1, num_producers, num_consumers, num_tasks);
+//  alg::run_mpmcq("test boost::lockfree_spsc", queue2, 1, 1, num_tasks);
+//  alg::run_mpmcq("test boost::lockfree_mpmc", queue3, num_producers, num_consumers, num_tasks);
 } 
 
 

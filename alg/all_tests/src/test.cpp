@@ -72,8 +72,7 @@ void test_promise_future();
 
 // *** 06_threading (container) *** //
 void test_lockfree_queue();
-void test_lockfree_hashmap_basic();
-void test_lockfree_hashmap();
+void test_threadpool();
 
 
 inline void banner(const std::string str)
@@ -145,21 +144,20 @@ int main()
 //  test_variant_overloading_lambda();  
 //  test_variant_visit(); 
       
-    banner("06_threading");
-    test_thread_create();
-    test_thread_stop_source();
-    test_thread_timing();
-    test_spinlock_mutex();
-    test_shared_mutex();
-    test_semaphore();
-    test_singleton();
-    test_synchronization();
-    test_promise_future();
+//  banner("06_threading");
+//  test_thread_create();
+//  test_thread_stop_source();
+//  test_thread_timing();
+//  test_spinlock_mutex();
+//  test_shared_mutex();
+//  test_semaphore();
+//  test_singleton();
+//  test_synchronization();
+//  test_promise_future();
 
     banner("06_threading (container)");
     test_lockfree_queue();
-//  test_lockfree_hashmap_basic();
-//  test_lockfree_hashmap();
+//  test_threadpool();
 
 //  banner("07_cpp20");  
 

@@ -74,10 +74,10 @@ private:
 namespace alg
 {
     template<typename Q> 
-    void queue_test(const std::string& test_name, Q& queue, 
-                    std::uint32_t num_producers,
-                    std::uint32_t num_consumers, 
-                    std::uint32_t num_tasks)
+    void run_mpmcq(const std::string& test_name, Q& queue, 
+                   std::uint32_t num_producers,
+                   std::uint32_t num_consumers, 
+                   std::uint32_t num_tasks)
     {
         std::vector<std::thread>   producers;
         std::vector<std::thread>   consumers;
