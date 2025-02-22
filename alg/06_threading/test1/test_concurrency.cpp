@@ -1,11 +1,16 @@
 #include<iostream>
 #include<locked_queue.h>
 #include<lockfree_queue.h>
-#include<lockfree_queue_test.h>
-/*
-#include<boost/lockfree/spsc_queue.hpp>
-#include<boost/lockfree/queue.hpp> 
-*/
+#include<threadpool.h>
+
+// *** test *** //
+#include<run_mpmcq.h>
+#include<run_threadpool.h>
+
+// *** boost *** // 
+// #include<boost/lockfree/spsc_queue.hpp> 
+// #include<boost/lockfree/queue.hpp> 
+
 
 
 // **********************************************************************************************
@@ -48,4 +53,14 @@ void test_lockfree_queue()
 } 
 
 
-
+void test_threadpool()
+{
+    alg::run_threadpool<alg::lockfree_queue_long> ("lockfree_queue_long", 10);
+    alg::run_threadpool<alg::lockfree_queue_short>("lockfree_queue_short",10);
+    alg::run_threadpool<alg::mutex_locked_queue>  ("mutex_locked_queue",  10);
+    alg::run_threadpool<alg::spin_locked_queue>   ("spin_locked_queue",   10);
+    alg::run_threadpool<alg::lockfree_queue_long> ("lockfree_queue_long", 0);
+    alg::run_threadpool<alg::lockfree_queue_short>("lockfree_queue_short",0);
+    alg::run_threadpool<alg::mutex_locked_queue>  ("mutex_locked_queue",  0);
+    alg::run_threadpool<alg::spin_locked_queue>   ("spin_locked_queue",   0);
+}

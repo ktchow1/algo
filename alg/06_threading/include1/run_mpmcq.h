@@ -20,22 +20,22 @@
  
 struct mpmcq_output
 {
-    void mark_done()
+    inline void mark_done()
     {
         ++m_value;
     }
 
-    void mark_start_time()
+    inline void mark_start_time()
     {
         clock_gettime(CLOCK_MONOTONIC, &m_ts0); 
     }
 
-    void mark_stop_time()
+    inline void mark_stop_time()
     {
         clock_gettime(CLOCK_MONOTONIC, &m_ts1); 
     }
 
-    std::uint64_t nanosec_elapsed() const noexcept
+    inline std::uint64_t nanosec_elapsed() const noexcept
     {
         return alg::to_nanosec(m_ts1) - alg::to_nanosec(m_ts0);
     }
