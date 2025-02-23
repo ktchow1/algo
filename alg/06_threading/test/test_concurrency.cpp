@@ -32,17 +32,14 @@
 
 void test_lockfree_queue()
 {
-    using QUEUE0 = alg::  locked_queue<mpmcq_task, std::mutex>;
-    using QUEUE1 = alg::  locked_queue<mpmcq_task, alg::spinlock>;
-    using QUEUE2 = alg::lockfree_queue<mpmcq_task, 1024>;
-
     std::uint32_t num_producers = 3;
     std::uint32_t num_consumers = 3;
     std::uint32_t num_tasks = 20000;
 
-    alg::run_mpmcq<QUEUE0>("test alg::(mutex) locked_queue ", num_producers, num_consumers, num_tasks);
-    alg::run_mpmcq<QUEUE1>("test alg::(spin)  locked_queue ", num_producers, num_consumers, num_tasks);
-    alg::run_mpmcq<QUEUE2>("test alg::lockfree_queue       ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::mutex_locked_queue>  ("test alg::mutex_locked_queue   ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg:: spin_locked_queue>  ("test alg:: spin_locked_queue   ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::lockfree_queue_long> ("test alg::lockfree_queue_long  ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::lockfree_queue_short>("test alg::lockfree_queue_short ", num_producers, num_consumers, num_tasks);
 } 
 
 
@@ -51,8 +48,8 @@ void test_threadpool()
     std::uint32_t num_threads = 3;
     std::uint32_t num_tasks = 20000;
 
-    alg::run_threadpool<alg::lockfree_queue_long> ("test threadpool with lockfree_queue_long  ", num_threads, num_tasks);
-    alg::run_threadpool<alg::lockfree_queue_short>("test threadpool with lockfree_queue_short ", num_threads, num_tasks);
-    alg::run_threadpool<alg::mutex_locked_queue>  ("test threadpool with mutex_locked_queue   ", num_threads, num_tasks);
-    alg::run_threadpool<alg::spin_locked_queue>   ("test threadpool with spin_locked_queue    ", num_threads, num_tasks);
+    alg::run_threadpool<alg::mutex_locked_queue>  ("test threadpool with alg::mutex_locked_queue   ", num_threads, num_tasks);
+    alg::run_threadpool<alg:: spin_locked_queue>  ("test threadpool with alg:: spin_locked_queue   ", num_threads, num_tasks);
+    alg::run_threadpool<alg::lockfree_queue_long> ("test threadpool with alg::lockfree_queue_long  ", num_threads, num_tasks);
+    alg::run_threadpool<alg::lockfree_queue_short>("test threadpool with alg::lockfree_queue_short ", num_threads, num_tasks);
 }

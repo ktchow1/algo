@@ -67,13 +67,13 @@ private:
 //
 namespace alg
 {
-    template<typename QUEUE> 
+    template<template<typename> typename QUEUE> 
     void run_mpmcq(const std::string& test_name,
                    std::uint32_t num_producers,
                    std::uint32_t num_consumers, 
                    std::uint32_t num_tasks)
     {
-        QUEUE queue;
+        QUEUE<mpmcq_task> queue;
         std::vector<std::thread>   producers;
         std::vector<std::thread>   consumers;
         std::vector<mpmcq_output>  outputs(num_producers * num_tasks); // Each element is accessed by 1 consumer, no atomic needed.
