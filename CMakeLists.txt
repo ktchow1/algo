@@ -30,6 +30,7 @@ include_directories(
     alg/05_template/include 
     alg/06_threading/include0 
     alg/06_threading/include1 
+    alg/07_cpp20/include 
     alg/08_interview/include 
     alg/all_tests/include 
     /mnt/d/dev/cpp_dependency/boost_1_84_0 
@@ -51,6 +52,8 @@ file(GLOB SOURCES
      "alg/05_template/test/*.cpp"
      "alg/06_threading/src/*.cpp"
      "alg/06_threading/test/*.cpp"
+     "alg/07_cpp20/src/*.cpp"
+     "alg/07_cpp20/test/*.cpp"
      "alg/08_interview/src/*.cpp"
      "alg/08_interview/test/*.cpp"
      "alg/all_tests/src/*.cpp"

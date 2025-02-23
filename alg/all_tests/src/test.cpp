@@ -74,6 +74,11 @@ void test_promise_future();
 void test_mpmcq();
 void test_threadpool();
 
+// *** 07_cpp20 *** //
+void test_spaceship();
+
+
+
 
 inline void banner(const std::string str)
 {
@@ -81,7 +86,7 @@ inline void banner(const std::string str)
     std::cout << "\n";
     std::cout << "\n" << s;
     std::cout << "\n" << "*** " << str << " ***";
-    std::cout << "\n" << s;
+    std::cout << "\n" << s << std::flush;
 }
 
 int main()
@@ -154,12 +159,11 @@ int main()
 //  test_singleton();
 //  test_synchronization();
 //  test_promise_future();
+//  test_mpmcq();
+//  test_threadpool();
 
-    banner("06_threading (container)");
-    test_mpmcq();
-    test_threadpool();
-
-//  banner("07_cpp20");  
+    banner("07_cpp20");  
+    test_spaceship();
 
 
 //  banner("08_interview");
