@@ -10,20 +10,19 @@
 
 namespace alg
 {
-    class jthreadpool_cv
+    class threadpool_j
     {
     public:
-        explicit jthreadpool_cv(std::uint32_t num_threads) 
+        explicit threadpool_j(std::uint32_t num_threads) 
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                jthreads.emplace_back(std::jthread(&jthreadpool_cv::fct, this, s_source.get_token(), n));
+                jthreads.emplace_back(std::jthread(&threadpool_j::fct, this, s_source.get_token(), n));
             }
         }
 
-        ~jthreadpool_cv()
+        ~threadpool_j()
         {
-            std::cout << "\njthreadpool destructor" << std::flush;
             stop();
         }
 
@@ -42,7 +41,7 @@ namespace alg
         }
 
     public: 
-        void add_task(const std::function<void()>& task)
+        void add_task(const std::function<void(std::uint32_t)>& task)
         {
             {
                 std::lock_guard<std::mutex> lock(mutex);
@@ -52,14 +51,14 @@ namespace alg
         }
 
     private:
-        void fct(std::stop_token s_token, std::uint32_t id)
+        void fct(std::stop_token s_token, std::uint32_t thread_id)
         {
             try
             {
                 // *** 1st loop *** //
                 while(!s_source.get_token().stop_requested())
                 {
-                    std::function<void()> task;
+                    std::function<void(std::uint32_t)> task;
                     {
                         std::unique_lock<std::mutex> lock(mutex);
                         if (!condvar.wait(lock, s_token, [this]()
@@ -75,32 +74,30 @@ namespace alg
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
-                    task();
+                    task(thread_id);
                 }
-                std::cout << "\njthread half-done" << id << std::flush;
 
                 // *** 2nd loop *** //
                 while(!tasks.empty())
                 {
-                    std::function<void()> task;
+                    std::function<void(std::uint32_t)> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
-                    task();
+                    task(thread_id);
                 }
-                std::cout << "\njthread done " << id << std::flush;
             }
             catch(std::exception& e)
             {
-                std::cout << "\nexception caugth in worker " << id << ", e = " << e.what() << std::flush;
+                std::cout << "\nException thrown from threadpool_j, thread_id " << thread_id << ", e = " << e.what() << std::flush;
             }
         }
 
     private:
         std::vector<std::jthread> jthreads;
-        std::queue<std::function<void()>> tasks;
+        std::queue<std::function<void(std::uint32_t)>> tasks;
         mutable std::mutex mutex;
         std::condition_variable_any condvar;   // Change : Replace condvar by condvar_any.
         std::stop_source s_source;             // Change : Replace out_of_scope by stop-source.

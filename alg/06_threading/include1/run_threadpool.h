@@ -5,6 +5,9 @@
 // *** alg *** //
 #include<run_mpmcq.h>
 #include<threadpool_sync.h>
+#include<threadpool.h>
+#include<threadpool_j.h>
+#include<threadpool_jcrt.h>
 #include<utility.h>
 
 
@@ -46,13 +49,13 @@ namespace alg
     }
 }
 
-/*
+  
 // ************************************************************ //
 // *** Test for threadpool / threadpool_j / threadpool_jcrt *** //
 // ************************************************************ //
 namespace alg
 {
-    template<template<typename> typename QUEUE>
+    template<typename POOL>
     void run_threadpool_condvar(const std::string& test_name, 
                                 std::uint32_t num_threads, 
                                 std::uint32_t num_tasks, 
@@ -63,16 +66,12 @@ namespace alg
         // ******************* //
         std::vector<task_output> task_outputs(num_tasks);
         {
-            alg::threadpool pool(num_threads);
+            POOL pool(num_threads);
             for(std::uint32_t n=0; n!=num_tasks; ++n)
             {
                 task_spec task{task_outputs[n]};
+                pool.add_task(task); // add_task always succeed, no retry needed
 
-
-                while(!pool.add_task(task)) 
-                {
-                    std::this_thread::sleep_for(std::chrono::microseconds(10));
-                }
                 std::this_thread::sleep_for(std::chrono::microseconds(delay_between_tasks_in_us));
             }
             pool.stop();
@@ -85,4 +84,4 @@ namespace alg
         std::string comment = task_check(num_threads, task_outputs);
         print_summary(test_name, "succeeded, " + comment);
     }
-}*/
+}

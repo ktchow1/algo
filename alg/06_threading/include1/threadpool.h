@@ -23,7 +23,6 @@ namespace alg
 
         ~threadpool()
         {
-            std::cout << "\nthreadpool destructor" << std::flush;
             stop();
         }
 
@@ -39,12 +38,11 @@ namespace alg
                 {
                     x.join();
                 }
-                std::cout << "\nthread joined" << std::flush;
             }
         }
 
     public: 
-        void add_task(const std::function<void()>& task)
+        void add_task(const std::function<void(std::uint32_t)>& task) 
         {
             {
                 std::lock_guard<std::mutex> lock(mutex);
@@ -57,7 +55,7 @@ namespace alg
         // Two-loop approaches to decouple :
         // 1. checking of out-of-scope and
         // 2. checking of queue emptyness 
-        void thread_fct(std::uint32_t id)
+        void thread_fct(std::uint32_t thread_id)
         {
             // set affinity here (skipped for simplicity)
             // set priority here (skipped for simplicity)
@@ -67,7 +65,7 @@ namespace alg
                 // *** 1st loop *** //
                 while(!out_of_scope.load())
                 {
-                    std::function<void()> task;
+                    std::function<void(std::uint32_t)> task;
                     {
                         std::unique_lock<std::mutex> lock(mutex);
                         condvar.wait(lock, [this]()
@@ -81,33 +79,31 @@ namespace alg
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
-                    task();
+                    task(thread_id);
                 }
-                std::cout << "\nthread half-done" << id << std::flush;
 
                 // *** 2nd loop *** //
                 while(!tasks.empty())
                 {
-                    std::function<void()> task;
+                    std::function<void(std::uint32_t)> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
                         task = std::move(tasks.front());
                         tasks.pop();
                     }
-                    task();
+                    task(thread_id);
                 }
-                std::cout << "\nthread done " << id << std::flush;
             }
             catch(std::exception& e)
             {
-                std::cout << "\nexception caugth in worker " << id << ", e = " << e.what() << std::flush;
+                std::cout << "\nException thrown from alg::threadpool, thread_id " << thread_id << ", e = " << e.what() << std::flush;
             //  stop(); // BUG5 : No need, as threadpool destructor is called in stack unwinding
             }
         }
 
     private:
         std::vector<std::thread> threads;
-        std::queue<std::function<void()>> tasks;
+        std::queue<std::function<void(std::uint32_t)>> tasks;
         mutable std::mutex mutex;
         std::condition_variable condvar;
         std::atomic<bool> out_of_scope;
