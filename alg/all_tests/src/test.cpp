@@ -71,7 +71,7 @@ void test_synchronization();
 void test_promise_future();
 
 // *** 06_threading (container) *** //
-void test_lockfree_queue();
+void test_mpmcq();
 void test_threadpool();
 
 
@@ -156,7 +156,7 @@ int main()
 //  test_promise_future();
 
     banner("06_threading (container)");
-    test_lockfree_queue();
+//  test_mpmcq();
     test_threadpool();
 
 //  banner("07_cpp20");  

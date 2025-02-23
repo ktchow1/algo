@@ -31,7 +31,7 @@
 // * Priority (using FIFO policy) should be avoided, it takes all resources.
 // ******************************************************************************************* //
 //
-void test_lockfree_queue()
+void test_mpmcq()
 {
     std::uint32_t num_producers = 3;
     std::uint32_t num_consumers = 4;
@@ -66,12 +66,19 @@ void test_threadpool()
     std::uint32_t num_threads = 3;
     std::uint32_t num_tasks = 30000;
     std::uint32_t delay_between_tasks_in_us = 80;
-
+/*
     alg::run_threadpool_sync<alg::mutex_locked_queue>  ("alg::threadpool_sync with alg::mutex_locked_queue   ", num_threads, num_tasks, delay_between_tasks_in_us);
     alg::run_threadpool_sync<alg:: spin_locked_queue>  ("alg::threadpool_sync with alg:: spin_locked_queue   ", num_threads, num_tasks, delay_between_tasks_in_us);
     alg::run_threadpool_sync<alg::lockfree_queue_long> ("alg::threadpool_sync with alg::lockfree_queue_long  ", num_threads, num_tasks, delay_between_tasks_in_us);
     alg::run_threadpool_sync<alg::lockfree_queue_short>("alg::threadpool_sync with alg::lockfree_queue_short ", num_threads, num_tasks, delay_between_tasks_in_us);
-
+  
     alg::run_threadpool_condvar<alg::threadpool>  ("alg::threadpool   with condvar", num_threads, num_tasks, delay_between_tasks_in_us);
     alg::run_threadpool_condvar<alg::threadpool_j>("alg::threadpool_j with condvar", num_threads, num_tasks, delay_between_tasks_in_us);
+*/ 
+
+    for(std::uint32_t n=0; n!=10; ++n)
+    {
+        alg::run_threadpool_condvar<alg::threadpool>  ("alg::threadpool   with condvar", num_threads, 3000, 1);
+        alg::run_threadpool_condvar<alg::threadpool_j>("alg::threadpool_j with condvar", num_threads, 3000, 1);
+    }
 }
