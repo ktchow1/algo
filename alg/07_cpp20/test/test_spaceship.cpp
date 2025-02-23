@@ -72,10 +72,13 @@ namespace test
             return m_z == rhs.m_z;
         }
 
-
         // ******************************************************* //
         // *** Typical element-wise spaceship operator for POD *** //
         // ******************************************************* //
+        // 1. spaceship operator returns ordering, does NOT return bool
+        // 2. ordering cannot be static_cast into bool / int
+        // 3. ordering can    be converted   into bool by comparison with zero
+        //
         inline auto operator<=>(const sample& rhs)
         {
             ++invoke_count1;
@@ -131,12 +134,20 @@ void test_spaceship()
     std::cout << "\n" << (s == c0) << " " << (s == c1) << " " << (s == c2);   test::debug();
     std::cout << "\n" << (c0 == s) << " " << (c1 == s) << " " << (c2 == s);   test::debug();
      
-
-
-
+    std::cout << "\n" << (a0 <=> s < 0) << " " << (a1 <=> s == 0) << " " << (a2 <=> s > 0);   test::debug();
+    std::cout << "\n" << (b0 <=> s < 0) << " " << (b1 <=> s == 0) << " " << (b2 <=> s > 0);   test::debug();
+    std::cout << "\n" << (c0 <=> s < 0) << " " << (c1 <=> s == 0) << " " << (c2 <=> s > 0);   test::debug();
 
     // secondary rewrite
-    
+    std::cout << "\n" << (s != a0) << " " << (s != a1) << " " << (s != a2);   test::debug();
+    std::cout << "\n" << (a0 != s) << " " << (a1 != s) << " " << (a2 != s);   test::debug();
+    std::cout << "\n" << (s != b0) << " " << (s != b1) << " " << (s != b2);   test::debug();
+    std::cout << "\n" << (b0 != s) << " " << (b1 != s) << " " << (b2 != s);   test::debug();
+    std::cout << "\n" << (s != c0) << " " << (s != c1) << " " << (s != c2);   test::debug();
+    std::cout << "\n" << (c0 != s) << " " << (c1 != s) << " " << (c2 != s);   test::debug();
 
+    std::cout << "\n" << (a0 <= s) << " " << (a1 <= s) << " " << (a2 >= s);   test::debug();
+    std::cout << "\n" << (b0 <= s) << " " << (b1 <= s) << " " << (b2 >= s);   test::debug();
+    std::cout << "\n" << (c0 <= s) << " " << (c1 <= s) << " " << (c2 >= s);   test::debug();
     print_summary("spaceship operator", "succeeded");
 }
