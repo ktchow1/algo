@@ -25,20 +25,6 @@ namespace alg
     class threadpool_sync
     {
     public:
-        threadpool_sync() = delete;
-       ~threadpool_sync()
-        { 
-            for(std::uint32_t n=0; n!=threads.size(); ++n) 
-            {
-                threads[n].join();
-            }
-        }
-
-        threadpool_sync(const threadpool_sync&) = delete;
-        threadpool_sync(threadpool_sync&&) = default;
-        threadpool_sync& operator=(const threadpool_sync&) = delete;
-        threadpool_sync& operator=(threadpool_sync&&) = default;
-
         explicit threadpool_sync(std::uint32_t num_threads) : run(true), threads(), task_queue(), sync() 
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
@@ -46,6 +32,21 @@ namespace alg
                 threads.emplace_back(std::thread(&threadpool_sync<T,Q>::thread_fct, this, n));
             }
         }
+
+       ~threadpool_sync()
+        { 
+            stop();
+            for(std::uint32_t n=0; n!=threads.size(); ++n) 
+            {
+                threads[n].join();
+            }
+        }
+
+        threadpool_sync() = delete;
+        threadpool_sync(const threadpool_sync&) = delete;
+        threadpool_sync(threadpool_sync&&) = default;
+        threadpool_sync& operator=(const threadpool_sync&) = delete;
+        threadpool_sync& operator=(threadpool_sync&&) = default;
 
         // ****************************************** //
         // NOT USED FOR HOME-DESKTOP. THIS IS FOR :
@@ -62,6 +63,11 @@ namespace alg
         }
 
     public: 
+        // **************************** //
+        // Stop may be called 2 times : 
+        // 1. once explicitly
+        // 2. once inside destructor
+        // **************************** //
         void stop()
         {
             run.store(false);
@@ -113,6 +119,7 @@ namespace alg
             while(run.load())
             {
                 sync.wait();
+
                 auto task = task_queue.pop();
                 if (task)
                 {

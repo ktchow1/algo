@@ -44,16 +44,20 @@ void test_lockfree_queue()
 } 
 
 
-// ******************************************************************************************* //
+// ************************************************************************************************* //
 // Comparison among different threadpool : 
 //
-//                 | usage | thread class | synchronization class   | task class                 
-// ----------------+-------+--------------+-------------------------+-------------------------
-// threadpool_sync | Yubo  | std:: thread | compile determined SYNC | compile determined T 
-// threadpool      | TDMS  | std:: thread | std::condition_variable | runtime std::function
-// threadpool_j    | -     | std::jthread | std::condition_variable | runtime std::function
-// threadpool_jcrt | -     | std::jthread | std::condition_variable | coroutine            
-// ******************************************************************************************* //
+//                 | template? | thread       | task          | queue      | synchronization
+// ----------------+-----------+--------------+---------------+------------+------------------------
+// threadpool_sync | yes       | std:: thread | fixed T       | customized | compile determined SYNC 
+// threadpool      | no        | std:: thread | std::function | std::queue | std::condition_variable 
+// threadpool_j    | no        | std::jthread | std::function | std::queue | std::condition_variable 
+// threadpool_jcrt | no        | std::jthread | coroutine     | std::queue | std::condition_variable 
+//
+// 
+// threadpool_sync is developed in Yubo
+// threadpool      is developed in TDMS
+// ************************************************************************************************* //
 //
 void test_threadpool()
 {

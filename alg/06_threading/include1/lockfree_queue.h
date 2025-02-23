@@ -90,6 +90,12 @@ namespace alg
 
     template<typename T>
     using lockfree_queue_short = lockfree_queue<T, 4>;
+    
+    template<typename Q> 
+    constexpr bool is_lockfree = false;
+
+    template<typename T, std::uint32_t N> 
+    constexpr bool is_lockfree<lockfree_queue<T,N>> = true;
 }
 
 

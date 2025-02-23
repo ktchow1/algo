@@ -1,4 +1,3 @@
-
 #pragma once
 #include<iostream>
 #include<vector>
@@ -8,34 +7,27 @@
 #include<mutex>
 #include<condition_variable>
 
-// **************************************************** //
-// Common problems in threadpool :
-// 1. destruct a running thread (without stop / join)
-// 2. join a already joined thread 
-// 3. pop a destructed task-queue
-// **************************************************** //
+
 namespace alg
 {
-    class threadpool_cv
+    class threadpool
     {
     public:
-        explicit threadpool_cv(std::uint32_t num_threads) : out_of_scope(false)
+        explicit threadpool(std::uint32_t num_threads) : out_of_scope(false)
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                threads.emplace_back(std::thread(&threadpool_cv::fct, this, n));
+                threads.emplace_back(std::thread(&threadpool::thread_fct, this, n));
             }
         }
 
-        ~threadpool_cv()
+        ~threadpool()
         {
             std::cout << "\nthreadpool destructor" << std::flush;
             stop();
         }
 
-        // Stop may be called 2 times : 
-        // 1. once explicitly
-        // 2. once inside destructor
+    public:
         void stop()
         {
             out_of_scope.store(true);
@@ -65,7 +57,7 @@ namespace alg
         // Two-loop approaches to decouple :
         // 1. checking of out-of-scope and
         // 2. checking of queue emptyness 
-        void fct(std::uint32_t id)
+        void thread_fct(std::uint32_t id)
         {
             // set affinity here (skipped for simplicity)
             // set priority here (skipped for simplicity)
