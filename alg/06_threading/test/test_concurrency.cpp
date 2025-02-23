@@ -1,7 +1,6 @@
 #include<iostream>
 #include<locked_queue.h>
 #include<lockfree_queue.h>
-#include<threadpool.h>
 
 // *** test *** //
 #include<run_mpmcq.h>
@@ -61,6 +60,7 @@ void test_mpmcq()
 //    threadpool     .add_task() will block until success
 // 3. threadpool_sync task T CANNOT throw.
 //    threadpool      task std::function<> may throw.
+// 4. threadpool_jcrt DOES NOT WORK yet, need to support unary-argument task in coroutine
 // ************************************************************************************************* //
 //
 void test_threadpool()
@@ -80,7 +80,7 @@ void test_threadpool()
         alg::run_threadpool_sync   <alg:: spin_locked_queue>  ("alg::threadpool_sync with alg:: spin_locked_queue   ", num_threads, num_tasks, delay_between_tasks_in_us);
         alg::run_threadpool_sync   <alg::lockfree_queue_long> ("alg::threadpool_sync with alg::lockfree_queue_long  ", num_threads, num_tasks, delay_between_tasks_in_us);
         alg::run_threadpool_sync   <alg::lockfree_queue_short>("alg::threadpool_sync with alg::lockfree_queue_short ", num_threads, num_tasks, delay_between_tasks_in_us);
-        alg::run_threadpool_condvar<alg::threadpool>          ("alg::threadpool   with condvar",                       num_threads, num_tasks, delay_between_tasks_in_us);
-        alg::run_threadpool_condvar<alg::threadpool_j>        ("alg::threadpool_j with condvar",                       num_threads, num_tasks, delay_between_tasks_in_us);
+        alg::run_threadpool_condvar<alg::threadpool>          ("alg::threadpool      with condvar",                       num_threads, num_tasks, delay_between_tasks_in_us);
+        alg::run_threadpool_condvar<alg::threadpool_j>        ("alg::threadpool_j    with condvar",                       num_threads, num_tasks, delay_between_tasks_in_us);
     }
 }

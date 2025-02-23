@@ -1,26 +1,24 @@
+#pragma once
 #include<iostream>
 #include<vector>
 #include<queue>
 #include<functional>
-#include<coroutine> // <--- Replace function-task by coroutine-task
+#include<coroutine> // <--- Replace std::function-task by coroutine-task
 #include<thread>
 #include<mutex>
 #include<condition_variable>
 
 
-// **************************************** //
-// *** This is a version for coroutine. *** //
-// **************************************** //
 namespace alg
 {
-    class jthreadpool_cv2
+    class threadpool_jcrt
     {
     public:
-        explicit jthreadpool_cv2(std::uint32_t num_threads)
+        explicit threadpool_jcrt(std::uint32_t num_threads)
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                jthreads.emplace_back(std::jthread(&jthreadpool_cv2::fct, this, s_source.get_token(), n));
+                jthreads.emplace_back(std::jthread(&threadpool_jcrt::thread_fct, this, s_source.get_token(), n));
             }
         }
 
@@ -31,28 +29,32 @@ namespace alg
         }
 
     public:
-        // ********************************************************************* //
+        // ************************* //    
+        // *** Producer of tasks *** //
+        // ************************* //    
         // Ensure that task.promise().final_suspend() return std::suspend_always
         // Otherwise, crash happens when we check-done, as task does not exists.
         //
         //   if (!task.done()) ...
         //
-        // ********************************************************************* //
+        
         void add_task(const std::coroutine_handle<>& task)
         {
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                tasks.push(task);
+                task_queue.push(task);
             }
             condvar.notify_one();
         }
 
     private:
-        void fct(std::stop_token s_token, std::uint32_t id)
+        // ************************* //    
+        // *** Consumer of tasks *** //
+        // ************************* //    
+        void thread_fct(std::stop_token s_token, std::uint32_t thread_id)
         {
             try
             {
-                // *** 1st loop *** //
                 while(!s_source.get_token().stop_requested())
                 {
                     std::coroutine_handle<> task;
@@ -60,49 +62,49 @@ namespace alg
                         std::unique_lock<std::mutex> lock(mutex);
                         if (!condvar.wait(lock, s_token, [this]()
                         {
-                            return !tasks.empty();
+                            return !task_queue.empty();
                         }))
                         {
                             break;
                         }
 
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        task = std::move(task_queue.front());
+                        task_queue.pop();
                     }
                     task();
 
                     // *** Unfinished coroutine *** //
                     if (!task.done()) add_task(task);
                 }
-                std::cout << "\njthread-coroutine half-done" << id << std::flush;
 
-                // *** 2nd loop *** //
-                while(!tasks.empty())
+                // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
+                while(!task_queue.empty())
                 {
                     std::coroutine_handle<> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        task = std::move(task_queue.front());
+                        task_queue.pop();
                     }
                     task();
 
                     // *** Unfinished coroutine *** //
                     if (!task.done()) add_task(task);
                 }
-                std::cout << "\njthread-coroutine done " << id << std::flush;
             }
             catch(std::exception& e)
             {
-                std::cout << "\nexception caugth in worker " << id << ", e = " << e.what() << std::flush;
+                std::cout << "\nException thrown from alg::threadpool_jcrt, thread_id " << thread_id << ", e = " << e.what() << std::flush;
             }
         }
 
     private:
+        std::stop_source s_source;           
         std::vector<std::jthread> jthreads;
-        std::queue<std::coroutine_handle<>> tasks;
+        std::queue<std::coroutine_handle<>> task_queue;
+
+    private:
         mutable std::mutex mutex;
-        std::condition_variable_any condvar;   // Change : Replace condvar by condvar_any.
-        std::stop_source s_source;             // Change : Replace out_of_scope by stop-source.
+        std::condition_variable_any condvar;
     };
 }
