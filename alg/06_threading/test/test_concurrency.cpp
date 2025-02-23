@@ -13,43 +13,56 @@
 
 
 
-// **********************************************************************************************
-// Here are the results for 3 producers, 3 consumers, 50000 tasks (in Yubo machine) 
+// ******************************************************************************************* //
+// Here are the results for 3 producers, 3 consumers, 50000 tasks, in Yubo machine, 
 // with 300ns waiting time between any two productions in producer (unit = nanosec) :
 //
-// percentile           | 0.1 |   1 |   5 |  10 |  25 |  50 |  75 |   90 |   95 |   99 | 99.9   |  
-// ---------------------+-----+-----+-----+-----+-----+-----+-----+------+------+------+--------+
-//   alg locked   queue | 141 | 142 | 146 | 151 | 176 | 197 | 546 | 1527 | 2481 | 5798 |   12ms | 
-//   alg lockfree queue |  83 |  88 | 116 | 117 | 119 | 122 | 126 |  128 |  130 |  135 |  151   | 
-// boost lockfree spscq |  86 |  97 | 106 | 108 | 112 | 116 | 122 |  127 |  130 |  138 |  157   | 
-// boost lockfree queue | 166 | 172 | 178 | 181 | 188 | 195 | 210 |  228 |  252 |  282 |  318   | 
-// **********************************************************************************************
-// Affinity is a must
-// Priority (using nice value)  is a must
-// Priority (using FIFO policy) should be avoided, it kills mpmcq
-// **********************************************************************************************
-  
-
+// percentile           | 0.1 |   1 |   5 |  10 |  25 |  50 |  75 |   90 |   95 |   99 | 99.9     
+// ---------------------+-----+-----+-----+-----+-----+-----+-----+------+------+------+------
+//   alg locked   queue | 141 | 142 | 146 | 151 | 176 | 197 | 546 | 1527 | 2481 | 5798 | 12ms  
+//   alg lockfree queue |  83 |  88 | 116 | 117 | 119 | 122 | 126 |  128 |  130 |  135 |  151    
+// boost lockfree spscq |  86 |  97 | 106 | 108 | 112 | 116 | 122 |  127 |  130 |  138 |  157    
+// boost lockfree queue | 166 | 172 | 178 | 181 | 188 | 195 | 210 |  228 |  252 |  282 |  318    
+// 
+//
+// Remarks :
+// * Affinity is a must.
+// * Priority (using nice value)  is a must.
+// * Priority (using FIFO policy) should be avoided, it takes all resources.
+// ******************************************************************************************* //
+//
 void test_lockfree_queue()
 {
     std::uint32_t num_producers = 3;
-    std::uint32_t num_consumers = 3;
-    std::uint32_t num_tasks = 20000;
+    std::uint32_t num_consumers = 4;
+    std::uint32_t num_tasks = 40000; // per producer
 
-    alg::run_mpmcq<alg::mutex_locked_queue>  ("test alg::mutex_locked_queue   ", num_producers, num_consumers, num_tasks);
-    alg::run_mpmcq<alg:: spin_locked_queue>  ("test alg:: spin_locked_queue   ", num_producers, num_consumers, num_tasks);
-    alg::run_mpmcq<alg::lockfree_queue_long> ("test alg::lockfree_queue_long  ", num_producers, num_consumers, num_tasks);
-    alg::run_mpmcq<alg::lockfree_queue_short>("test alg::lockfree_queue_short ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::mutex_locked_queue>  ("mpmcq with alg::mutex_locked_queue   ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg:: spin_locked_queue>  ("mpmcq with alg:: spin_locked_queue   ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::lockfree_queue_long> ("mpmcq with alg::lockfree_queue_long  ", num_producers, num_consumers, num_tasks);
+    alg::run_mpmcq<alg::lockfree_queue_short>("mpmcq with alg::lockfree_queue_short ", num_producers, num_consumers, num_tasks);
 } 
 
 
+// ******************************************************************************************* //
+// Comparison among different threadpool : 
+//
+//                 | usage | thread class | synchronization class   | task class                 
+// ----------------+-------+--------------+-------------------------+-------------------------
+// threadpool_sync | Yubo  | std:: thread | compile determined SYNC | compile determined T 
+// threadpool      | TDMS  | std:: thread | std::condition_variable | runtime std::function
+// threadpool_j    | -     | std::jthread | std::condition_variable | runtime std::function
+// threadpool_jcrt | -     | std::jthread | std::condition_variable | coroutine            
+// ******************************************************************************************* //
+//
 void test_threadpool()
 {
-    std::uint32_t num_threads = 3;
-    std::uint32_t num_tasks = 20000;
+    std::uint32_t num_threads = 4;
+    std::uint32_t num_tasks = 40000;
+    std::uint32_t delay_between_tasks_in_us = 100;
 
-    alg::run_threadpool<alg::mutex_locked_queue>  ("test threadpool with alg::mutex_locked_queue   ", num_threads, num_tasks);
-    alg::run_threadpool<alg:: spin_locked_queue>  ("test threadpool with alg:: spin_locked_queue   ", num_threads, num_tasks);
-    alg::run_threadpool<alg::lockfree_queue_long> ("test threadpool with alg::lockfree_queue_long  ", num_threads, num_tasks);
-    alg::run_threadpool<alg::lockfree_queue_short>("test threadpool with alg::lockfree_queue_short ", num_threads, num_tasks);
+    alg::run_threadpool_sync<alg::mutex_locked_queue>  ("threadpool_sync with alg::mutex_locked_queue   ", num_threads, num_tasks, delay_between_tasks_in_us);
+    alg::run_threadpool_sync<alg:: spin_locked_queue>  ("threadpool_sync with alg:: spin_locked_queue   ", num_threads, num_tasks, delay_between_tasks_in_us);
+    alg::run_threadpool_sync<alg::lockfree_queue_long> ("threadpool_sync with alg::lockfree_queue_long  ", num_threads, num_tasks, delay_between_tasks_in_us);
+    alg::run_threadpool_sync<alg::lockfree_queue_short>("threadpool_sync with alg::lockfree_queue_short ", num_threads, num_tasks, delay_between_tasks_in_us);
 }

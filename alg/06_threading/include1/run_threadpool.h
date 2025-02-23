@@ -1,111 +1,55 @@
 #pragma once
 #include<iostream>
-#include<cassert>
 #include<functional>
 
 // *** alg *** //
-#include<threadpool.h>
-#include<statistics.h>
+#include<run_mpmcq.h>
+#include<threadpool_sync.h>
 #include<utility.h>
 
 
-struct thdpool_output
-{
-    std::thread::id tid;
-    std::uint64_t ns_response;
-    std::uint64_t ns_calculate0;
-    std::uint64_t ns_calculate1;
-    double exp_x0;
-    double exp_x1;
-};
-
-struct thdpool_task
-{
-    inline void operator()() 
-    {
-        timespec ts_response;
-        clock_gettime(CLOCK_MONOTONIC, &ts_response);
-        res->tid = std::this_thread::get_id();
-        res->ns_response = alg::to_nanosec(ts_response) - alg::to_nanosec(ts_emplace);
-
-        const std::uint32_t N = 1000;
-        double s = (1+x/N);
-
-        timespec ts0;
-        timespec ts1;
-        timespec ts2;
-        clock_gettime(CLOCK_MONOTONIC, &ts0);
-
-        res->exp_x0 = 1;
-        for(std::uint32_t n=0; n!=N; ++n) 
-        {
-            res->exp_x0 *= s;    
-        }
-
-        clock_gettime(CLOCK_MONOTONIC, &ts1);
-
-        res->exp_x1 = exp(x);
-
-        clock_gettime(CLOCK_MONOTONIC, &ts2);
-        res->ns_calculate0 = alg::to_nanosec(ts1) - alg::to_nanosec(ts0);
-        res->ns_calculate1 = alg::to_nanosec(ts2) - alg::to_nanosec(ts1);
-    }
-
-    timespec ts_emplace;
-    double x;
-    thdpool_output* res;
-};
-
-
-// *************************** //
-// *** Test for threadpool *** //
-// *************************** //
+// ******************************** //
+// *** Test for threadpool_sync *** //
+// ******************************** //
 namespace alg
 {
     template<template<typename> typename QUEUE>
-    void run_threadpool(const std::string& test_name, 
-                        std::uint32_t num_threads, 
-                        std::uint32_t num_tasks)
+    void run_threadpool_sync(const std::string& test_name, 
+                             std::uint32_t num_threads, 
+                             std::uint32_t num_tasks, 
+                             std::uint32_t delay_between_tasks_in_us)
     {
-        std::uint32_t waiting_in_us = 10;
-        std::vector<thdpool_output> outputs(num_tasks);
+        std::vector<task_output> task_outputs(num_tasks);
+        std::vector<std::uint32_t> task_counts (num_threads, 0); 
 
 
         // ******************* //
         // *** Main thread *** //
         // ******************* //
         {
-            alg::threadpool<thdpool_task, QUEUE> pool(num_threads);
+            alg::threadpool_sync<task_spec, QUEUE> pool(num_threads);
             for(std::uint32_t n=0; n!=num_tasks; ++n)
             {
-                double r = rand() % 1000 / 200.0;
-                timespec time;
-                clock_gettime(CLOCK_MONOTONIC, &time);
-
-                while(!pool.emplace_task(time, r, &outputs[n])) 
+                while(!pool.emplace_task(task_outputs[n])) 
                 {
-                    std::this_thread::sleep_for(std::chrono::microseconds(waiting_in_us));
+                    std::this_thread::sleep_for(std::chrono::microseconds(10));
                 }
-
-                if (waiting_in_us > 0)
-                {
-                    std::this_thread::sleep_for(std::chrono::microseconds(waiting_in_us));
-                }
+                std::this_thread::sleep_for(std::chrono::microseconds(delay_between_tasks_in_us));
             }
             pool.stop();
         }
-
+        // threadpool_sync is destructed, joins all threads, task_outputs are ready
+          
 
         // **************** //
         // *** Checking *** //
         // **************** //
-        alg::statistics<std::uint64_t> stat; 
-        for(const auto& x:outputs) 
-        {
-            stat.add(x.ns_response);
-        }
-
-        print_summary(test_name, "succeeded, time = " + stat.get_str());
+        std::string comment = task_check(num_threads, task_outputs);
+        print_summary(test_name, "succeeded, " + comment);
     }
 }
 
+
+// ************************************************************ //
+// *** Test for threadpool / threadpool_j / threadpool_jcrt *** //
+// ************************************************************ //

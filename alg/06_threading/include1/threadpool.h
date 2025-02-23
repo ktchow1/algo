@@ -1,140 +1,124 @@
+
 #pragma once
-#include<locked_queue.h>
-#include<lockfree_queue.h>
-#include<synchronization.h>
-#include<thread.h>
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<functional>
+#include<thread>
+#include<mutex>
+#include<condition_variable>
 
-
-// ****************************************************************** //
-// T = task (must be default constructible if lockfree_queue is used)
-// Q = multi-thread safe queue
-// S = synchronization primitive
-// ****************************************************************** //
-// S = sync_futex        work, 1.7us 
-// S = sync_pmutex       deadlock
-// S = sync_HansBarz     work, 1.7us 
-// S = sync_psemaphore   work, 1.7us
-// S = sync_condvar      work, 2.2us
-// ****************************************************************** //
+// **************************************************** //
+// Common problems in threadpool :
+// 1. destruct a running thread (without stop / join)
+// 2. join a already joined thread 
+// 3. pop a destructed task-queue
+// **************************************************** //
 namespace alg
 {
-    template<std::invocable T, 
-             template<typename> typename Q = mutex_locked_queue,  
-             sync_primitive S = sync_psemaphore>       
-
-    class threadpool
+    class threadpool_cv
     {
     public:
-        threadpool() = delete;
-       ~threadpool()
-        { 
-            for(std::uint32_t n=0; n!=threads.size(); ++n) 
-            {
-                threads[n].join();
-            }
-        }
-
-        threadpool(const threadpool&) = delete;
-        threadpool(threadpool&&) = default;
-        threadpool& operator=(const threadpool&) = delete;
-        threadpool& operator=(threadpool&&) = default;
-
-        explicit threadpool(std::uint32_t num_threads) : run(true), threads(), task_queue(), sync() 
+        explicit threadpool_cv(std::uint32_t num_threads) : out_of_scope(false)
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                threads.emplace_back(std::thread(&threadpool<T,Q>::thread_fct, this));
+                threads.emplace_back(std::thread(&threadpool_cv::fct, this, n));
             }
         }
 
-        // ****************************************** //
-        // NOT USED FOR HOME-DESKTOP. THIS IS FOR :
-        // * RELEASE MODE
-        // * sudo TO ALLOW CHANGE IN SCHEDULE POLICY
-        // ****************************************** //
-        threadpool(std::uint32_t num_threads, const std::vector<std::uint32_t>& affinity) : threadpool(num_threads)
-        {   
-            for(auto& x:threads) 
-            {
-                set_thread_affinity(x.native_handle(), affinity);
-                set_thread_policy  (x.native_handle(), SCHED_RR);
-            } 
+        ~threadpool_cv()
+        {
+            std::cout << "\nthreadpool destructor" << std::flush;
+            stop();
         }
 
-    public: 
+        // Stop may be called 2 times : 
+        // 1. once explicitly
+        // 2. once inside destructor
         void stop()
         {
-            run.store(false);
-            for(std::uint32_t n=0; n!=threads.size(); ++n) 
+            out_of_scope.store(true);
+            condvar.notify_all();
+            for(auto& x:threads)
             {
-                sync.notify();
+                // BUG3 : Need to check joinable to avoid multi-join, otherwise it throws
+                if (x.joinable()) 
+                {
+                    x.join();
+                }
+                std::cout << "\nthread joined" << std::flush;
             }
         }
 
     public: 
-        // ************************* //    
-        // *** Producer of tasks *** //
-        // ************************* //    
-        template<typename... ARGS>
-        bool emplace_task(ARGS&&... args)
+        void add_task(const std::function<void()>& task)
         {
-            if (task_queue.emplace(std::forward<ARGS>(args)...))
             {
-                sync.notify(); 
-                return true;
+                std::lock_guard<std::mutex> lock(mutex);
+                tasks.push(task);
             }
-            else
-            {
-                return false;
-            }
-        }
-
-        template<typename... ARGS>
-        void emplace_task_until_success(ARGS&&... args)
-        {
-            while(!task_queue.emplace(std::forward<ARGS>(args)...));
-            sync.notify(); 
+            condvar.notify_one();
         }
 
     private:
-        // ************************* //    
-        // *** Consumer of tasks *** //
-        // ************************* //    
-        void thread_fct()
+        // Two-loop approaches to decouple :
+        // 1. checking of out-of-scope and
+        // 2. checking of queue emptyness 
+        void fct(std::uint32_t id)
         {
-            // Decouple two checking :
-            // 1. is threadpool running 
-            // 2. is task queue empty 
-            //
-            // Adventages of decoupling :
-            // 1. avoid repeated lock & unlock on peeking queue size
-            // 2. avoid lost notification on stopping threadpool
-
-            while(run.load())
+            // set affinity here (skipped for simplicity)
+            // set priority here (skipped for simplicity)
+            
+            try // BUG4 : Need to handle exception thrown from task
             {
-                sync.wait();
-                auto task = task_queue.pop();
-                if (task)
+                // *** 1st loop *** //
+                while(!out_of_scope.load())
                 {
-                    (*task)();
+                    std::function<void()> task;
+                    {
+                        std::unique_lock<std::mutex> lock(mutex);
+                        condvar.wait(lock, [this]()
+                        { 
+                            // Predicate returns true to continue
+                            return !tasks.empty() 
+                                  || out_of_scope.load(); // BUG1 : missing this results in wakeup-miss on termination
+                        }); 
+
+                        if (out_of_scope.load()) break; // BUG2 : missing this results in popping empty queue on termination
+                        task = std::move(tasks.front());
+                        tasks.pop();
+                    }
+                    task();
                 }
+                std::cout << "\nthread half-done" << id << std::flush;
+
+                // *** 2nd loop *** //
+                while(!tasks.empty())
+                {
+                    std::function<void()> task;
+                    {
+                        std::lock_guard<std::mutex> lock(mutex);
+                        task = std::move(tasks.front());
+                        tasks.pop();
+                    }
+                    task();
+                }
+                std::cout << "\nthread done " << id << std::flush;
             }
-
-            // All threads are now spinning (no more waiting).
-            while(task_queue.peek_size() > 0)
+            catch(std::exception& e)
             {
-                auto task = task_queue.pop();
-                if (task)
-                {
-                    (*task)();
-                }
+                std::cout << "\nexception caugth in worker " << id << ", e = " << e.what() << std::flush;
+            //  stop(); // BUG5 : No need, as threadpool destructor is called in stack unwinding
             }
         }
 
     private:
-        std::atomic<bool> run;
         std::vector<std::thread> threads;
-        Q<T> task_queue;
-        S sync;
+        std::queue<std::function<void()>> tasks;
+        mutable std::mutex mutex;
+        std::condition_variable condvar;
+        std::atomic<bool> out_of_scope;
     };
 }
+
