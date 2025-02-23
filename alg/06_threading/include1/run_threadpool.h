@@ -63,12 +63,17 @@ struct thdpool_task
 namespace alg
 {
     template<template<typename> typename QUEUE>
-    void run_threadpool(const std::string& test_name, std::uint32_t num_threads, std::uint32_t num_tasks)
+    void run_threadpool(const std::string& test_name, 
+                        std::uint32_t num_threads, 
+                        std::uint32_t num_tasks)
     {
         std::uint32_t waiting_in_us = 10;
-        std::vector<thdpool_output> results;
-        results.resize(num_tasks);
+        std::vector<thdpool_output> outputs(num_tasks);
 
+
+        // ******************* //
+        // *** Main thread *** //
+        // ******************* //
         {
             alg::threadpool<thdpool_task, QUEUE> pool(num_threads);
             for(std::uint32_t n=0; n!=num_tasks; ++n)
@@ -77,7 +82,7 @@ namespace alg
                 timespec time;
                 clock_gettime(CLOCK_MONOTONIC, &time);
 
-                while(!pool.emplace_task(time, r, &results[n])) 
+                while(!pool.emplace_task(time, r, &outputs[n])) 
                 {
                     std::this_thread::sleep_for(std::chrono::microseconds(waiting_in_us));
                 }
@@ -90,17 +95,16 @@ namespace alg
             pool.stop();
         }
 
-        alg::statistics<std::uint64_t> stat; 
-        for(std::uint32_t n=0; n!=num_tasks; ++n)
-        {
-            stat.add(results[n].ns_response);
-        }
-
-
 
         // **************** //
         // *** Checking *** //
         // **************** //
+        alg::statistics<std::uint64_t> stat; 
+        for(const auto& x:outputs) 
+        {
+            stat.add(x.ns_response);
+        }
+
         print_summary(test_name, "succeeded, time = " + stat.get_str());
     }
 }
