@@ -33,7 +33,7 @@ namespace alg
             condvar.notify_all();
             for(auto& x:threads)
             {
-                // BUG3 : Need to check joinable to avoid multi-join, otherwise it throws
+                // BUG : Need to check joinable to avoid multi-join, otherwise it throws
                 if (x.joinable()) x.join();
             }
         }
@@ -55,44 +55,60 @@ namespace alg
         // ************************* //    
         // *** Consumer of tasks *** //
         // ************************* //    
+        // [Remark 1]
+        // BUG : Missing "run.load()" leads to wakeup-miss on stop-request
+
         void thread_fct(std::uint32_t thread_id)
         {
-            try // BUG4 : Need to handle exception thrown from task
+            try 
             {
                 while(run.load())
                 {
-                    std::function<void(std::uint32_t)> task;
+                    std::optional<std::function<void(std::uint32_t)>> task;
                     {
                         std::unique_lock<std::mutex> lock(mutex);
-                        condvar.wait(lock, [this]() // Predicate returns true to continue
-                        { 
-                            return !task_queue.empty() || 
-                                   !run.load(); // BUG1 : missing this results in wakeup-miss on termination
-                        }); 
-
-                        if (!run.load()) break; // BUG2 : missing this results in popping empty queue on termination
-                        task = std::move(task_queue.front());
-                        task_queue.pop();
+                        condvar.wait(lock, [this]() { return !task_queue.empty() || !run.load(); }); // <--- Remark 1
+                        task = pop_task();
                     }
-                    task(thread_id);
+                    if (task) 
+                    {
+                        (*task)(thread_id);
+                    }
                 }
 
-                // All threads are now spinning (no more waiting).
-                while(!task_queue.empty())
+                // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
+                while(!task_queue.empty())                           // <--- one queue-empty-check before mutex
                 {
-                    std::function<void(std::uint32_t)> task;
+                    std::optional<std::function<void(std::uint32_t)>> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
-                        task = std::move(task_queue.front());
-                        task_queue.pop();
+                        task = pop_task();                           // <--- one queue-empty-check after mutex
                     }
-                    task(thread_id);
+                    if (task) 
+                    {
+                        (*task)(thread_id);
+                    }
                 }
             }
-            catch(std::exception& e)
+            catch(std::exception& e) // BUG : Need to handle exception thrown from task
             {
                 std::cout << "\nException thrown from alg::threadpool, thread_id " << thread_id << ", e = " << e.what() << std::flush;
             }
+        }
+
+        // ************************************** //
+        // *** Combine std::queue<T>::front() *** //
+        // ***    with std::queue<T>::pop()   *** //
+        // ************************************** //
+        std::optional<std::function<void(std::uint32_t)>> pop_task()
+        {
+            if (!task_queue.empty())               
+            {
+                auto task = std::move(task_queue.front());
+                task_queue.pop();
+                return task;
+            }
+            return std::nullopt;
         }
 
     private:

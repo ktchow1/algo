@@ -132,7 +132,7 @@ namespace alg
                 }
             }
 
-            // All threads are now spinning (no more waiting).
+            // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
             while(task_queue.peek_size() > 0)
             {
                 auto task = task_queue.pop();

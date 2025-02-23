@@ -17,7 +17,7 @@ namespace alg
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                jthreads.emplace_back(std::jthread(&threadpool_j::fct, this, s_source.get_token(), n));
+                jthreads.emplace_back(std::jthread(&threadpool_j::thread_fct, this, s_source.get_token(), n));
             }
         }
 
@@ -29,77 +29,100 @@ namespace alg
         void stop()
         {
             s_source.request_stop();
-        //  condvar.notify_all(); // Change : Stop-callback auto invokes condvar.notify_all().
-        //  for(auto& x:jthreads) // Change : auto-join in destructor. 
-        //  {
-        //      if (x.joinable()) 
-        //      {
-        //          x.join();
-        //      }
-        //      std::cout << "\njthread joined" << std::flush;
-        //  }
+
+            // Unlike the threadpool::stop() :
+            // * there is no condvar.notify_all(), because token is passed to condvar::wait()
+            // * there is no need to join threads, because jthreads can auto-join
         }
 
     public: 
+        // ************************* //    
+        // *** Producer of tasks *** //
+        // ************************* //    
         void add_task(const std::function<void(std::uint32_t)>& task)
         {
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                tasks.push(task);
+                task_queue.push(task);
             }
             condvar.notify_one();
         }
 
     private:
-        void fct(std::stop_token s_token, std::uint32_t thread_id)
+        // ************************* //    
+        // *** Consumer of tasks *** //
+        // ************************* //    
+        // [Remark 1] Condition variable wait() will proceed when either :
+        // 1. task_queue is non empty, predicate returns true  ---> there must be next task, execute the task 
+        // 2. stop requested in token, predicate returns false ---> break while loop, do not execute any task
+
+        void thread_fct(std::stop_token s_token, std::uint32_t thread_id)
         {
             try
             {
-                // *** 1st loop *** //
                 while(!s_source.get_token().stop_requested())
                 {
                     std::function<void(std::uint32_t)> task;
                     {
                         std::unique_lock<std::mutex> lock(mutex);
-                        if (!condvar.wait(lock, s_token, [this]()
-                        { 
-                            return !tasks.empty();
-                        //        || out_of_scope.load(); // Change : Move stop-token into predicate.
-                        }))
+                        if (!condvar.wait(lock, s_token, [this]() { return !task_queue.empty(); })) // <--- Remark 1
                         {
-                            break; // Change : For stop_requested, break ...
+                            break; 
                         } 
-
-                    //  if (out_of_scope.load()) break;
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        task = pop_task_without_checking();
                     }
                     task(thread_id);
                 }
 
-                // *** 2nd loop *** //
-                while(!tasks.empty())
+                // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
+                while(!task_queue.empty())
                 {
-                    std::function<void(std::uint32_t)> task;
+                    std::optional<std::function<void(std::uint32_t)>> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        task = pop_task();    
                     }
-                    task(thread_id);
+                    if (task) 
+                    {
+                        (*task)(thread_id);
+                    }
                 }
             }
             catch(std::exception& e)
             {
-                std::cout << "\nException thrown from threadpool_j, thread_id " << thread_id << ", e = " << e.what() << std::flush;
+                std::cout << "\nException thrown from alg::threadpool_j, thread_id " << thread_id << ", e = " << e.what() << std::flush;
             }
         }
 
+        // ************************************** //
+        // *** Combine std::queue<T>::front() *** //
+        // ***    with std::queue<T>::pop()   *** //
+        // ************************************** //
+        std::optional<std::function<void(std::uint32_t)>> pop_task()
+        {
+            if (!task_queue.empty())               
+            {
+                auto task = std::move(task_queue.front());
+                task_queue.pop();
+                return task;
+            }
+            return std::nullopt;
+        }
+
+        std::function<void(std::uint32_t)> pop_task_without_checking()
+        {
+            auto task = std::move(task_queue.front());
+            task_queue.pop();
+            return task;
+        }
+
     private:
+        std::stop_source s_source;           
         std::vector<std::jthread> jthreads;
-        std::queue<std::function<void(std::uint32_t)>> tasks;
+        std::queue<std::function<void(std::uint32_t)>> task_queue;
+
+    private:
         mutable std::mutex mutex;
-        std::condition_variable_any condvar;   // Change : Replace condvar by condvar_any.
-        std::stop_source s_source;             // Change : Replace out_of_scope by stop-source.
+        std::condition_variable_any condvar;
     };
 }

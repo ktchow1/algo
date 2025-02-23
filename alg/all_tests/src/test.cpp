@@ -156,7 +156,7 @@ int main()
 //  test_promise_future();
 
     banner("06_threading (container)");
-//  test_mpmcq();
+    test_mpmcq();
     test_threadpool();
 
 //  banner("07_cpp20");  
