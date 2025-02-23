@@ -13,7 +13,7 @@ namespace alg
     class threadpool
     {
     public:
-        explicit threadpool(std::uint32_t num_threads) : out_of_scope(false)
+        explicit threadpool(std::uint32_t num_threads) : run(true)
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
@@ -29,67 +29,62 @@ namespace alg
     public:
         void stop()
         {
-            out_of_scope.store(true);
+            run.store(false);
             condvar.notify_all();
             for(auto& x:threads)
             {
                 // BUG3 : Need to check joinable to avoid multi-join, otherwise it throws
-                if (x.joinable()) 
-                {
-                    x.join();
-                }
+                if (x.joinable()) x.join();
             }
         }
 
     public: 
+        // ************************* //    
+        // *** Producer of tasks *** //
+        // ************************* //    
         void add_task(const std::function<void(std::uint32_t)>& task) 
         {
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                tasks.push(task);
+                task_queue.push(task);
             }
             condvar.notify_one();
         }
 
     private:
-        // Two-loop approaches to decouple :
-        // 1. checking of out-of-scope and
-        // 2. checking of queue emptyness 
+        // ************************* //    
+        // *** Consumer of tasks *** //
+        // ************************* //    
         void thread_fct(std::uint32_t thread_id)
         {
-            // set affinity here (skipped for simplicity)
-            // set priority here (skipped for simplicity)
-            
             try // BUG4 : Need to handle exception thrown from task
             {
-                // *** 1st loop *** //
-                while(!out_of_scope.load())
+                while(run.load())
                 {
                     std::function<void(std::uint32_t)> task;
                     {
                         std::unique_lock<std::mutex> lock(mutex);
-                        condvar.wait(lock, [this]()
+                        condvar.wait(lock, [this]() // Predicate returns true to continue
                         { 
-                            // Predicate returns true to continue
-                            return !tasks.empty() 
-                                  || out_of_scope.load(); // BUG1 : missing this results in wakeup-miss on termination
+                            return !task_queue.empty() || 
+                                   !run.load(); // BUG1 : missing this results in wakeup-miss on termination
                         }); 
 
-                        if (out_of_scope.load()) break; // BUG2 : missing this results in popping empty queue on termination
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        if (!run.load()) break; // BUG2 : missing this results in popping empty queue on termination
+                        task = std::move(task_queue.front());
+                        task_queue.pop();
                     }
                     task(thread_id);
                 }
 
-                // *** 2nd loop *** //
-                while(!tasks.empty())
+                // All threads are now spinning (no more waiting).
+                while(!task_queue.empty())
                 {
                     std::function<void(std::uint32_t)> task;
                     {
                         std::lock_guard<std::mutex> lock(mutex);
-                        task = std::move(tasks.front());
-                        tasks.pop();
+                        task = std::move(task_queue.front());
+                        task_queue.pop();
                     }
                     task(thread_id);
                 }
@@ -97,16 +92,18 @@ namespace alg
             catch(std::exception& e)
             {
                 std::cout << "\nException thrown from alg::threadpool, thread_id " << thread_id << ", e = " << e.what() << std::flush;
-            //  stop(); // BUG5 : No need, as threadpool destructor is called in stack unwinding
             }
         }
 
     private:
+        std::atomic<bool> run;
         std::vector<std::thread> threads;
-        std::queue<std::function<void(std::uint32_t)>> tasks;
+        std::queue<std::function<void(std::uint32_t)>> task_queue;
+
+    private:
+        // *** Substitute for sync_primitive in alg::threadpool_sync *** //
         mutable std::mutex mutex;
         std::condition_variable condvar;
-        std::atomic<bool> out_of_scope;
     };
 }
 

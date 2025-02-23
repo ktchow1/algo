@@ -36,10 +36,6 @@ namespace alg
        ~threadpool_sync()
         { 
             stop();
-            for(std::uint32_t n=0; n!=threads.size(); ++n) 
-            {
-                threads[n].join();
-            }
         }
 
         threadpool_sync() = delete;
@@ -71,9 +67,13 @@ namespace alg
         void stop()
         {
             run.store(false);
-            for(std::uint32_t n=0; n!=threads.size(); ++n) 
+            for(const auto& x:threads) 
             {
                 sync.notify();
+            }
+            for(auto& x:threads) 
+            {
+                if (x.joinable()) x.join();
             }
         }
 
@@ -108,14 +108,19 @@ namespace alg
         // ************************* //    
         void thread_fct(std::uint32_t thread_id)
         {
+            // set affinity here (skipped for simplicity)
+            // set priority here (skipped for simplicity)
+
+
+            // ****************************************************** //
             // Decouple two checking :
-            // 1. is threadpool_sync running 
+            // 1. is running 
             // 2. is task queue empty 
             //
             // Adventages of decoupling :
             // 1. avoid repeated lock & unlock on peeking queue size
-            // 2. avoid lost notification on stopping threadpool_sync
-
+            // 2. avoid lost notification on stopping threadpool
+            // ****************************************************** //
             while(run.load())
             {
                 sync.wait();
