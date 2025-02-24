@@ -6,28 +6,7 @@
 
 namespace test
 {
-    std::uint32_t invoke_count0  = 0;
-    std::uint32_t invoke_count1  = 0;
-    std::uint32_t invoke_countA0 = 0;
-    std::uint32_t invoke_countA1 = 0;
-    std::uint32_t invoke_countB0 = 0;
-    std::uint32_t invoke_countB1 = 0;
-    std::uint32_t invoke_countC0 = 0;
-    std::uint32_t invoke_countC1 = 0;
-
-
-    inline void debug()
-    {
-        std::cout << "\ndebug = ";
-        std::cout << invoke_count0  << ", ";
-        std::cout << invoke_count1  << ", ";
-        std::cout << invoke_countA0 << ", ";
-        std::cout << invoke_countA1 << ", ";
-        std::cout << invoke_countB0 << ", ";
-        std::cout << invoke_countB1 << ", ";
-        std::cout << invoke_countC0 << ", ";
-        std::cout << invoke_countC1;
-    }
+    std::uint32_t op_invoked = 0;
 
     struct sampleA
     {
@@ -48,7 +27,7 @@ namespace test
     {
         inline bool operator==(const sample& rhs)
         {
-            ++invoke_count0;
+            op_invoked = 11;
             return m_x == rhs.m_x && 
                    m_y == rhs.m_y &&
                    m_z == rhs.m_z; 
@@ -56,19 +35,19 @@ namespace test
 
         inline bool operator==(const sampleA& rhs)
         {
-            ++invoke_countA0;
+            op_invoked = 12;
             return m_x == rhs.m_x;
         }
 
         inline bool operator==(const sampleB& rhs)
         {
-            ++invoke_countB0;
+            op_invoked = 13;
             return m_y == rhs.m_y;
         }
 
         inline bool operator==(const sampleC& rhs)
         {
-            ++invoke_countC0;
+            op_invoked = 14;
             return m_z == rhs.m_z;
         }
 
@@ -81,8 +60,7 @@ namespace test
         //
         inline auto operator<=>(const sample& rhs)
         {
-            ++invoke_count1;
-
+            op_invoked = 21;
             if (auto tmp = m_x <=> rhs.m_x; tmp != 0) return tmp;
             if (auto tmp = m_y <=> rhs.m_y; tmp != 0) return tmp;
             return         m_z <=> rhs.m_z;
@@ -90,19 +68,19 @@ namespace test
 
         inline auto operator<=>(const sampleA& rhs)
         {
-            ++invoke_countA1;
+            op_invoked = 22;
             return m_x <=> rhs.m_x;
         }
 
         inline auto operator<=>(const sampleB& rhs)
         {
-            ++invoke_countB1;
+            op_invoked = 23;
             return m_y <=> rhs.m_y;
         }
         
         inline auto operator<=>(const sampleC& rhs)
         {
-            ++invoke_countC1;
+            op_invoked = 24;
             return m_z <=> rhs.m_z;
         }
 
@@ -127,27 +105,21 @@ void test_spaceship()
     test::sampleC c2{36};
 
     // primary reverse
-    std::cout << "\n" << (s == a0) << " " << (s == a1) << " " << (s == a2);   test::debug();
-    std::cout << "\n" << (a0 == s) << " " << (a1 == s) << " " << (a2 == s);   test::debug();
-    std::cout << "\n" << (s == b0) << " " << (s == b1) << " " << (s == b2);   test::debug();
-    std::cout << "\n" << (b0 == s) << " " << (b1 == s) << " " << (b2 == s);   test::debug();
-    std::cout << "\n" << (s == c0) << " " << (s == c1) << " " << (s == c2);   test::debug();
-    std::cout << "\n" << (c0 == s) << " " << (c1 == s) << " " << (c2 == s);   test::debug();
-     
-    std::cout << "\n" << (a0 <=> s < 0) << " " << (a1 <=> s == 0) << " " << (a2 <=> s > 0);   test::debug();
-    std::cout << "\n" << (b0 <=> s < 0) << " " << (b1 <=> s == 0) << " " << (b2 <=> s > 0);   test::debug();
-    std::cout << "\n" << (c0 <=> s < 0) << " " << (c1 <=> s == 0) << " " << (c2 <=> s > 0);   test::debug();
+    assert(!(a0 == s) && test::op_invoked == 12);    test::op_invoked = 0;
+    assert( (a1 == s) && test::op_invoked == 12);    test::op_invoked = 0;
+    assert(!(a2 == s) && test::op_invoked == 12);    test::op_invoked = 0;
+       
 
     // secondary rewrite
-    std::cout << "\n" << (s != a0) << " " << (s != a1) << " " << (s != a2);   test::debug();
-    std::cout << "\n" << (a0 != s) << " " << (a1 != s) << " " << (a2 != s);   test::debug();
-    std::cout << "\n" << (s != b0) << " " << (s != b1) << " " << (s != b2);   test::debug();
-    std::cout << "\n" << (b0 != s) << " " << (b1 != s) << " " << (b2 != s);   test::debug();
-    std::cout << "\n" << (s != c0) << " " << (s != c1) << " " << (s != c2);   test::debug();
-    std::cout << "\n" << (c0 != s) << " " << (c1 != s) << " " << (c2 != s);   test::debug();
+    //
+    /*
+    std::cout << "\n" << (a0 != s) << " " << (a1 != s) << " " << (a2 != s);  
+    std::cout << "\n" << (b0 != s) << " " << (b1 != s) << " " << (b2 != s);  
+    std::cout << "\n" << (c0 != s) << " " << (c1 != s) << " " << (c2 != s);  
 
-    std::cout << "\n" << (a0 <= s) << " " << (a1 <= s) << " " << (a2 >= s);   test::debug();
-    std::cout << "\n" << (b0 <= s) << " " << (b1 <= s) << " " << (b2 >= s);   test::debug();
-    std::cout << "\n" << (c0 <= s) << " " << (c1 <= s) << " " << (c2 >= s);   test::debug();
+    std::cout << "\n" << (a0 <= s) << " " << (a1 <= s) << " " << (a2 >= s);  
+    std::cout << "\n" << (b0 <= s) << " " << (b1 <= s) << " " << (b2 >= s);  
+    std::cout << "\n" << (c0 <= s) << " " << (c1 <= s) << " " << (c2 >= s);  
+    */
     print_summary("spaceship operator", "succeeded");
 }
