@@ -25,7 +25,7 @@ namespace test
 
     struct sample
     {
-        inline bool operator==(const sample& rhs)
+        inline bool operator==(const sample& rhs) const
         {
             op_invoked = 11;
             return m_x == rhs.m_x && 
@@ -33,19 +33,19 @@ namespace test
                    m_z == rhs.m_z; 
         }
 
-        inline bool operator==(const sampleA& rhs)
+        inline bool operator==(const sampleA& rhs) const
         {
             op_invoked = 12;
             return m_x == rhs.m_x;
         }
 
-        inline bool operator==(const sampleB& rhs)
+        inline bool operator==(const sampleB& rhs) const
         {
             op_invoked = 13;
             return m_y == rhs.m_y;
         }
 
-        inline bool operator==(const sampleC& rhs)
+        inline bool operator==(const sampleC& rhs) const
         {
             op_invoked = 14;
             return m_z == rhs.m_z;
@@ -58,7 +58,7 @@ namespace test
         // 2. ordering cannot be static_cast into bool / int
         // 3. ordering can    be converted   into bool by comparison with zero
         //
-        inline auto operator<=>(const sample& rhs)
+        inline auto operator<=>(const sample& rhs) const
         {
             op_invoked = 21;
             if (auto tmp = m_x <=> rhs.m_x; tmp != 0) return tmp;
@@ -66,19 +66,19 @@ namespace test
             return         m_z <=> rhs.m_z;
         }
 
-        inline auto operator<=>(const sampleA& rhs)
+        inline auto operator<=>(const sampleA& rhs) const
         {
             op_invoked = 22;
             return m_x <=> rhs.m_x;
         }
 
-        inline auto operator<=>(const sampleB& rhs)
+        inline auto operator<=>(const sampleB& rhs) const
         {
             op_invoked = 23;
             return m_y <=> rhs.m_y;
         }
         
-        inline auto operator<=>(const sampleC& rhs)
+        inline auto operator<=>(const sampleC& rhs) const
         {
             op_invoked = 24;
             return m_z <=> rhs.m_z;
@@ -93,7 +93,10 @@ namespace test
 
 void test_spaceship()
 {
-    test::sample   s{15,25,35};
+    test::sample  s {15,25,35};
+    test::sample  s0{15,25,34};
+    test::sample  s1{15,25,35};
+    test::sample  s2{15,25,36};
     test::sampleA a0{14};
     test::sampleA a1{15};
     test::sampleA a2{16};
@@ -104,22 +107,67 @@ void test_spaceship()
     test::sampleC c1{35};
     test::sampleC c2{36};
 
-    // primary reverse
-    assert(!(a0 == s) && test::op_invoked == 12);    test::op_invoked = 0;
-    assert( (a1 == s) && test::op_invoked == 12);    test::op_invoked = 0;
-    assert(!(a2 == s) && test::op_invoked == 12);    test::op_invoked = 0;
+
+    // reverse of primary (heterogenous ==), return bool
+    assert(!(a0 == s) && test::op_invoked == 12);          test::op_invoked = 0;
+    assert( (a1 == s) && test::op_invoked == 12);          test::op_invoked = 0;
+    assert(!(a2 == s) && test::op_invoked == 12);          test::op_invoked = 0;
        
+    assert(!(b0 == s) && test::op_invoked == 13);          test::op_invoked = 0;
+    assert( (b1 == s) && test::op_invoked == 13);          test::op_invoked = 0;
+    assert(!(b2 == s) && test::op_invoked == 13);          test::op_invoked = 0;
 
-    // secondary rewrite
-    //
-    /*
-    std::cout << "\n" << (a0 != s) << " " << (a1 != s) << " " << (a2 != s);  
-    std::cout << "\n" << (b0 != s) << " " << (b1 != s) << " " << (b2 != s);  
-    std::cout << "\n" << (c0 != s) << " " << (c1 != s) << " " << (c2 != s);  
+    assert(!(c0 == s) && test::op_invoked == 14);          test::op_invoked = 0;
+    assert( (c1 == s) && test::op_invoked == 14);          test::op_invoked = 0;
+    assert(!(c2 == s) && test::op_invoked == 14);          test::op_invoked = 0;
 
-    std::cout << "\n" << (a0 <= s) << " " << (a1 <= s) << " " << (a2 >= s);  
-    std::cout << "\n" << (b0 <= s) << " " << (b1 <= s) << " " << (b2 >= s);  
-    std::cout << "\n" << (c0 <= s) << " " << (c1 <= s) << " " << (c2 >= s);  
-    */
+    // reverse of primary (heterogenous <=>), return ordering
+    assert( (a0 <=> s) <  0 && test::op_invoked == 22);    test::op_invoked = 0;
+    assert( (a1 <=> s) == 0 && test::op_invoked == 22);    test::op_invoked = 0;
+    assert( (a2 <=> s) >  0 && test::op_invoked == 22);    test::op_invoked = 0;
+       
+    assert( (b0 <=> s) <  0 && test::op_invoked == 23);    test::op_invoked = 0;
+    assert( (b1 <=> s) == 0 && test::op_invoked == 23);    test::op_invoked = 0;
+    assert( (b2 <=> s) >  0 && test::op_invoked == 23);    test::op_invoked = 0;
+
+    assert( (c0 <=> s) <  0 && test::op_invoked == 24);    test::op_invoked = 0;
+    assert( (c1 <=> s) == 0 && test::op_invoked == 24);    test::op_invoked = 0;
+    assert( (c2 <=> s) >  0 && test::op_invoked == 24);    test::op_invoked = 0;
+
+    // rewrite of secondary (homogenous !=), return bool
+    assert( (s0 != s) && test::op_invoked == 11);          test::op_invoked = 0;
+    assert(!(s1 != s) && test::op_invoked == 11);          test::op_invoked = 0;
+    assert( (s2 != s) && test::op_invoked == 11);          test::op_invoked = 0;
+
+    // rewrite of secondary (heterogenous !=), return bool
+    assert( (a0 != s) && test::op_invoked == 12);          test::op_invoked = 0;
+    assert(!(a1 != s) && test::op_invoked == 12);          test::op_invoked = 0;
+    assert( (a2 != s) && test::op_invoked == 12);          test::op_invoked = 0;
+    
+    assert( (b0 != s) && test::op_invoked == 13);          test::op_invoked = 0;
+    assert(!(b1 != s) && test::op_invoked == 13);          test::op_invoked = 0;
+    assert( (b2 != s) && test::op_invoked == 13);          test::op_invoked = 0;
+
+    assert( (c0 != s) && test::op_invoked == 14);          test::op_invoked = 0;
+    assert(!(c1 != s) && test::op_invoked == 14);          test::op_invoked = 0;
+    assert( (c2 != s) && test::op_invoked == 14);          test::op_invoked = 0;
+
+    // rewrite of secondary (homogenous <,<=,>,>=), return bool
+    assert( (s0 <  s) && test::op_invoked == 21);          test::op_invoked = 0;
+    assert( (s1 <= s) && test::op_invoked == 21);          test::op_invoked = 0;
+    assert( (s2 >  s) && test::op_invoked == 21);          test::op_invoked = 0;
+
+    // rewrite of secondary (heterogenous <,<=,>,>=), return bool
+    assert( (a0 <  s) && test::op_invoked == 22);          test::op_invoked = 0;
+    assert( (a1 <= s) && test::op_invoked == 22);          test::op_invoked = 0;
+    assert( (a2 >  s) && test::op_invoked == 22);          test::op_invoked = 0;
+
+    assert( (b0 <  s) && test::op_invoked == 23);          test::op_invoked = 0;
+    assert( (b1 <= s) && test::op_invoked == 23);          test::op_invoked = 0;
+    assert( (b2 >  s) && test::op_invoked == 23);          test::op_invoked = 0;
+
+    assert( (c0 <  s) && test::op_invoked == 24);          test::op_invoked = 0;
+    assert( (c1 <= s) && test::op_invoked == 24);          test::op_invoked = 0;
+    assert( (c2 >  s) && test::op_invoked == 24);          test::op_invoked = 0;
     print_summary("spaceship operator", "succeeded");
 }
