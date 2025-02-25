@@ -37,13 +37,13 @@ namespace alg
 
 
     public:
-        lockfree_queue() noexcept : array{}, next_write(0), next_read(0)
+        lockfree_queue() noexcept : m_array{}, m_next_write(0), m_next_read(0)
         {
             for(std::uint32_t n=0; n!=N; ++n)
             {
-                array[n].state.store(n); 
-                // empty  cell when array[n%N].state == n
-                // filled cell when array[n%N].state == n+1
+                m_array[n].state.store(n); 
+                // empty  cell when m_array[n%N].state == n
+                // filled cell when m_array[n%N].state == n+1
             }
         }
 
@@ -77,10 +77,10 @@ namespace alg
     private:
         static constexpr std::uint32_t size = N;
         static constexpr std::uint32_t mask = N-1;
-        std::array<cell, size> array;
-        alignas(64) std::atomic<std::uint32_t> next_write;
-        alignas(64) std::atomic<std::uint32_t> next_read;
-        alignas(64) std::uint32_t padding;
+        std::array<cell, size> m_array;
+        alignas(64) std::atomic<std::uint32_t> m_next_write;
+        alignas(64) std::atomic<std::uint32_t> m_next_read;
+        alignas(64) std::uint32_t m_padding;
         // padding is added to avoid other threads sharing same cacheline as last member
     };
 
@@ -110,9 +110,9 @@ namespace alg
     {
         while(true)
         {
-            auto n = next_write.load(std::memory_order_acquire);
+            auto n = m_next_write.load(std::memory_order_acquire);
             auto m = n & mask;
-            auto s = array[m].state.load(std::memory_order_acquire);
+            auto s = m_array[m].state.load(std::memory_order_acquire);
 
             if (s < n) 
             {
@@ -120,10 +120,10 @@ namespace alg
             }
             else if (s == n)
             {
-                if (next_write.compare_exchange_strong(n,n+1,std::memory_order_relaxed))
+                if (m_next_write.compare_exchange_strong(n,n+1,std::memory_order_relaxed))
                 {
-                    new (&(array[m].value)) T{std::forward<ARGS>(args)...}; 
-                    array[m].state.store(n+1, std::memory_order_release);
+                    new (&(m_array[m].value)) T{std::forward<ARGS>(args)...}; 
+                    m_array[m].state.store(n+1, std::memory_order_release);
                     return true;
                 }
                 else
@@ -143,10 +143,10 @@ namespace alg
     {
         while(true)
         {
-            auto n  = next_read.load(std::memory_order_acquire);
+            auto n  = m_next_read.load(std::memory_order_acquire);
             auto n1 = n+1;
             auto m  = n & mask;
-            auto s  = array[m].state.load(std::memory_order_acquire);
+            auto s  = m_array[m].state.load(std::memory_order_acquire);
 
             if (s < n1) 
             {
@@ -154,10 +154,10 @@ namespace alg
             }
             else if (s == n1)
             {
-                if (next_read.compare_exchange_strong(n,n1,std::memory_order_relaxed))
+                if (m_next_read.compare_exchange_strong(n,n1,std::memory_order_relaxed))
                 {
-                    std::optional<T> x = std::make_optional(std::move_if_noexcept(array[m].value)); 
-                    array[m].state.store(n+N, std::memory_order_release);
+                    std::optional<T> x = std::make_optional(std::move_if_noexcept(m_array[m].value)); 
+                    m_array[m].state.store(n+N, std::memory_order_release);
                     return x; 
                 }
                 else
@@ -200,7 +200,7 @@ namespace alg
     template<typename T, std::uint32_t N, typename CONSTRAINT>
     std::uint32_t lockfree_queue<T, N, CONSTRAINT>::peek_size() const noexcept
     {
-        return next_write.load(std::memory_order_seq_cst) - next_read.load(std::memory_order_seq_cst);
+        return m_next_write.load(std::memory_order_seq_cst) - m_next_read.load(std::memory_order_seq_cst);
     }
 
     template<typename T, std::uint32_t N, typename CONSTRAINT> 
@@ -209,12 +209,12 @@ namespace alg
     {
         output.clear();
 
-        std::uint32_t nw = next_write.load();
-        std::uint32_t nr = next_read.load();
+        std::uint32_t nw = m_next_write.load();
+        std::uint32_t nr = m_next_read.load();
         for(std::uint32_t n=nr; n!=nw; ++n)
         {
             auto m = n & mask;
-            output.push_back(array[m].value);
+            output.push_back(m_array[m].value);
         }
     }
 }

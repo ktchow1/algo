@@ -8,21 +8,21 @@ namespace alg
     // ******************************************************** //
     // *** Wrappers supporting CTAD without explicity guide *** //
     // ******************************************************** //
-    template<typename F> 
+    template<typename FCT> 
     struct filter    
     { 
-        F impl; 
+        FCT value; 
     };
 
-    template<typename F> 
+    template<typename FCT> 
     struct transform 
     { 
-        F impl; 
+        FCT value; 
     };
     
     struct take      
     { 
-        std::uint32_t impl; 
+        std::uint32_t value; 
     };
 
 
@@ -35,12 +35,18 @@ namespace alg
     public:
         using T = typename C::value_type;
 
+        struct take_counter
+        {
+            std::uint32_t m_count;
+            std::uint32_t m_limit;
+        };
+
+    public:
         lazy_view(C& container) : i0(container.begin()), 
                                   i1(container.end()),
-                                  predicate{},
-                                  transformation{},
-                                  taken_count{0},
-                                  taken_total{0}
+                                  m_filter{},
+                                  m_transform{},
+                                  m_take{}
         {
         }
 
@@ -51,12 +57,12 @@ namespace alg
             C output;
             for(auto i=i0; i!=i1; ++i)
             {
-                if (predicate(*i))
+                if (m_filter(*i))
                 {
-                    output.push_back(transformation(*i));
+                    output.push_back(m_transform(*i));
 
-                    ++taken_count;
-                    if (taken_count == taken_total) return output;
+                    ++m_take.m_count;
+                    if (m_take.m_count == m_take.m_limit) return output;
                 }
             }
             return output;
@@ -75,21 +81,21 @@ namespace alg
     public:
         typename C::iterator    i0;
         typename C::iterator    i1;    
-        std::function<bool(T)>  predicate;
-        std::function<T(T)>     transformation;
-        std::uint32_t           taken_count;
-        std::uint32_t           taken_total;
+
+        std::function<bool(T)>  m_filter;
+        std::function<T(T)>     m_transform;
+        take_counter            m_take;
     };
 
 
     // ***************************************************************************************************** //
     // *** The pipeline expression (in test) resolves into the following operators, returning lazy_view. *** //
     // ***************************************************************************************************** //
-    template<typename C, typename F>
-    lazy_view<C> operator | (C& lhs, filter<F> rhs)
+    template<typename C, typename FCT>
+    lazy_view<C> operator | (C& lhs, filter<FCT> rhs)
     {
         lazy_view<C> output(lhs);
-        output.predicate = rhs.impl; 
+        output.m_filter = rhs.value; 
         return output;
     }
 
@@ -100,25 +106,25 @@ namespace alg
     // ***************** //
     // *** Cascading *** //
     // ***************** //
-    template<typename C, typename F>
-    lazy_view<C> operator | (lazy_view<C> lhs, filter<F> rhs)
+    template<typename C, typename FCT>
+    lazy_view<C> operator | (lazy_view<C> lhs, filter<FCT> rhs)
     {
-        lhs.predicate = rhs.impl; 
+        lhs.m_filter = rhs.value; 
         return lhs;
     }
 
-    template<typename C, typename F>
-    lazy_view<C> operator | (lazy_view<C> lhs, transform<F> rhs)
+    template<typename C, typename FCT>
+    lazy_view<C> operator | (lazy_view<C> lhs, transform<FCT> rhs)
     {
-        lhs.transformation = rhs.impl; 
+        lhs.m_transform = rhs.value; 
         return lhs;
     }
 
     template<typename C>
     lazy_view<C> operator | (lazy_view<C> lhs, take rhs)
     {
-        lhs.taken_count = 0;
-        lhs.taken_total = rhs.impl; 
+        lhs.m_take.m_count = 0;
+        lhs.m_take.m_limit = rhs.value; 
         return lhs;
     }
 }

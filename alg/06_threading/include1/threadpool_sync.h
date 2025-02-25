@@ -25,11 +25,11 @@ namespace alg
     class threadpool_sync
     {
     public:
-        explicit threadpool_sync(std::uint32_t num_threads) : run(true), threads(), task_queue(), sync() 
+        explicit threadpool_sync(std::uint32_t num_threads) : m_run(true), m_threads(), m_task_queue(), m_sync() 
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                threads.emplace_back(std::thread(&threadpool_sync<T,Q>::thread_fct, this, n));
+                m_threads.emplace_back(std::thread(&threadpool_sync<T,Q>::thread_fct, this, n));
             }
         }
 
@@ -51,7 +51,7 @@ namespace alg
         // ****************************************** //
         threadpool_sync(std::uint32_t num_threads, const std::vector<std::uint32_t>& affinity) : threadpool_sync(num_threads)
         {   
-            for(auto& x:threads) 
+            for(auto& x:m_threads) 
             {
                 set_thread_affinity(x.native_handle(), affinity);
                 set_thread_policy  (x.native_handle(), SCHED_RR);
@@ -66,12 +66,12 @@ namespace alg
         // **************************** //
         void stop()
         {
-            run.store(false);
-            for(const auto& x:threads) 
+            m_run.store(false);
+            for(const auto& x:m_threads) 
             {
-                sync.notify();
+                m_sync.notify();
             }
-            for(auto& x:threads) 
+            for(auto& x:m_threads) 
             {
                 if (x.joinable()) x.join();
             }
@@ -84,9 +84,9 @@ namespace alg
         template<typename... ARGS>
         bool emplace_task(ARGS&&... args)
         {
-            if (task_queue.emplace(std::forward<ARGS>(args)...))
+            if (m_task_queue.emplace(std::forward<ARGS>(args)...))
             {
-                sync.notify(); 
+                m_sync.notify(); 
                 return true;
             }
             else
@@ -98,8 +98,8 @@ namespace alg
         template<typename... ARGS>
         void emplace_task_until_success(ARGS&&... args)
         {
-            while(!task_queue.emplace(std::forward<ARGS>(args)...));
-            sync.notify(); 
+            while(!m_task_queue.emplace(std::forward<ARGS>(args)...));
+            m_sync.notify(); 
         }
 
     private:
@@ -121,11 +121,11 @@ namespace alg
             // 1. avoid repeated lock & unlock on peeking queue size
             // 2. avoid lost notification on stopping threadpool
             // ****************************************************** //
-            while(run.load())
+            while(m_run.load())
             {
-                sync.wait();
+                m_sync.wait();
 
-                auto task = task_queue.pop();
+                auto task = m_task_queue.pop();
                 if (task)
                 {
                     (*task)(thread_id);
@@ -133,9 +133,9 @@ namespace alg
             }
 
             // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
-            while(task_queue.peek_size() > 0)
+            while(m_task_queue.peek_size() > 0)
             {
-                auto task = task_queue.pop();
+                auto task = m_task_queue.pop();
                 if (task)
                 {
                     (*task)(thread_id);
@@ -144,9 +144,9 @@ namespace alg
         }
 
     private:
-        std::atomic<bool> run;
-        std::vector<std::thread> threads;
-        Q<T> task_queue;
-        S sync;
+        std::atomic<bool> m_run;
+        std::vector<std::thread> m_threads;
+        Q<T> m_task_queue;
+        S m_sync;
     };
 }

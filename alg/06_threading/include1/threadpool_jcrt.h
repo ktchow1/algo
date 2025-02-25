@@ -18,14 +18,14 @@ namespace alg
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                jthreads.emplace_back(std::jthread(&threadpool_jcrt::thread_fct, this, s_source.get_token(), n));
+                m_jthreads.emplace_back(std::jthread(&threadpool_jcrt::thread_fct, this, m_stop_source.get_token(), n));
             }
         }
 
         void stop()
         {
-            s_source.request_stop();
-            for(auto& x:jthreads) x.join();
+            m_stop_source.request_stop();
+            for(auto& x:m_jthreads) x.join();
         }
 
     public:
@@ -41,10 +41,10 @@ namespace alg
         void add_task(const std::coroutine_handle<>& task)
         {
             {
-                std::lock_guard<std::mutex> lock(mutex);
-                task_queue.push(task);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_task_queue.push(task);
             }
-            condvar.notify_one();
+            m_condvar.notify_one();
         }
 
     private:
@@ -55,21 +55,21 @@ namespace alg
         {
             try
             {
-                while(!s_source.get_token().stop_requested())
+                while(!m_stop_source.get_token().stop_requested())
                 {
                     std::coroutine_handle<> task;
                     {
-                        std::unique_lock<std::mutex> lock(mutex);
-                        if (!condvar.wait(lock, s_token, [this]()
+                        std::unique_lock<std::mutex> lock(m_mutex);
+                        if (!m_condvar.wait(lock, s_token, [this]()
                         {
-                            return !task_queue.empty();
+                            return !m_task_queue.empty();
                         }))
                         {
                             break;
                         }
 
-                        task = std::move(task_queue.front());
-                        task_queue.pop();
+                        task = std::move(m_task_queue.front());
+                        m_task_queue.pop();
                     }
                     task();
 
@@ -78,13 +78,13 @@ namespace alg
                 }
 
                 // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
-                while(!task_queue.empty())
+                while(!m_task_queue.empty())
                 {
                     std::coroutine_handle<> task;
                     {
-                        std::lock_guard<std::mutex> lock(mutex);
-                        task = std::move(task_queue.front());
-                        task_queue.pop();
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        task = std::move(m_task_queue.front());
+                        m_task_queue.pop();
                     }
                     task();
 
@@ -99,12 +99,12 @@ namespace alg
         }
 
     private:
-        std::stop_source s_source;           
-        std::vector<std::jthread> jthreads;
-        std::queue<std::coroutine_handle<>> task_queue;
+        std::stop_source m_stop_source;           
+        std::vector<std::jthread> m_jthreads;
+        std::queue<std::coroutine_handle<>> m_task_queue;
 
     private:
-        mutable std::mutex mutex;
-        std::condition_variable_any condvar;
+        mutable std::mutex m_mutex;
+        std::condition_variable_any m_condvar;
     };
 }

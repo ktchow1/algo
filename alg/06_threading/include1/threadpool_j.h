@@ -17,7 +17,7 @@ namespace alg
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                jthreads.emplace_back(std::jthread(&threadpool_j::thread_fct, this, s_source.get_token(), n));
+                m_jthreads.emplace_back(std::jthread(&threadpool_j::thread_fct, this, m_stop_source.get_token(), n));
             }
         }
 
@@ -28,7 +28,7 @@ namespace alg
 
         void stop()
         {
-            s_source.request_stop();
+            m_stop_source.request_stop();
 
             // Unlike the threadpool::stop() :
             // * there is no condvar.notify_all(), because token is passed to condvar::wait()
@@ -42,10 +42,10 @@ namespace alg
         void add_task(const std::function<void(std::uint32_t)>& task)
         {
             {
-                std::lock_guard<std::mutex> lock(mutex);
-                task_queue.push(task);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_task_queue.push(task);
             }
-            condvar.notify_one();
+            m_condvar.notify_one();
         }
 
     private:
@@ -60,12 +60,12 @@ namespace alg
         {
             try
             {
-                while(!s_source.get_token().stop_requested())
+                while(!m_stop_source.get_token().stop_requested())
                 {
                     std::function<void(std::uint32_t)> task;
                     {
-                        std::unique_lock<std::mutex> lock(mutex);
-                        if (!condvar.wait(lock, s_token, [this]() { return !task_queue.empty(); })) // <--- Remark 1
+                        std::unique_lock<std::mutex> lock(m_mutex);
+                        if (!m_condvar.wait(lock, s_token, [this]() { return !m_task_queue.empty(); })) // <--- Remark 1
                         {
                             break; 
                         } 
@@ -75,11 +75,11 @@ namespace alg
                 }
 
                 // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
-                while(!task_queue.empty())
+                while(!m_task_queue.empty())
                 {
                     std::optional<std::function<void(std::uint32_t)>> task;
                     {
-                        std::lock_guard<std::mutex> lock(mutex);
+                        std::lock_guard<std::mutex> lock(m_mutex);
                         task = pop_task();    
                     }
                     if (task) 
@@ -100,10 +100,10 @@ namespace alg
         // ************************************** //
         std::optional<std::function<void(std::uint32_t)>> pop_task()
         {
-            if (!task_queue.empty())               
+            if (!m_task_queue.empty())               
             {
-                auto task = std::move(task_queue.front());
-                task_queue.pop();
+                auto task = std::move(m_task_queue.front());
+                m_task_queue.pop();
                 return task;
             }
             return std::nullopt;
@@ -111,18 +111,18 @@ namespace alg
 
         std::function<void(std::uint32_t)> pop_task_without_checking()
         {
-            auto task = std::move(task_queue.front());
-            task_queue.pop();
+            auto task = std::move(m_task_queue.front());
+            m_task_queue.pop();
             return task;
         }
 
     private:
-        std::stop_source s_source;           
-        std::vector<std::jthread> jthreads;
-        std::queue<std::function<void(std::uint32_t)>> task_queue;
+        std::stop_source m_stop_source;           
+        std::vector<std::jthread> m_jthreads;
+        std::queue<std::function<void(std::uint32_t)>> m_task_queue;
 
     private:
-        mutable std::mutex mutex;
-        std::condition_variable_any condvar;
+        mutable std::mutex m_mutex;
+        std::condition_variable_any m_condvar;
     };
 }

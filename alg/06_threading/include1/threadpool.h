@@ -13,11 +13,11 @@ namespace alg
     class threadpool
     {
     public:
-        explicit threadpool(std::uint32_t num_threads) : run(true)
+        explicit threadpool(std::uint32_t num_threads) : m_run(true)
         {
             for(std::uint32_t n=0; n!=num_threads; ++n)
             {
-                threads.emplace_back(std::thread(&threadpool::thread_fct, this, n));
+                m_threads.emplace_back(std::thread(&threadpool::thread_fct, this, n));
             }
         }
 
@@ -29,9 +29,9 @@ namespace alg
     public:
         void stop()
         {
-            run.store(false);
-            condvar.notify_all();
-            for(auto& x:threads)
+            m_run.store(false);
+            m_condvar.notify_all();
+            for(auto& x:m_threads)
             {
                 // BUG : Need to check joinable to avoid multi-join, otherwise it throws
                 if (x.joinable()) x.join();
@@ -45,10 +45,10 @@ namespace alg
         void add_task(const std::function<void(std::uint32_t)>& task) 
         {
             {
-                std::lock_guard<std::mutex> lock(mutex);
-                task_queue.push(task);
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_task_queue.push(task);
             }
-            condvar.notify_one();
+            m_condvar.notify_one();
         }
 
     private:
@@ -56,18 +56,18 @@ namespace alg
         // *** Consumer of tasks *** //
         // ************************* //    
         // [Remark 1]
-        // BUG : Missing "run.load()" leads to wakeup-miss on stop-request
+        // BUG : Missing "m_run.load()" leads to wakeup-miss on stop-request
 
         void thread_fct(std::uint32_t thread_id)
         {
             try 
             {
-                while(run.load())
+                while(m_run.load())
                 {
                     std::optional<std::function<void(std::uint32_t)>> task;
                     {
-                        std::unique_lock<std::mutex> lock(mutex);
-                        condvar.wait(lock, [this]() { return !task_queue.empty() || !run.load(); }); // <--- Remark 1
+                        std::unique_lock<std::mutex> lock(m_mutex);
+                        m_condvar.wait(lock, [this]() { return !m_task_queue.empty() || !m_run.load(); }); // <--- Remark 1
                         task = pop_task();
                     }
                     if (task) 
@@ -77,11 +77,11 @@ namespace alg
                 }
 
                 // STOP REQUESTED, ALL THREADS RUNNING, NO WAITING.
-                while(!task_queue.empty())                           // <--- one queue-empty-check before mutex
+                while(!m_task_queue.empty())                           // <--- one queue-empty-check before mutex
                 {
                     std::optional<std::function<void(std::uint32_t)>> task;
                     {
-                        std::lock_guard<std::mutex> lock(mutex);
+                        std::lock_guard<std::mutex> lock(m_mutex);
                         task = pop_task();                           // <--- one queue-empty-check after mutex
                     }
                     if (task) 
@@ -102,24 +102,24 @@ namespace alg
         // ************************************** //
         std::optional<std::function<void(std::uint32_t)>> pop_task()
         {
-            if (!task_queue.empty())               
+            if (!m_task_queue.empty())               
             {
-                auto task = std::move(task_queue.front());
-                task_queue.pop();
+                auto task = std::move(m_task_queue.front());
+                m_task_queue.pop();
                 return task;
             }
             return std::nullopt;
         }
 
     private:
-        std::atomic<bool> run;
-        std::vector<std::thread> threads;
-        std::queue<std::function<void(std::uint32_t)>> task_queue;
+        std::atomic<bool> m_run;
+        std::vector<std::thread> m_threads;
+        std::queue<std::function<void(std::uint32_t)>> m_task_queue;
 
     private:
         // *** Substitute for sync_primitive in alg::threadpool_sync *** //
-        mutable std::mutex mutex;
-        std::condition_variable condvar;
+        mutable std::mutex m_mutex;
+        std::condition_variable m_condvar;
     };
 }
 

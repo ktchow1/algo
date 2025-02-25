@@ -31,18 +31,18 @@ namespace alg
         template<typename... ARGS> 
         bool emplace(ARGS&&... args) noexcept
         {
-            std::lock_guard<LOCK> lock(impl);  
-            queue.emplace(std::forward<ARGS>(args)...);
+            std::lock_guard<LOCK> lock(m_impl);  
+            m_queue.emplace(std::forward<ARGS>(args)...);
             return true;
         }
 
         std::optional<T> pop() noexcept
         {
-            std::lock_guard<LOCK> lock(impl); 
-            if (queue.size() == 0) return std::nullopt;
+            std::lock_guard<LOCK> lock(m_impl); 
+            if (m_queue.size() == 0) return std::nullopt;
             
-            T output = std::move(queue.front());
-            queue.pop();
+            T output = std::move(m_queue.front());
+            m_queue.pop();
             return std::make_optional(output);
         }
 
@@ -69,14 +69,14 @@ namespace alg
     public:
         std::uint32_t peek_size() const noexcept
         {
-            std::lock_guard<LOCK> lock(impl);
-            return queue.size();
+            std::lock_guard<LOCK> lock(m_impl);
+            return m_queue.size();
         }
         
 
     private:
-        std::queue<T> queue;
-        mutable LOCK impl; // mutex or spinlock
+        std::queue<T> m_queue;
+        mutable LOCK m_impl; // mutex or spinlock
     };
 
     template<typename T>
