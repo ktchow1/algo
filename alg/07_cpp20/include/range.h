@@ -35,7 +35,9 @@ namespace alg
     public:
         using T = typename C::value_type;
 
-        struct take_counter
+        using  filt_type = std::function<bool(T)>;
+        using  tran_type = std::function<T(T)>;
+        struct take_type
         {
             std::uint32_t m_count;
             std::uint32_t m_limit;
@@ -79,12 +81,11 @@ namespace alg
         }
 
     public:
-        typename C::iterator    i0;
-        typename C::iterator    i1;    
-
-        std::function<bool(T)>  m_filter;
-        std::function<T(T)>     m_transform;
-        take_counter            m_take;
+        typename C::iterator i0;
+        typename C::iterator i1;    
+        filt_type m_filter;
+        tran_type m_transform;
+        take_type m_take;
     };
 
 
