@@ -5,7 +5,9 @@
 
 namespace alg
 {
-    // Filter, transform ... etc, are all wrappers, supporting CTAD without explicity guide.
+    // ******************************************************** //
+    // *** Wrappers supporting CTAD without explicity guide *** //
+    // ******************************************************** //
     template<typename F> 
     struct filter    
     { 
@@ -24,9 +26,9 @@ namespace alg
     };
 
 
-    // *********************************************** //
-    // *** A container view, with lazy calculation *** //
-    // *********************************************** //
+    // ********************************************** //
+    // *** A container view, with lazy evaluation *** //
+    // ********************************************** //
     template<typename C> // C = container
     struct lazy_view
     {
@@ -45,7 +47,7 @@ namespace alg
         // casting operator
         operator C()
         {
-            // This is lazy calculation.
+            // This is lazy evaluation.
             C output;
             for(auto i=i0; i!=i1; ++i)
             {
