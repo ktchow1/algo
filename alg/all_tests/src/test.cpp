@@ -70,12 +70,13 @@ void test_singleton();
 void test_synchronization();
 void test_promise_future();
 
-// *** 06_threading (container) *** //
+// *** 06_threading (mpmcq & threadpool) *** //
 void test_mpmcq();
 void test_threadpool();
 
 // *** 07_cpp20 *** //
 void test_spaceship();
+void test_range();
 
 
 
@@ -159,11 +160,14 @@ int main()
 //  test_singleton();
 //  test_synchronization();
 //  test_promise_future();
+
+//  banner("06_threading - mpmcq & threadpool");
 //  test_mpmcq();
 //  test_threadpool();
 
     banner("07_cpp20");  
     test_spaceship();
+    test_range();
 
 
 //  banner("08_interview");
