@@ -48,13 +48,40 @@ namespace alg
         using logic = std::variant<filter_type, transform_type, take_type>;
 
     public:
-        struct iterator
+        class iterator
         {
             iterator(lazy_view& view, iterator_type& iter) : m_view(view), m_iter(iter)
             {
-            //  if (invalid()) next_valid(); 
+                if (!is_valid()) next_valid(); 
             }
-            
+
+        public: 
+            void operator++()
+            {
+                next_valid();
+            }
+
+            bool operator==(const iterator& rhs) const
+            {
+                return m_iter == rhs.m_iter;
+            }
+
+            const T& operator*() const
+            {
+                return *m_iter;
+            }
+
+            T& operator*()
+            {
+                return *m_iter;
+            }
+
+        private:
+            bool is_valid() const noexcept
+            {
+                return true; 
+            }
+
             void next_valid()
             {
 /*              if (m_iter == m_view.m_end) return;
@@ -89,27 +116,7 @@ namespace alg
                 } */
             }
 
-            void operator++()
-            {
-                next_valid();
-            }
-
-            bool operator==(const iterator& rhs) const
-            {
-                return m_iter == rhs.m_iter;
-            }
-
-            const T& operator*() const
-            {
-                return *m_iter;
-            }
-
-            T& operator*()
-            {
-                return *m_iter;
-            }
-
-        public:
+        private:
             lazy_view&    m_view;
             iterator_type m_iter;
             T             m_value;
@@ -173,7 +180,12 @@ namespace alg
             return m_end;
         }
 
-    public:
+        void add_logic(const logic& x)
+        {
+            m_logics.push_back(x);
+        }
+
+    private:
         iterator_type      m_begin;
         iterator_type      m_end;    
         std::vector<logic> m_logics;
@@ -187,7 +199,7 @@ namespace alg
     lazy_view<C> operator | (C& lhs, const filter<FCT>& rhs)
     {
         lazy_view<C> output(lhs);
-        output.m_logics.push_back(typename lazy_view<C>::filter_type{rhs.value}); 
+        output.add_logic(typename lazy_view<C>::filter_type{rhs.value}); 
         return output;
     }
 
@@ -195,7 +207,7 @@ namespace alg
     lazy_view<C> operator | (C& lhs, const transform<FCT>& rhs)
     {
         lazy_view<C> output(lhs);
-        output.m_logics.push_back(typename lazy_view<C>::transform_type{rhs.value}); 
+        output.add_logic(typename lazy_view<C>::transform_type{rhs.value}); 
         return output;
     }
 
@@ -203,7 +215,7 @@ namespace alg
     lazy_view<C> operator | (C& lhs, const take& rhs)
     {
         lazy_view<C> output(lhs);
-        output.m_logics.push_back(typename lazy_view<C>::take_type{0, rhs.value}); 
+        output.add_logic(typename lazy_view<C>::take_type{0, rhs.value}); 
         return output;
     }
 
@@ -214,21 +226,21 @@ namespace alg
     template<typename C, typename FCT>
     lazy_view<C> operator | (lazy_view<C>&& lhs, const filter<FCT>& rhs) // Is "lhs" universal reference or rvalue reference?
     {
-        lhs.m_logics.push_back(typename lazy_view<C>::filter_type{rhs.value}); 
+        lhs.add_logic(typename lazy_view<C>::filter_type{rhs.value}); 
         return lhs;
     }
 
     template<typename C, typename FCT>
     lazy_view<C> operator | (lazy_view<C>&& lhs, const transform<FCT>& rhs)
     {
-        lhs.m_logics.push_back(typename lazy_view<C>::transform_type{rhs.value}); 
+        lhs.add_logic(typename lazy_view<C>::transform_type{rhs.value}); 
         return lhs;
     }
 
     template<typename C>
     lazy_view<C> operator | (lazy_view<C>&& lhs, const take& rhs)
     {
-        lhs.m_logics.push_back(typename lazy_view<C>::take_type{0, rhs.value});
+        lhs.add_logic(typename lazy_view<C>::take_type{0, rhs.value});
         return lhs;
     }
 }
