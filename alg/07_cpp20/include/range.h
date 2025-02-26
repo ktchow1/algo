@@ -35,6 +35,7 @@ namespace alg
     {
     public:
         using              T = typename C::value_type;
+        using  iterator_type = typename C::iterator;
         using    filter_type = std::function<bool(T)>;
         using transform_type = std::function<T(T)>;
 
@@ -46,6 +47,73 @@ namespace alg
 
         using logic = std::variant<filter_type, transform_type, take_type>;
 
+    public:
+        struct iterator
+        {
+            iterator(lazy_view& view, iterator_type& iter) : m_view(view), m_iter(iter)
+            {
+            //  if (invalid()) next_valid(); 
+            }
+            
+            void next_valid()
+            {
+/*              if (m_iter == m_view.m_end) return;
+                ++  m_iter;
+                m_value = *m_iter;
+
+
+                bool valid = true;
+                for(auto& logic:m_view.m_logics)
+                { 
+                    if (logic.index() == 0)
+                    {
+                        if (!std::get<0>(logic)(m_value)) valid = false;
+                    }
+                    else if (logic.index() == 1)
+                    {
+                        m_value = std::get<1>(logic)(m_value);
+                    }
+                    else if (logic.index() == 2)
+                    {
+                        if (std::get<2>(logic).m_count == 
+                            std::get<2>(logic).m_limit) 
+                        {
+                            m_iter = m_view.m_end;
+                            return; 
+                        }
+                        if (valid)
+                        {
+                            ++std::get<2>(logic).m_count;
+                        }
+                    }
+                } */
+            }
+
+            void operator++()
+            {
+                next_valid();
+            }
+
+            bool operator==(const iterator& rhs) const
+            {
+                return m_iter == rhs.m_iter;
+            }
+
+            const T& operator*() const
+            {
+                return *m_iter;
+            }
+
+            T& operator*()
+            {
+                return *m_iter;
+            }
+
+        public:
+            lazy_view&    m_view;
+            iterator_type m_iter;
+            T             m_value;
+        };
 
     public:
         lazy_view(C& container) : m_begin(container.begin()), m_end(container.end()), m_logics{}
@@ -61,11 +129,13 @@ namespace alg
             for(auto iter=m_begin; iter!=m_end; ++iter)
             {
                 auto x = *iter;
+                bool add_x = true;
+
                 for(auto& logic:m_logics)
                 { 
                     if (logic.index() == 0)
                     {
-                        if (!std::get<0>(logic)(x)) break; // break inner-for, but continue outer-for
+                        if (!std::get<0>(logic)(x)) add_x = false;
                     }
                     else if (logic.index() == 1)
                     {
@@ -74,9 +144,19 @@ namespace alg
                     else if (logic.index() == 2)
                     {
                         if (std::get<2>(logic).m_count == 
-                            std::get<2>(logic).m_limit) return output;
-                        ++  std::get<2>(logic).m_count;
+                            std::get<2>(logic).m_limit) 
+                        {
+                            return output; 
+                        }
+                        if (add_x)
+                        {
+                            ++std::get<2>(logic).m_count;
+                        }
                     }
+                }
+
+                if (add_x)
+                {
                     output.push_back(x);
                 }
             } 
@@ -94,15 +174,15 @@ namespace alg
         }
 
     public:
-        typename C::iterator m_begin;
-        typename C::iterator m_end;    
-        std::vector<logic>   m_logics;
+        iterator_type      m_begin;
+        iterator_type      m_end;    
+        std::vector<logic> m_logics;
     };
 
 
-    // ***************************************************************************************************** //
-    // *** The pipeline expression (in test) resolves into the following operators, returning lazy_view. *** //
-    // ***************************************************************************************************** //
+    // *********************************** //
+    // *** Pipe for creating lazy_view *** //
+    // *********************************** //
     template<typename C, typename FCT>
     lazy_view<C> operator | (C& lhs, const filter<FCT>& rhs)
     {
@@ -111,13 +191,26 @@ namespace alg
         return output;
     }
 
-    // more ...
+    template<typename C, typename FCT>
+    lazy_view<C> operator | (C& lhs, const transform<FCT>& rhs)
+    {
+        lazy_view<C> output(lhs);
+        output.m_logics.push_back(typename lazy_view<C>::transform_type{rhs.value}); 
+        return output;
+    }
+
+    template<typename C>
+    lazy_view<C> operator | (C& lhs, const take& rhs)
+    {
+        lazy_view<C> output(lhs);
+        output.m_logics.push_back(typename lazy_view<C>::take_type{0, rhs.value}); 
+        return output;
+    }
 
 
-
-    // ***************** //
-    // *** Cascading *** //
-    // ***************** //
+    // ************************** //
+    // *** Pipe for cascading *** //
+    // ************************** //
     template<typename C, typename FCT>
     lazy_view<C> operator | (lazy_view<C>&& lhs, const filter<FCT>& rhs) // Is "lhs" universal reference or rvalue reference?
     {
