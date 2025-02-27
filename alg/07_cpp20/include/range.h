@@ -27,30 +27,41 @@ namespace alg
     };
 
 
-    // ********************** //
-    // *** Container view *** //
-    // ********************** //
+    // ***************** //
+    // *** lazy_view *** //
+    // ***************** //
     template<typename C> // C = container
     struct lazy_view
     {
     public:
         using              T = typename C::value_type;
-        using  iterator_type = typename C::iterator;
         using    filter_type = std::function<bool(T)>;
         using transform_type = std::function<T(T)>;
 
         struct take_type
         {
-            std::uint32_t m_count;
-            std::uint32_t m_limit;
+            mutable std::uint32_t m_count; // why mutable? it can be updated for const logic in remark 1
+            const   std::uint32_t m_limit;
+
+            bool is_within_limit_and_increment() const // why const? it can be updated for const logic in remark 1
+            {
+                bool ans = m_count < m_limit;
+                if (ans) ++m_count;
+                return ans;
+            }
         }; 
 
         using logic = std::variant<filter_type, transform_type, take_type>;
+        friend class lazy_view_iterator;
 
-    public:
-        class iterator
+
+        // ************************** //
+        // *** lazy_view_iterator *** //
+        // ************************** //
+        class lazy_view_iterator
         {
-            iterator(lazy_view& view, iterator_type& iter) : m_view(view), m_iter(iter)
+        public:
+            lazy_view_iterator(const lazy_view& view, const C::iterator& iter) : m_view(view), m_iter(iter)
             {
                 if (!is_valid()) next_valid(); 
             }
@@ -61,65 +72,95 @@ namespace alg
                 next_valid();
             }
 
-            bool operator==(const iterator& rhs) const
+            bool operator==(const lazy_view_iterator& rhs) const
             {
                 return m_iter == rhs.m_iter;
             }
 
             const T& operator*() const
             {
-                return *m_iter;
-            }
-
-            T& operator*()
-            {
-                return *m_iter;
+                return m_value;
             }
 
         private:
-            bool is_valid() const noexcept
+            bool is_valid() 
             {
-                return true; 
-            }
+                // *** 1. check end *** //
+                if (m_iter == m_view.m_end) return true;
 
-            void next_valid()
-            {
-/*              if (m_iter == m_view.m_end) return;
-                ++  m_iter;
+                // *** 2. get value *** //
                 m_value = *m_iter;
 
-
-                bool valid = true;
+                // *** 3. apply logics *** //
                 for(auto& logic:m_view.m_logics)
                 { 
                     if (logic.index() == 0)
                     {
-                        if (!std::get<0>(logic)(m_value)) valid = false;
+                        if (!std::get<0>(logic)(m_value)) 
+                        {
+                            return false;
+                        }
                     }
                     else if (logic.index() == 1)
                     {
-                        m_value = std::get<1>(logic)(m_value);
+                       m_value = std::get<1>(logic)(m_value);
                     }
                     else if (logic.index() == 2)
                     {
-                        if (std::get<2>(logic).m_count == 
-                            std::get<2>(logic).m_limit) 
+                        if (!std::get<2>(logic).is_within_limit_and_increment()) 
                         {
                             m_iter = m_view.m_end;
-                            return; 
-                        }
-                        if (valid)
-                        {
-                            ++std::get<2>(logic).m_count;
+                            return false; 
                         }
                     }
-                } */
+                } 
+                return true;
+            }
+
+            void next_valid()
+            {
+                while(true)
+                {
+                    // *** 1. check end *** //
+                    if (m_iter == m_view.m_end) return;
+
+                    // *** 2. get value *** //
+                    ++m_iter;
+                    m_value = *m_iter;
+
+                    // *** 3. apply logics *** //
+                    bool filtered_away = false;
+                    for(auto& logic:m_view.m_logics)
+                    { 
+                        if (logic.index() == 0)
+                        {
+                            if (!std::get<0>(logic)(m_value)) 
+                            {
+                                filtered_away = true;
+                                break; // break all logics, continue to next element
+                            }
+                        }
+                        else if (logic.index() == 1)
+                        {
+                            m_value = std::get<1>(logic)(m_value);
+                        }
+                        else if (logic.index() == 2)
+                        {
+                            if (!std::get<2>(logic).is_within_limit_and_increment()) 
+                            {
+                                m_iter = m_view.m_end;
+                                return; 
+                            }
+                        }
+                    } 
+                    if (!filtered_away) return;
+                }
             }
 
         private:
-            lazy_view&    m_view;
-            iterator_type m_iter;
-            T             m_value;
+            const lazy_view& m_view;
+            C::iterator      m_iter;
+            T                m_value;
         };
 
     public:
@@ -133,51 +174,21 @@ namespace alg
         operator C()
         {
             C output;
-            for(auto iter=m_begin; iter!=m_end; ++iter)
+            for(auto iter=begin(); iter!=end(); ++iter)
             {
-                auto x = *iter;
-                bool add_x = true;
-
-                for(auto& logic:m_logics)
-                { 
-                    if (logic.index() == 0)
-                    {
-                        if (!std::get<0>(logic)(x)) add_x = false;
-                    }
-                    else if (logic.index() == 1)
-                    {
-                        x = std::get<1>(logic)(x);
-                    }
-                    else if (logic.index() == 2)
-                    {
-                        if (std::get<2>(logic).m_count == 
-                            std::get<2>(logic).m_limit) 
-                        {
-                            return output; 
-                        }
-                        if (add_x)
-                        {
-                            ++std::get<2>(logic).m_count;
-                        }
-                    }
-                }
-
-                if (add_x)
-                {
-                    output.push_back(x);
-                }
-            } 
+                output.push_back(*iter);
+            }
             return output;
         }
 
-        auto begin() const // Todo : not completed
+        auto begin() const 
         {
-            return m_begin;
+            return lazy_view_iterator(*this, m_begin);
         }
 
         auto end() const 
         {
-            return m_end;
+            return lazy_view_iterator(*this, m_end);
         }
 
         void add_logic(const logic& x)
@@ -186,8 +197,8 @@ namespace alg
         }
 
     private:
-        iterator_type      m_begin;
-        iterator_type      m_end;    
+        C::iterator        m_begin;
+        C::iterator        m_end;    
         std::vector<logic> m_logics;
     };
 
