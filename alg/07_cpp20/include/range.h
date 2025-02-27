@@ -83,15 +83,38 @@ namespace alg
             }
 
         private:
+            enum class logic_output
+            {
+                ok, filtered_away, reach_limit
+            };
+
             bool is_valid() 
             {
-                // *** 1. check end *** //
                 if (m_iter == m_view.m_end) return true;
 
-                // *** 2. get value *** //
                 m_value = *m_iter;
+                return apply_logic();
+            }
 
-                // *** 3. apply logics *** //
+            void next_valid()
+            {
+                while(true)
+                {
+                    if (m_iter == m_view.m_end) return;
+
+                    ++m_iter;
+                    m_value = *m_iter;
+                    if (apply_logic()) return;
+                }
+            }
+
+        private:
+            // ******************************************************//
+            // return  true : caller can stop iterating
+            // return false : caller needs to iterate to next element 
+            // ******************************************************//
+            bool apply_logic()
+            {
                 for(auto& logic:m_view.m_logics)
                 { 
                     if (logic.index() == 0)
@@ -103,58 +126,18 @@ namespace alg
                     }
                     else if (logic.index() == 1)
                     {
-                       m_value = std::get<1>(logic)(m_value);
+                        m_value = std::get<1>(logic)(m_value);
                     }
                     else if (logic.index() == 2)
                     {
                         if (!std::get<2>(logic).is_within_limit_and_increment()) 
                         {
                             m_iter = m_view.m_end;
-                            return false; 
+                            return true; 
                         }
                     }
                 } 
                 return true;
-            }
-
-            void next_valid()
-            {
-                while(true)
-                {
-                    // *** 1. check end *** //
-                    if (m_iter == m_view.m_end) return;
-
-                    // *** 2. get value *** //
-                    ++m_iter;
-                    m_value = *m_iter;
-
-                    // *** 3. apply logics *** //
-                    bool filtered_away = false;
-                    for(auto& logic:m_view.m_logics)
-                    { 
-                        if (logic.index() == 0)
-                        {
-                            if (!std::get<0>(logic)(m_value)) 
-                            {
-                                filtered_away = true;
-                                break; // break all logics, continue to next element
-                            }
-                        }
-                        else if (logic.index() == 1)
-                        {
-                            m_value = std::get<1>(logic)(m_value);
-                        }
-                        else if (logic.index() == 2)
-                        {
-                            if (!std::get<2>(logic).is_within_limit_and_increment()) 
-                            {
-                                m_iter = m_view.m_end;
-                                return; 
-                            }
-                        }
-                    } 
-                    if (!filtered_away) return;
-                }
             }
 
         private:
