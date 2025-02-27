@@ -39,9 +39,19 @@ namespace alg
         using transform_type = std::function<T(T)>;
 
         struct take_type
-        {
-            mutable std::uint32_t m_count; // why mutable? see Remark 1
-            const   std::uint32_t m_limit;
+        { 
+            // Todo : putting m_count here is not good, since :
+            //
+            // * m_count is made mutable because of remark 1A
+            // * contruct std::vector from alg::lazy_view once
+            // * contruct std::vector from alg::lazy_view again
+            // * the 2 vectors will be different, which does not make sense
+            // * the 2nd vector is empty, as m_count == m_limit 
+            //
+            // solution : lazy_view_iterator owns a copy of lazy_view, see remark 1B 
+            //
+            mutable std::uint32_t m_count;
+            const   std::uint32_t m_limit;  
         }; 
 
         using logic = std::variant<filter_type, transform_type, take_type>;
@@ -123,14 +133,15 @@ namespace alg
                             m_iter = m_view.m_end;
                             return true; 
                         }
-                        ++std::get<2>(logic).m_count; // Remark 1
+                        ++std::get<2>(logic).m_count; // Remark 1A
                     }
                 } 
                 return true;
             }
 
         private:
-            const lazy_view& m_view;
+        //  const lazy_view& m_view; // Remark 1B
+            lazy_view        m_view;
             C::iterator      m_iter;
             T                m_value;
         };

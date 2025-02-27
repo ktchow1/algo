@@ -286,6 +286,16 @@ bool compare(const CONTAINER& c0, const CONTAINER& c1)
     return true;
 }
 
+template<typename T, typename VIEW0, typename VIEW1> // Todo : T can be deduced from VIEW0 & VIEW1
+bool compare(VIEW0& v0, VIEW1& v1)
+{
+    std::vector<T> vec0; 
+    std::vector<T> vec1; 
+    for(const auto& x:v0) vec0.push_back(x);
+    for(const auto& x:v1) vec1.push_back(x);
+    return compare(vec0, vec1);
+}
+
 
 // **************** //
 // *** Printing *** //
