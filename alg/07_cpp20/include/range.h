@@ -40,15 +40,8 @@ namespace alg
 
         struct take_type
         {
-            mutable std::uint32_t m_count; // why mutable? it can be updated for const logic in remark 1
+            mutable std::uint32_t m_count; // why mutable? see Remark 1
             const   std::uint32_t m_limit;
-
-            bool is_within_limit_and_increment() const // why const? it can be updated for const logic in remark 1
-            {
-                bool ans = m_count < m_limit;
-                if (ans) ++m_count;
-                return ans;
-            }
         }; 
 
         using logic = std::variant<filter_type, transform_type, take_type>;
@@ -83,11 +76,6 @@ namespace alg
             }
 
         private:
-            enum class logic_output
-            {
-                ok, filtered_away, reach_limit
-            };
-
             bool is_valid() 
             {
                 if (m_iter == m_view.m_end) return true;
@@ -108,7 +96,6 @@ namespace alg
                 }
             }
 
-        private:
             // ******************************************************//
             // return  true : caller can stop iterating
             // return false : caller needs to iterate to next element 
@@ -130,11 +117,13 @@ namespace alg
                     }
                     else if (logic.index() == 2)
                     {
-                        if (!std::get<2>(logic).is_within_limit_and_increment()) 
+                        if (std::get<2>(logic).m_count >= 
+                            std::get<2>(logic).m_limit)
                         {
                             m_iter = m_view.m_end;
                             return true; 
                         }
+                        ++std::get<2>(logic).m_count; // Remark 1
                     }
                 } 
                 return true;
