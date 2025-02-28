@@ -26,6 +26,7 @@ void test_dp_matrix_only();
 void test_cast();
 void test_constexpr();
 void test_constexpr_map();
+void test_exception();
 void test_memory_allocator();
 void test_memory_deleter();
 void test_memory_new_operator();
@@ -113,10 +114,11 @@ int main()
 //  test_dp_matrix_and_graph();
 //  test_dp_matrix_only();  
     
-//  banner("04_fundalmental");
+    banner("04_fundalmental");
 //  test_cast();
 //  test_constexpr();
 //  test_constexpr_map();
+    test_exception();
 //  test_memory_allocator();
 //  test_memory_deleter();
 //  test_memory_new_operator();
