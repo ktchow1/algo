@@ -3,6 +3,49 @@
 #include<cassert>
 #include<utility.h>
 
+// ********************************************************************* //
+// 1. define == and <=> (for homogenous input)
+//    T ==  T that returns bool
+//    T <=> T that returns ordering
+//
+// 2. define == and <=> (for heterogenous input)
+//    T ==  X that returns bool
+//    T <=> X that returns ordering
+//
+// 3. rewriting of secondary operator (for homogenous input)
+//    T != T that returns !(T == T)
+//    T >= T that returns (T <=> T) >= 0
+//    T <= T that returns (T <=> T) <= 0
+//    T >  T that returns (T <=> T) >  0
+//    T <  T that returns (T <=> T) <  0
+//
+// 4. rewriting of secondary operator (for heterogenous input)
+//    T != X that returns !(X == T)
+//    T >= X that returns (X <=> T) >= 0
+//    T <= X that returns (X <=> T) <= 0
+//    T >  X that returns (X <=> T) >  0
+//    T <  X that returns (X <=> T) <  0
+//
+// 5. reversing of primary operator (for heterogenous input)     
+//    X ==  T that returns T == X
+//    X !=  T that returns T != X
+//    X <=> T that returns 0 <=> (T <=> X) 
+//    X >=  T that returns T <= X
+//    X <=  T that returns T >= X
+//    X >   T that returns T <  X
+//    X <   T that returns T >  X
+//
+// As a result 4 operators into step 1&2 becomes 21 operators in step 5.
+// ********************************************************************* //
+// Solve 3 problems : 
+// 1. no need declare 21 operators
+// 2. rewrite ensure 
+//    <= and >  are complement 
+//    >= and <  are complement
+//    == and != are complement
+// 3. elementwise comparison is faster
+// ********************************************************************* //
+
 
 namespace test
 {
