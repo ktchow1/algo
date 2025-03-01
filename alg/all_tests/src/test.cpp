@@ -78,6 +78,7 @@ void test_threadpool();
 // *** 07_cpp20 *** //
 void test_spaceship();
 void test_range();
+void test_concepts();
 
 
 
@@ -114,11 +115,11 @@ int main()
 //  test_dp_matrix_and_graph();
 //  test_dp_matrix_only();  
     
-    banner("04_fundalmental");
+//  banner("04_fundalmental");
 //  test_cast();
 //  test_constexpr();
 //  test_constexpr_map();
-    test_exception();
+//  test_exception();
 //  test_memory_allocator();
 //  test_memory_deleter();
 //  test_memory_new_operator();
@@ -170,6 +171,7 @@ int main()
     banner("07_cpp20");  
     test_spaceship();
     test_range();
+    test_concepts();
 
 
 //  banner("08_interview");

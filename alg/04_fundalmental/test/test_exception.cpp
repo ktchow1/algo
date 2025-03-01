@@ -7,6 +7,21 @@
 #include<utility.h>
 
 
+// *************************************************************************** //
+// [Interview question]
+// Why move semantics function are usually declared "noexcept", but ...
+// why copy semantics function are usually NOT declared so ?
+//
+// Answer : 
+// 1. Move semantics is transfer ownership of resources without deep copying 
+//    or allocating, it is low cost & low risk, hence usually "noexcept".
+//
+// 2. In absence of "noexcept" in std::vector<T>::push_back(T&&)
+//    it will fallback to copy in std::vector<T>::push_back(const T&)
+//    which increases unexpected time and risk without acknowledging caller
+// *************************************************************************** //
+
+
 namespace test
 {
     std::vector<std::uint32_t> invoke_seq;
@@ -87,13 +102,16 @@ namespace test
         }
     }
 
-    // ************************************************************************** //
+    // *************************************************************************** //
     // Each thread has its own execution context, a thread cannot catch exception 
     // thrown from another thread, unless we do exception propagation using :
     //
     // - std::exception_ptr 
     // - std::current_exception
-    // ************************************************************************** //
+    //
+    // There is no direct conversion between std::exception and std::exception_ptr
+    // we need to throw one of them, catch it as another type.
+    // *************************************************************************** //
     void propagate_exception(std::exception_ptr& ex_ptr)
     {
         try 
