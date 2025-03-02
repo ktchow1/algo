@@ -78,7 +78,8 @@ void test_threadpool();
 // *** 07_cpp20 *** //
 void test_spaceship();
 void test_range();
-void test_concepts();
+void test_concepts_apply();
+void test_concepts_define();
 
 
 
@@ -171,7 +172,8 @@ int main()
     banner("07_cpp20");  
     test_spaceship();
     test_range();
-    test_concepts();
+    test_concepts_apply();
+    test_concepts_define();
 
 
 //  banner("08_interview");

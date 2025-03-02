@@ -226,7 +226,7 @@ namespace alg
     constexpr bool is_vec_except_pointer_v = is_vec_except_pointer<V>::type::value;
 
 
-    // is_convertible will be replaced by is_base_pf
+    // is_convertible will be replaced by is_base_of
     template<typename B> false_type is_inherit_impl(const void*); // general case (no need to implement, used in decltype)
     template<typename B>  true_type is_inherit_impl(const B*);    // special case (no need to implement, used in decltype)
     template<typename B, typename D> struct is_inherit : public decltype(is_inherit_impl<B>(std::declval<D*>())) {}; // BUG : compile error without <B>, as special case can bind to any type
