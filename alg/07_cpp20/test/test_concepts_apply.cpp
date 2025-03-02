@@ -9,7 +9,6 @@
 
 
 
-
 // ***************************** //
 // *** Applying std concepts *** //
 // ***************************** //
@@ -33,12 +32,9 @@ namespace test
     // ********************************************** //
     // *** std concepts with 1 template parameter *** //
     // ********************************************** //
-    struct type_A { type_A() = delete;     type_A(std::uint32_t){}                                         };
-    struct type_B { type_B(){}             type_B(const type_B&) = delete;     type_B(type_B&&){}          };
-    struct type_C { type_C(){}             type_C(const type_C&){}             type_C(type_C&&) = delete;  };
-
-    template<typename T, typename U> 
-    void tester_no_constraint(const T&, const U&) {}
+    struct type_A { type_A() = delete; type_A(std::uint32_t){}                                    void special_fct(){} };
+    struct type_B { type_B(){}         type_B(const type_B&) = delete; type_B(type_B&&){}         void special_fct(){} };
+    struct type_C { type_C(){}         type_C(const type_C&){}         type_C(type_C&&) = delete; void special_fct(){} };
 
     template<typename T, typename U> requires std::default_initializable<T>
     void tester_no_A_method1(const T&, const U&) {}
@@ -65,45 +61,104 @@ namespace test
     // *********************************************** //
     // *** std concepts with 2 template parameters *** //
     // *********************************************** //
-    // The order of template parameter in std::is_base_of<B,D> is different from that in std::derived_from<D,B>
+    // 1. order of template parameter in std::is_base_of<B,D> is different from 
+    //    order of template parameter in std::derived_from<D,B>
+    // 2. when using std::derived_from<D,B> to replace typename in method 3,
+    //    simply use std::derived_from<B>
       
-    struct type_D : public type_B {};
+    struct type_D : public type_B 
+    {
+    private:
+        void special_fct(); // overwritten type_B::special_fct(), so that type_D cannot fulfill concept type_ABC
+    };
 
-    template<typename T, typename U> requires std::derived_from<T, type_B>
+    template<typename T, typename U> requires std::derived_from<U, type_B>
     void tester_derived_from_B_method1(const T&, const U&) {}
-    template<typename T, typename U> requires std::derived_from<T, U>
-    void tester_derived_from_U_method1(const T&, const U&) {}
+    template<typename T, typename U> requires std::derived_from<U, T>
+    void tester_derived_from_T_method1(const T&, const U&) {}
 
+    template<typename T, typename U> 
+    void tester_derived_from_B_method2(const T&, const U&) requires std::derived_from<U, type_B> {}
+    template<typename T, typename U>
+    void tester_derived_from_T_method2(const T&, const U&) requires std::derived_from<U, T> {}
 
-
-
+    template<typename T, std::derived_from<type_B> U> 
+    void tester_derived_from_B_method3(const T&, const U&) {}
+    template<typename T, std::derived_from<T> U>
+    void tester_derived_from_T_method3(const T&, const U&) {}
 
 
     // *********************************************** //
-    // *** std concepts with 2 template parameters *** //
+    // *** std concepts with 3 template parameters *** //
     // *********************************************** //
-    template<typename T, typename U, typename V>
-    void tester_no_constraint(const T&, const U&, const V&) {}
+    template<typename T, typename U, typename F> requires std::invocable<F, std::string, T>
+    void tester_invoke_binary_method1(const T&, const U&, const F&) {}
+    template<typename T, typename U, typename F> requires std::invocable<F, std::string, T, U>
+    void tester_invoke_ternary_method1(const T&, const U&, const F&) {}
 
-    // ************************************* //
-    // *** simple definition of concepts *** //
-    // ************************************* //
+    template<typename T, typename U, typename F>
+    void tester_invoke_binary_method2(const T&, const U&, const F&) requires std::invocable<F, std::string, T> {}
+    template<typename T, typename U, typename F>
+    void tester_invoke_ternary_method2(const T&, const U&, const F&) requires std::invocable<F, std::string, T, U> {}
+
+    template<typename T, typename U, std::invocable<std::string,T> F>
+    void tester_invoke_binary_method3(const T&, const U&, const F&) {}
+    template<typename T, typename U, std::invocable<std::string,T,U> F>
+    void tester_invoke_ternary_method3(const T&, const U&, const F&) {}
 
 
-    // ************************* //
-    // *** requires-requires *** //
-    // ************************* //
+    // ******************************************* //
+    // *** simple concept - no requires-clause *** //
+    // ******************************************* //
+    struct type_E {};
 
+    template<typename T>  constexpr bool is_type_ABCD         = false;
+    template<>            constexpr bool is_type_ABCD<type_A> = true;
+    template<>            constexpr bool is_type_ABCD<type_B> = true;
+    template<>            constexpr bool is_type_ABCD<type_C> = true;
+    template<>            constexpr bool is_type_ABCD<type_D> = true;
+
+    template<typename T>
+    concept type_ABCD = is_type_ABCD<T>;
+
+    template<typename T, typename U> requires type_ABCD<T>
+    void tester_type_ABCD_method1(const T&, const U&) {}
+
+    template<typename T, typename U> 
+    void tester_type_ABCD_method2(const T&, const U&) requires type_ABCD<T> {}
+
+    template<type_ABCD T, typename U> 
+    void tester_type_ABCD_method3(const T&, const U&) {}
+
+
+    // ************************************************************* //
+    // *** simple concept - support method 4 "requires-requires" *** //
+    // ************************************************************* //
+    template<typename T>
+    concept type_ABC = requires(T x)
+    {
+        x.special_fct();
+    };
+
+    template<typename T, typename U> requires type_ABC<T>
+    void tester_type_ABC_method1(const T&, const U&) {}
+
+    template<typename T, typename U> 
+    void tester_type_ABC_method2(const T&, const U&) requires type_ABC<T> {}
+
+    template<type_ABC T, typename U> 
+    void tester_type_ABC_method3(const T&, const U&) {}
+
+    template<typename T, typename U> requires requires(T x) { x.special_fct(); }
+    void tester_type_ABC_method4(const T&, const U&) {}
 }
 
 
+// *************************************************** //
+// *** Comment lines cannot compile due to concept *** //
+// *************************************************** //
 void test_concepts_apply_constraint_on_1_para()
 {
-    // Comment lines cannot compile due to concept
-    test::tester_no_constraint(test::type_A{123}, std::string{"abc"});
-    test::tester_no_constraint(test::type_B{},    std::string{"abc"});
-    test::tester_no_constraint(test::type_C{},    std::string{"abc"});
-
 //  test::tester_no_A_method1(test::type_A{123}, std::string{"abc"});
     test::tester_no_A_method1(test::type_B{},    std::string{"abc"});
     test::tester_no_A_method1(test::type_C{},    std::string{"abc"});
@@ -133,33 +188,114 @@ void test_concepts_apply_constraint_on_1_para()
     test::tester_no_C_method3(test::type_A{123}, std::string{"abc"});
     test::tester_no_C_method3(test::type_B{},    std::string{"abc"}); // std::move_constructible = requires move_constructible only
 //  test::tester_no_C_method3(test::type_C{},    std::string{"abc"});
-  
     print_summary("coocepts - apply constraint on 1 para", "succeeded");
 }
 
 
 void test_concepts_apply_constraint_on_2_para()
 {
+//  test::tester_derived_from_B_method1(test::type_B{}, test::type_A{123});
+    test::tester_derived_from_B_method1(test::type_B{}, test::type_D{});
+    test::tester_derived_from_T_method1(test::type_B{}, test::type_D{});
+//  test::tester_derived_from_T_method1(test::type_C{}, test::type_D{});
 
+//  test::tester_derived_from_B_method2(test::type_B{}, test::type_A{123});
+    test::tester_derived_from_B_method2(test::type_B{}, test::type_D{});
+    test::tester_derived_from_T_method2(test::type_B{}, test::type_D{});
+//  test::tester_derived_from_T_method2(test::type_C{}, test::type_D{});
+
+//  test::tester_derived_from_B_method3(test::type_B{}, test::type_A{123});
+    test::tester_derived_from_B_method3(test::type_B{}, test::type_D{});
+    test::tester_derived_from_T_method3(test::type_B{}, test::type_D{});
+//  test::tester_derived_from_T_method3(test::type_C{}, test::type_D{});
     print_summary("coocepts - apply constraint on 2 para", "succeeded");
 }
 
 
 void test_concepts_apply_constraint_on_3_para()
 {
+//  test::tester_invoke_binary_method1 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, const std::string&){});
+    test::tester_invoke_binary_method1 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+//  test::tester_invoke_ternary_method1(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+    test::tester_invoke_ternary_method1(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t, const std::string&){});
+
+//  test::tester_invoke_binary_method2 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, const std::string&){});
+    test::tester_invoke_binary_method2 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+//  test::tester_invoke_ternary_method2(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+    test::tester_invoke_ternary_method2(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t, const std::string&){});
+
+//  test::tester_invoke_binary_method3 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, const std::string&){});
+    test::tester_invoke_binary_method3 (std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+//  test::tester_invoke_ternary_method3(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t){});
+    test::tester_invoke_ternary_method3(std::uint32_t{123}, std::string{"abc"}, [](const std::string&, std::uint32_t, const std::string&){});
     print_summary("coocepts - apply constraint on 3 para", "succeeded");
 }
 
 
 void test_concepts_requires_requires()
 {
+    // ********************************* //
+    // *** Simple definition concept *** //
+    // ********************************* //
+//  test::tester_type_ABCD_method1(std::uint32_t{"abc"}, std::string{"abc"});
+    test::tester_type_ABCD_method1(test::type_A{123},    std::string{"abc"});
+    test::tester_type_ABCD_method1(test::type_B{},       std::string{"abc"});
+    test::tester_type_ABCD_method1(test::type_C{},       std::string{"abc"});
+    test::tester_type_ABCD_method1(test::type_D{},       std::string{"abc"});
+//  test::tester_type_ABCD_method1(test::type_E{},       std::string{"abc"});
+
+//  test::tester_type_ABCD_method2(std::uint32_t{"abc"}, std::string{"abc"});
+    test::tester_type_ABCD_method2(test::type_A{123},    std::string{"abc"});
+    test::tester_type_ABCD_method2(test::type_B{},       std::string{"abc"});
+    test::tester_type_ABCD_method2(test::type_C{},       std::string{"abc"});
+    test::tester_type_ABCD_method2(test::type_D{},       std::string{"abc"});
+//  test::tester_type_ABCD_method2(test::type_E{},       std::string{"abc"});
+
+//  test::tester_type_ABCD_method3(std::uint32_t{"abc"}, std::string{"abc"});
+    test::tester_type_ABCD_method3(test::type_A{123},    std::string{"abc"});
+    test::tester_type_ABCD_method3(test::type_B{},       std::string{"abc"});
+    test::tester_type_ABCD_method3(test::type_C{},       std::string{"abc"});
+    test::tester_type_ABCD_method3(test::type_D{},       std::string{"abc"});
+//  test::tester_type_ABCD_method3(test::type_E{},       std::string{"abc"});
+
+
+    // ************************************************************* //
+    // *** Simple definition concept - support requires requires *** //
+    // ************************************************************* //
+//  test::tester_type_ABC_method1(std::uint32_t{"abc"},  std::string{"abc"});
+    test::tester_type_ABC_method1(test::type_A{123},     std::string{"abc"});
+    test::tester_type_ABC_method1(test::type_B{},        std::string{"abc"});
+    test::tester_type_ABC_method1(test::type_C{},        std::string{"abc"});
+//  test::tester_type_ABC_method1(test::type_D{},        std::string{"abc"}); 
+//  test::tester_type_ABC_method1(test::type_E{},        std::string{"abc"});
+
+//  test::tester_type_ABC_method2(std::uint32_t{"abc"},  std::string{"abc"});
+    test::tester_type_ABC_method2(test::type_A{123},     std::string{"abc"});
+    test::tester_type_ABC_method2(test::type_B{},        std::string{"abc"});
+    test::tester_type_ABC_method2(test::type_C{},        std::string{"abc"});
+//  test::tester_type_ABC_method2(test::type_D{},        std::string{"abc"}); 
+//  test::tester_type_ABC_method2(test::type_E{},        std::string{"abc"});
+  
+//  test::tester_type_ABC_method3(std::uint32_t{"abc"},  std::string{"abc"});
+    test::tester_type_ABC_method3(test::type_A{123},     std::string{"abc"});
+    test::tester_type_ABC_method3(test::type_B{},        std::string{"abc"});
+    test::tester_type_ABC_method3(test::type_C{},        std::string{"abc"});
+//  test::tester_type_ABC_method3(test::type_D{},        std::string{"abc"}); 
+//  test::tester_type_ABC_method3(test::type_E{},        std::string{"abc"});
+    
+//  test::tester_type_ABC_method4(std::uint32_t{"abc"},  std::string{"abc"});
+    test::tester_type_ABC_method4(test::type_A{123},     std::string{"abc"});
+    test::tester_type_ABC_method4(test::type_B{},        std::string{"abc"});
+    test::tester_type_ABC_method4(test::type_C{},        std::string{"abc"});
+//  test::tester_type_ABC_method4(test::type_D{},        std::string{"abc"}); 
+//  test::tester_type_ABC_method4(test::type_E{},        std::string{"abc"}); 
     print_summary("coocepts - requires requires", "succeeded");
 }
 
 
-void test_concepts_with_abbv_function_template()
+void test_concepts_with_abbreviated_function_template()
 {
-    print_summary("coocepts - with abbv function template", "succeeded");
+    print_summary("coocepts - with abbreviated function template", "succeeded");
 }
 
 
@@ -169,7 +305,7 @@ void test_concepts_apply()
     test_concepts_apply_constraint_on_2_para();
     test_concepts_apply_constraint_on_3_para();
     test_concepts_requires_requires();
-    test_concepts_with_abbv_function_template();
+    test_concepts_with_abbreviated_function_template();
 }
 
 
