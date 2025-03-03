@@ -114,9 +114,9 @@ namespace test
     // Concept can be applied to "auto" argument like the following.
     //
 
-    auto tester_invoke_abbrev_fct(const std::invocable<std::string, std::uint32_t, std::uint32_t> auto& fct, std::uint32_t x, std::uint32_t y) 
+    auto abbrev_fct_invoker(const std::invocable<std::string, std::uint32_t, std::uint32_t, std::uint32_t> auto& fct, std::uint32_t id) 
     {
-        return fct(std::string{"hard coded string inside tester : "}, x, y);
+        return fct(std::string{"abbrev fct invoker : "}, id, id+1, id+2);
     }
 
 
@@ -270,9 +270,37 @@ void test_concepts_apply_constraint_on_3_para()
     print_summary("coocepts - apply constraint on 3 para", "succeeded");
 }
 
+struct abbrev_functor
+{
+    auto operator()(const std::string& s, std::uint32_t x, std::uint32_t y, std::uint32_t z) const
+    {
+        std::stringstream ss;
+        ss << "[functor] ";
+        ss << s;
+        ss << x << ", ";
+        ss << y << ", ";
+        ss << z;
+        return ss.str();
+    }
+};
 
 void test_concepts_apply_constraint_on_abbrev_fct_template()
 {
+    auto ans1 = test::abbrev_fct_invoker(abbrev_functor{}, std::uint32_t{10});
+    auto ans2 = test::abbrev_fct_invoker([](const std::string& s, std::uint32_t x, std::uint32_t y, std::uint32_t z)
+    {
+        std::stringstream ss;
+        ss << "[lambda] ";
+        ss << s;
+        ss << x << ", ";
+        ss << y << ", ";
+        ss << z;
+        return ss.str();
+    }
+    , std::uint32_t{20});
+
+    assert(ans1 == std::string{"[functor] abbrev fct invoker : 10, 11, 12"});
+    assert(ans2 == std::string{"[lambda] abbrev fct invoker : 20, 21, 22"});
     print_summary("coocepts - apply constraint on abbrev fct template", "succeeded");
 }
 
