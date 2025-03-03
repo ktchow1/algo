@@ -107,6 +107,19 @@ namespace test
     void tester_invoke_ternary_method3(const T&, const U&, const F&) {}
 
 
+    // ******************************************************* //
+    // *** std concepts with abbreviated template function *** //
+    // ******************************************************* //
+    // Abbreviated template function is function with "auto" argument.
+    // Concept can be applied to "auto" argument like the following.
+    //
+
+    auto tester_invoke_abbrev_fct(const std::invocable<std::string, std::uint32_t, std::uint32_t> auto& fct, std::uint32_t x, std::uint32_t y) 
+    {
+        return fct(std::string{"hard coded string inside tester : "}, x, y);
+    }
+
+
     // ******************************************* //
     // *** simple concept - no requires-clause *** //
     // ******************************************* //
@@ -129,6 +142,32 @@ namespace test
 
     template<type_ABCD T, typename U> 
     void tester_type_ABCD_method3(const T&, const U&) {}
+
+
+    // *** SFINAE *** //
+    template<typename T, typename std::enable_if<is_type_ABCD<T>, int>::type = 0>
+    std::uint32_t tester_sfinae_method1(const T&)
+    {
+        return 11;
+    };
+
+    template<typename T, typename std::enable_if<!is_type_ABCD<T>, int>::type = 0>
+    std::uint32_t tester_sfinae_method1(const T&)
+    {
+        return 12;
+    };
+
+    template<typename T>
+    constexpr std::uint32_t tester_sfinae_method2(const T&)
+    {
+        return 22;
+    };
+
+    template<type_ABCD T>
+    std::uint32_t tester_sfinae_method2(const T&)
+    {
+        return 21;
+    };
 
 
     // ************************************************************* //
@@ -232,11 +271,14 @@ void test_concepts_apply_constraint_on_3_para()
 }
 
 
-void test_concepts_requires_requires()
+void test_concepts_apply_constraint_on_abbrev_fct_template()
 {
-    // ********************************* //
-    // *** Simple definition concept *** //
-    // ********************************* //
+    print_summary("coocepts - apply constraint on abbrev fct template", "succeeded");
+}
+
+
+void test_concepts_vs_SFINAE()
+{
 //  test::tester_type_ABCD_method1(std::uint32_t{"abc"}, std::string{"abc"});
     test::tester_type_ABCD_method1(test::type_A{123},    std::string{"abc"});
     test::tester_type_ABCD_method1(test::type_B{},       std::string{"abc"});
@@ -258,10 +300,17 @@ void test_concepts_requires_requires()
     test::tester_type_ABCD_method3(test::type_D{},       std::string{"abc"});
 //  test::tester_type_ABCD_method3(test::type_E{},       std::string{"abc"});
 
+    // SFINAE 
+    assert(test::tester_sfinae_method1( test::type_A {123}) == 11);
+    assert(test::tester_sfinae_method1(std::uint32_t {123}) == 12);
+    assert(test::tester_sfinae_method2( test::type_A {123}) == 21);
+    assert(test::tester_sfinae_method2(std::uint32_t {123}) == 22);
+    print_summary("coocepts - vs SFINAE", "succeeded");
+}
 
-    // ************************************************************* //
-    // *** Simple definition concept - support requires requires *** //
-    // ************************************************************* //
+
+void test_concepts_requires_requires()
+{
 //  test::tester_type_ABC_method1(std::uint32_t{"abc"},  std::string{"abc"});
     test::tester_type_ABC_method1(test::type_A{123},     std::string{"abc"});
     test::tester_type_ABC_method1(test::type_B{},        std::string{"abc"});
@@ -293,51 +342,16 @@ void test_concepts_requires_requires()
 }
 
 
-void test_concepts_with_abbreviated_function_template()
-{
-    print_summary("coocepts - with abbreviated function template", "succeeded");
-}
-
-
 void test_concepts_apply()
 {
     test_concepts_apply_constraint_on_1_para();
     test_concepts_apply_constraint_on_2_para();
     test_concepts_apply_constraint_on_3_para();
+    test_concepts_apply_constraint_on_abbrev_fct_template();
+    test_concepts_vs_SFINAE();
     test_concepts_requires_requires();
-    test_concepts_with_abbreviated_function_template();
 }
 
 
 
 
-// ************************************************************************************************************** //
-// This is a abbv function template using auto (with concept).
-// With auto, it accepts all function pointer, lambda, std::function by keeping their own types.
-// Without auto, we need to use std::function as arg type, everything is convert to std::function, which is slow.
-// ************************************************************************************************************** //
-void execute(std::invocable<std::uint32_t, const std::vector<std::uint32_t>&> auto callback, auto init, const auto& data)
-{
-    std::cout << "\nexecute " << callback(init, data);
-}
-
-auto fct(std::uint32_t s, const std::vector<std::uint32_t>& v)
-{
-    std::uint32_t sum = s;
-    for(const auto& x:v) s+=x;
-    return s;
-}
-
-void test_template_AFT_invocable()
-{
-    std::vector<std::uint32_t> vec{1,2,3,4,5,6,7,8,9,10};
-
-    execute(fct, 100, vec);
-    execute([](std::uint32_t s, const std::vector<std::uint32_t>& v)
-    {
-        std::uint32_t sum = s;
-        for(const auto& x:v) s+=x;
-        return s;
-    },
-    100, std::vector<std::uint32_t>{1,2,3,4,5,6,7,8,9,10});
-}
