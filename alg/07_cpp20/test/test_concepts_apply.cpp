@@ -12,7 +12,7 @@
 // ***************************** //
 // *** Applying std concepts *** //
 // ***************************** //
-// There are 3 ways to apply concept :
+// There are 4 ways to apply concept :
 // 1. as requires-clause after template parameter   (supports conjunction / disjunction of multiple concepts)
 // 2. as requires-clause after function prototype   (supports conjunction / disjunction of multiple concepts)
 // 3. as requires-clause in template parameter list (does not support conjunction / disjunction) <--- 1st template parameter is the one on which constraint applied
