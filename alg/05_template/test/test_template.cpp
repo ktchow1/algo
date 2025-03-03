@@ -165,68 +165,21 @@ void test_template()
     print_summary("template template", "succeeded in compile time");
 
 
-    // *** member pointer as template parameter - method 1 *** //
-    alg::A_with_members a1{0,0,"",""};
-    assert(a1.m_x == 0);
-    assert(a1.m_y == 0);
-    assert(a1.m_z == std::string{});
-    assert(a1.m_w == std::string{});
+    // *** member pointer as type-template-parameter *** //
+    assert(alg::invoker0(&alg::fct_group::fct0, std::string{"100"}, std::uint32_t{10})                   ==  1110 );
+    assert(alg::invoker0(&alg::fct_group::fct1, std::string{"200"}, std::uint32_t{20})                   == "2220");
+    assert(alg::invoker0(&alg::fct_group::fct2, std::string{"300"}, std::uint32_t{30}, std::uint32_t{3}) ==  3333 );
+    assert(alg::invoker0(&alg::fct_group::fct3, std::string{"400"}, std::uint32_t{40}, std::uint32_t{4}) == "4444");
+    print_summary("member pointer as     type-template-parameter", "succeeded in compile time");
 
-    alg::hard_code_method1(a1, &alg::A_with_members::m_x);
-    assert(a1.m_x == 123);
-    assert(a1.m_y == 0);
-    assert(a1.m_z == std::string{});
-    assert(a1.m_w == std::string{});
 
-    alg::hard_code_method1(a1, &alg::A_with_members::m_y);
-    assert(a1.m_x == 123);
-    assert(a1.m_y == 123);
-    assert(a1.m_z == std::string{});
-    assert(a1.m_w == std::string{});
+    // *** member pointer as non-type-template-parameter *** //
+    print_summary("member pointer as non-type-template-parameter", "succeeded in compile time");
 
-    alg::hard_code_method1(a1, &alg::A_with_members::m_z);
-    assert(a1.m_x == 123);
-    assert(a1.m_y == 123);
-    assert(a1.m_z == std::string{"123"});
-    assert(a1.m_w == std::string{});
 
-    alg::hard_code_method1(a1, &alg::A_with_members::m_w);
-    assert(a1.m_x == 123);
-    assert(a1.m_y == 123);
-    assert(a1.m_z == std::string{"123"});
-    assert(a1.m_w == std::string{"123"});
+    // *** char[] as template parameter *** //
 
-    // *** member pointer as template parameter - method 2 *** // (both work)
-    alg::A_with_members a2{0,0,"",""};
-    assert(a2.m_x == 0);
-    assert(a2.m_y == 0);
-    assert(a2.m_z == std::string{});
-    assert(a2.m_w == std::string{});
-
-    alg::hard_code_method1(a2, &alg::A_with_members::m_x);
-    assert(a2.m_x == 123);
-    assert(a2.m_y == 0);
-    assert(a2.m_z == std::string{});
-    assert(a2.m_w == std::string{});
-
-    alg::hard_code_method1(a2, &alg::A_with_members::m_y);
-    assert(a2.m_x == 123);
-    assert(a2.m_y == 123);
-    assert(a2.m_z == std::string{});
-    assert(a2.m_w == std::string{});
-
-    alg::hard_code_method1(a2, &alg::A_with_members::m_z);
-    assert(a2.m_x == 123);
-    assert(a2.m_y == 123);
-    assert(a2.m_z == std::string{"123"});
-    assert(a2.m_w == std::string{});
-
-    alg::hard_code_method1(a2, &alg::A_with_members::m_w);
-    assert(a2.m_x == 123);
-    assert(a2.m_y == 123);
-    assert(a2.m_z == std::string{"123"});
-    assert(a2.m_w == std::string{"123"});
-    print_summary("  member pointer as template parameter", "succeeded in compile time");
+    print_summary("char [] string as non-type-template-parameter", "succeeded in compile time");
 }
 
 

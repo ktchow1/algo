@@ -135,13 +135,13 @@ int main()
 //  test_std_layout();
 //  test_timer();
   
-//  banner("05_template");
+    banner("05_template");
 //  test_array();
 //  test_function();
 //  test_metaprog();
 //  test_optional_ref();
 //  test_shared_ptr();
-//  test_template(); 
+    test_template(); 
 //  test_template_specialization(); 
 //  test_traits();
 //  test_tuple_idx_seq();

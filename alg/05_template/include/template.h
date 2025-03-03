@@ -193,39 +193,44 @@ namespace alg
     };
 
 
-    // ******************************************** //
-    // *** member pointer as template parameter *** //
-    // ******************************************** //
-    void hard_code(std::uint32_t& x)  { x =  123;  }
-    void hard_code(std::string&   x)  { x = "123"; }
-
-    struct A_with_members
+    // ************************************************************ //
+    // *** member pointer as     type-template-parameter        *** //
+    // *** member pointer as non-type-template-parameter (NTTP) *** //
+    // ************************************************************ //
+    // Both invokers below can handle all member pointers 
+    // - with different return value
+    // - with different signature
+    //
+    struct fct_group
     {
-        std::uint32_t m_x;
-        std::uint32_t m_y;
-        std::string   m_z;
-        std::string   m_w;
+        std::uint32_t fct0(const std::string& s, std::uint32_t n)                  { return                std::stol(s) + n     + 1000;  }
+        std::string   fct1(const std::string& s, std::uint32_t n)                  { return std::to_string(std::stol(s) + n     + 2000); }
+        std::uint32_t fct2(const std::string& s, std::uint32_t n, std::uint32_t m) { return                std::stol(s) + n + m + 3000;  }
+        std::string   fct3(const std::string& s, std::uint32_t n, std::uint32_t m) { return std::to_string(std::stol(s) + n + m + 4000); }
     };
 
-    // method 1
-    template<typename T> 
-    void hard_code_method1(A_with_members& a, T mem_ptr)
+    //                +--- type template parameter for member pointer
+    //                v
+    template<typename T, typename...ARGS>                        
+    auto invoker0(T mem_ptr, ARGS&&... args) // pass mem_ptr as input arg
     {
-        hard_code(a.*mem_ptr);
+        fct_group x;
+        return (x.*mem_ptr)(std::forward<ARGS>(args)...);
     }
 
-    // method 2
-    template<typename T> 
-    void hard_code_method2(A_with_members& a, T A_with_members::* mem_ptr)
+    //                                    +--- non type template parameter for member pointer
+    //                                    v
+    template<typename RET, RET fct_group::* mem_ptr, typename...ARGS> // pass mem_ptr as NTTP
+    auto invoker1(ARGS&&... args)  
     {
-        hard_code(a.*mem_ptr);
+        fct_group x;
+        return (x.*mem_ptr)(std::forward<ARGS>(args)...);
     }
 
-    // template parameter | type             | value
-    // -------------------+------------------+---------------
-    //          T         | std::string      | fct(s)         <--- for general template usuage
-    //          T         | std::string A::* | fct(&A::m_x)   <--- for template member pointer
-    //                                              ^
+
+    // **************************************************** //
+    // *** string as non-type-template-parameter (NTTP) *** //
+    // **************************************************** //
 }
 
 
