@@ -166,14 +166,36 @@ void test_template()
 
 
     // *** member pointer as type-template-parameter *** //
-    assert(alg::invoker0(&alg::fct_group::fct0, std::string{"100"}, std::uint32_t{10})                   ==  1110 );
-    assert(alg::invoker0(&alg::fct_group::fct1, std::string{"200"}, std::uint32_t{20})                   == "2220");
-    assert(alg::invoker0(&alg::fct_group::fct2, std::string{"300"}, std::uint32_t{30}, std::uint32_t{3}) ==  3333 );
-    assert(alg::invoker0(&alg::fct_group::fct3, std::string{"400"}, std::uint32_t{40}, std::uint32_t{4}) == "4444");
+    assert(alg::invoker_TTP(&alg::fct_group::fct1, std::string{"100"}, std::uint32_t{10}, std::uint32_t{1}) == "1111");
+    assert(alg::invoker_TTP(&alg::fct_group::fct2, std::string{"200"}, std::uint32_t{20}, std::uint32_t{2}) == "2222");
+    assert(alg::invoker_TTP(&alg::fct_group::fct3, std::string{"300"}, std::uint32_t{30}, std::uint32_t{3}) == "3333");
+    assert(alg::invoker_TTP(&alg::fct_group::fct4, std::uint32_t{400}, std::uint32_t{40}) == 4440);
+    assert(alg::invoker_TTP(&alg::fct_group::fct5, std::uint32_t{500}, std::uint32_t{50}) == 5550);
+    assert(alg::invoker_TTP(&alg::fct_group::fct6, std::uint32_t{600}, std::uint32_t{60}) == 6660);
+    assert(alg::invoker_TTP(&alg::fct_group::fct7) == "abcde");
+    assert(alg::invoker_TTP(&alg::fct_group::fct8) == "klmno");
+    assert(alg::invoker_TTP(&alg::fct_group::fct9) == "pqrst");
     print_summary("member pointer as     type-template-parameter", "succeeded in compile time");
 
 
     // *** member pointer as non-type-template-parameter *** //
+    assert(alg::invoker_NTTP0<&alg::fct_group::fct4>(std::uint32_t{400}, std::uint32_t{40}) == 4440);
+    assert(alg::invoker_NTTP0<&alg::fct_group::fct5>(std::uint32_t{500}, std::uint32_t{50}) == 5550);
+    assert(alg::invoker_NTTP0<&alg::fct_group::fct6>(std::uint32_t{600}, std::uint32_t{60}) == 6660);
+
+    assert(alg::invoker_NTTP1<&alg::fct_group::fct7>() == "abcde");
+    assert(alg::invoker_NTTP1<&alg::fct_group::fct8>() == "klmno");
+    assert(alg::invoker_NTTP1<&alg::fct_group::fct9>() == "pqrst");
+
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct1>(std::string{"100"}, std::uint32_t{10}, std::uint32_t{1}) == "1111");
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct2>(std::string{"200"}, std::uint32_t{20}, std::uint32_t{2}) == "2222");
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct3>(std::string{"300"}, std::uint32_t{30}, std::uint32_t{3}) == "3333");
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct4>(std::uint32_t{400}, std::uint32_t{40}) ==  4440 );
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct5>(std::uint32_t{500}, std::uint32_t{50}) ==  5550 );
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct6>(std::uint32_t{600}, std::uint32_t{60}) ==  6660 );
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct7>() == "abcde");
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct8>() == "klmno");
+    assert(alg::invoker_NTTP2<&alg::fct_group::fct9>() == "pqrst");
     print_summary("member pointer as non-type-template-parameter", "succeeded in compile time");
 
 

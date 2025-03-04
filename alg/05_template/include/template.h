@@ -194,34 +194,60 @@ namespace alg
 
 
     // ************************************************************ //
-    // *** member pointer as     type-template-parameter        *** //
+    // *** member pointer as     type-template-parameter  (TTP) *** //
     // *** member pointer as non-type-template-parameter (NTTP) *** //
     // ************************************************************ //
-    // Both invokers below can handle all member pointers 
-    // - with different return value
-    // - with different signature
+    // invoker_TTP       passes member pointer as input argument.
+    // invoker_NTTP0/1/2 passes member pointer as template parameter NTTP.
+    //
+    // invoker_TTP     can work with member pointers having different signatures.
+    // invoker_NTTP0/1 can work with member pointers having identical signature only.
+    // invoker_NTTP2   can work with member pointers having different signatures, replacing signatures with "auto".
     //
     struct fct_group
     {
-        std::uint32_t fct0(const std::string& s, std::uint32_t n)                  { return                std::stol(s) + n     + 1000;  }
-        std::string   fct1(const std::string& s, std::uint32_t n)                  { return std::to_string(std::stol(s) + n     + 2000); }
-        std::uint32_t fct2(const std::string& s, std::uint32_t n, std::uint32_t m) { return                std::stol(s) + n + m + 3000;  }
-        std::string   fct3(const std::string& s, std::uint32_t n, std::uint32_t m) { return std::to_string(std::stol(s) + n + m + 4000); }
+        std::string fct1(const std::string& s, std::uint32_t n, std::uint32_t m) { return std::to_string(std::stol(s) + n + m + 1000); }
+        std::string fct2(const std::string& s, std::uint32_t n, std::uint32_t m) { return std::to_string(std::stol(s) + n + m + 2000); }
+        std::string fct3(const std::string& s, std::uint32_t n, std::uint32_t m) { return std::to_string(std::stol(s) + n + m + 3000); }
+
+        std::uint32_t fct4(std::uint32_t n, std::uint32_t m) { return n + m + 4000; }
+        std::uint32_t fct5(std::uint32_t n, std::uint32_t m) { return n + m + 5000; }
+        std::uint32_t fct6(std::uint32_t n, std::uint32_t m) { return n + m + 6000; }
+
+        std::string fct7() { return "abcde"; }
+        std::string fct8() { return "klmno"; }
+        std::string fct9() { return "pqrst"; }
     };
 
     //                +--- type template parameter for member pointer
     //                v
     template<typename T, typename...ARGS>                        
-    auto invoker0(T mem_ptr, ARGS&&... args) // pass mem_ptr as input arg
+    auto invoker_TTP(T mem_ptr, ARGS&&... args) 
     {
         fct_group x;
         return (x.*mem_ptr)(std::forward<ARGS>(args)...);
     }
 
-    //                                    +--- non type template parameter for member pointer
-    //                                    v
-    template<typename RET, RET fct_group::* mem_ptr, typename...ARGS> // pass mem_ptr as NTTP
-    auto invoker1(ARGS&&... args)  
+    //                                   +--- non type template parameter for member pointer
+    //                                   v
+    template<std::uint32_t (fct_group::* mem_ptr)(std::uint32_t, std::uint32_t), typename...ARGS>
+    auto invoker_NTTP0(ARGS&&... args)  
+    {
+        fct_group x;
+        return (x.*mem_ptr)(std::forward<ARGS>(args)...);
+    }
+
+    //                                 +--- non type template parameter for member pointer
+    //                                 v
+    template<std::string (fct_group::* mem_ptr)()> 
+    auto invoker_NTTP1()  
+    {
+        fct_group x;
+        return (x.*mem_ptr)();
+    }
+
+    template<auto mem_ptr, typename...ARGS> // since c++17
+    auto invoker_NTTP2(ARGS&&... args)  
     {
         fct_group x;
         return (x.*mem_ptr)(std::forward<ARGS>(args)...);
