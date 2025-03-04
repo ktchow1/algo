@@ -202,7 +202,7 @@ namespace alg
     //
     // invoker_TTP     can work with member pointers having different signatures.
     // invoker_NTTP0/1 can work with member pointers having identical signature only.
-    // invoker_NTTP2   can work with member pointers having different signatures, replacing signatures with "auto".
+    // invoker_NTTP2   can work with member pointers having different signatures, replacing clumsy signatures with "auto".
     //
     struct fct_group
     {
@@ -246,7 +246,7 @@ namespace alg
         return (x.*mem_ptr)();
     }
 
-    template<auto mem_ptr, typename...ARGS> // since c++17
+    template<auto mem_ptr, typename...ARGS> 
     auto invoker_NTTP2(ARGS&&... args)  
     {
         fct_group x;
@@ -257,6 +257,18 @@ namespace alg
     // **************************************************** //
     // *** string as non-type-template-parameter (NTTP) *** //
     // **************************************************** //
+    // Must     use const char*
+    // Must not use std::string
+    // Must not use std::string_view
+
+    template<const char* str> 
+    struct str_as_NTTP
+    {
+        auto get() const
+        {
+            return std::string{str};
+        } 
+    };
 }
 
 
