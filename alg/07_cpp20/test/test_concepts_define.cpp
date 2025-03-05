@@ -29,12 +29,13 @@
 // 4. requires expression -   simple requirement
 // 5. requires expression - compound requirement (with brace {})
 // 6. requires expression -   nested requirement
-// 7. other concepts
+// 7. other concepts                             <--- this is same as 6? just put concept in different places
 //
-//
-//
-//
-//
+
+
+// ************** //
+// *** Define *** //
+// ************** //
 namespace test
 {
     struct typeK       { using type = std::uint32_t;   std::uint32_t foo() { return 123;   } };
@@ -62,7 +63,7 @@ namespace test
     concept concept_method3 = 
     requires
     {
-        typename T::value;
+        typename T::type;
         // <--- can be multi lines
     };
 
@@ -87,21 +88,95 @@ namespace test
     {
         { x.fct() } -> std::same_as<std::string>;
         requires concept_method1<T>;
+        requires concept_method2<T>;
     };
 
     template<typename T>
     concept concept_method7 = 
     concept_method1<T> &&
+    concept_method2<T> &&
     requires(T x)
     {
         { x.fct() } -> std::same_as<std::string>;
     };
 }
 
+
+// ************* //
+// *** Apply *** //
+// ************* //
+namespace test
+{
+    template<typename T, typename U> requires concept_method1<T>
+    void tester_method1(const T&, const U&) {}
+
+    template<typename T, typename U> requires concept_method2<T>
+    void tester_method2(const T&, const U&) {}
+
+    template<typename T, typename U> requires concept_method3<T>
+    void tester_method3(const T&, const U&) {}
+
+    template<typename T, typename U> requires concept_method4<T>
+    void tester_method4(const T&, const U&) {}
+
+    template<typename T, typename U> requires concept_method5<T>
+    void tester_method5(const T&, const U&) {}
+
+    template<typename T, typename U> requires concept_method6<T>
+    void tester_method6(const T&, const U&) {}
+     
+    template<typename T, typename U> requires concept_method7<T>
+    void tester_method7(const T&, const U&) {}
+}
+
 void test_concepts_define()
 {
+//  test::tester_method1(std::string{"x"}, std::string{"abc"});
+    test::tester_method1(test::typeK{},    std::string{"abc"});
+    test::tester_method1(test::typeL{},    std::string{"abc"});
+    test::tester_method1(test::typeM{},    std::string{"abc"});
+//  test::tester_method1(test::typeN{},    std::string{"abc"});
+  
+//  test::tester_method2(std::string{"x"}, std::string{"abc"});
+//  test::tester_method2(test::typeK{},    std::string{"abc"});
+    test::tester_method2(test::typeL{},    std::string{"abc"});
+    test::tester_method2(test::typeM{},    std::string{"abc"});
+    test::tester_method2(test::typeN{},    std::string{"abc"});
+
+//  test::tester_method3(std::string{"x"}, std::string{"abc"});
+    test::tester_method3(test::typeK{},    std::string{"abc"});
+    test::tester_method3(test::typeL{},    std::string{"abc"});
+    test::tester_method3(test::typeM{},    std::string{"abc"});
+//  test::tester_method3(test::typeN{},    std::string{"abc"});
+
+//  test::tester_method4(std::string{"x"}, std::string{"abc"});
+//  test::tester_method4(test::typeK{},    std::string{"abc"});
+    test::tester_method4(test::typeL{},    std::string{"abc"});
+    test::tester_method4(test::typeM{},    std::string{"abc"});
+    test::tester_method4(test::typeN{},    std::string{"abc"});
+
+//  test::tester_method5(std::string{"x"}, std::string{"abc"});
+//  test::tester_method5(test::typeK{},    std::string{"abc"});
+//  test::tester_method5(test::typeL{},    std::string{"abc"});
+    test::tester_method5(test::typeM{},    std::string{"abc"});
+    test::tester_method5(test::typeN{},    std::string{"abc"});
+  
+//  test::tester_method6(std::string{"x"}, std::string{"abc"});
+//  test::tester_method6(test::typeK{},    std::string{"abc"});
+//  test::tester_method6(test::typeL{},    std::string{"abc"});
+    test::tester_method6(test::typeM{},    std::string{"abc"});
+//  test::tester_method6(test::typeN{},    std::string{"abc"});
+
+//  test::tester_method7(std::string{"x"}, std::string{"abc"});
+//  test::tester_method7(test::typeK{},    std::string{"abc"});
+//  test::tester_method7(test::typeL{},    std::string{"abc"});
+    test::tester_method7(test::typeM{},    std::string{"abc"});
+//  test::tester_method7(test::typeN{},    std::string{"abc"});
+  
+    print_summary("coocepts - define concept", "succeeded");
 }
 
 void test_concepts_define_examples()
 {
+    print_summary("coocepts - define concept (examples)", "succeeded");
 }
