@@ -219,6 +219,7 @@ namespace alg
         std::string fct9() { return "pqrst"; }
     };
 
+
     //                +--- type template parameter for member pointer
     //                v
     template<typename T, typename...ARGS>                        
@@ -227,6 +228,7 @@ namespace alg
         fct_group x;
         return (x.*mem_ptr)(std::forward<ARGS>(args)...);
     }
+
 
     //                                   +--- non type template parameter for member pointer
     //                                   v
@@ -237,6 +239,7 @@ namespace alg
         return (x.*mem_ptr)(std::forward<ARGS>(args)...);
     }
 
+
     //                                 +--- non type template parameter for member pointer
     //                                 v
     template<std::string (fct_group::* mem_ptr)()> 
@@ -245,6 +248,7 @@ namespace alg
         fct_group x;
         return (x.*mem_ptr)();
     }
+
 
     template<auto mem_ptr, typename...ARGS> 
     auto invoker_NTTP2(ARGS&&... args)  

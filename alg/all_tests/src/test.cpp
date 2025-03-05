@@ -80,7 +80,7 @@ void test_spaceship();
 void test_range();
 void test_concepts_apply();
 void test_concepts_define();
-
+void test_concepts_define_examples();
 
 
 
@@ -174,7 +174,7 @@ int main()
     test_range();
     test_concepts_apply();
     test_concepts_define();
-
+    test_concepts_define_examples();
 
 //  banner("08_interview");
 //  interview::test_alphagrep_max_min_diff_in_subset();
